@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNotNull, or } from 'drizzle-orm';
 import { getDatabase } from '../database/connection';
 import { modCases } from '../database/schema';
 import type { ModActionType, ModCase } from '../types';
@@ -73,6 +73,22 @@ export class ModCaseRepository {
       .select()
       .from(modCases)
       .where(and(eq(modCases.guildId, guildId), eq(modCases.userId, userId)))
+      .orderBy(desc(modCases.createdAt))
+      .limit(limit);
+
+    return results.map(record => this.mapCase(record));
+  }
+
+  async getByUserOrModerator(guildId: string, userId: string, limit = 10): Promise<ModCase[]> {
+    const results = await this.db
+      .select()
+      .from(modCases)
+      .where(
+        and(
+          eq(modCases.guildId, guildId),
+          or(eq(modCases.userId, userId), eq(modCases.moderatorId, userId))
+        )
+      )
       .orderBy(desc(modCases.createdAt))
       .limit(limit);
 

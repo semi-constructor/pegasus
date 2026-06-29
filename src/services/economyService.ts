@@ -1,4 +1,5 @@
 import { economyRepository } from '../repositories/economyRepository';
+import { t } from '../i18n';
 import type {
   EconomyBalance,
   EconomyTransaction,
@@ -6,6 +7,8 @@ import type {
   EconomySettings,
   EconomyGamblingStats,
 } from '../database/schema';
+import { client } from '../index';
+import { logger } from '../utils/logger';
 
 export interface TransactionResult {
   success: boolean;
@@ -69,7 +72,7 @@ export class EconomyService {
 
       const updatedBalance = await economyRepository.addToBalance(userId, guildId, amount);
       if (!updatedBalance) {
-        return { success: false, error: 'Failed to update balance' };
+        return { success: false, error: t('commands.economy.errors.general') };
       }
 
       const transaction = await economyRepository.createTransaction({
@@ -84,7 +87,7 @@ export class EconomyService {
       return { success: true, balance: updatedBalance, transaction };
     } catch (error) {
       console.error('Error adding money:', error);
-      return { success: false, error: 'An error occurred while processing the transaction' };
+      return { success: false, error: t('commands.economy.errors.general') };
     }
   }
 
@@ -99,7 +102,7 @@ export class EconomyService {
       const fromBalance = await this.getOrCreateBalance(fromUserId, guildId);
 
       if (fromBalance.balance < amount) {
-        return { success: false, error: 'Insufficient funds' };
+        return { success: false, error: t('commands.economy.errors.insufficientFunds') };
       }
 
       // Deduct from sender
@@ -129,7 +132,7 @@ export class EconomyService {
       return senderResult;
     } catch (error) {
       console.error('Error transferring money:', error);
-      return { success: false, error: 'An error occurred during the transfer' };
+      return { success: false, error: t('commands.economy.errors.general') };
     }
   }
 
@@ -140,14 +143,14 @@ export class EconomyService {
       if (isOnCooldown) {
         const cooldown = await economyRepository.getCooldown(userId, guildId, 'daily');
         if (!cooldown) {
-          return { success: false, error: 'Cooldown not found' };
+          return { success: false, error: t('common.error') };
         }
         const timeLeft = cooldown.nextAvailable.getTime() - Date.now();
         const hours = Math.floor(timeLeft / 1000 / 60 / 60);
         const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
         return {
           success: false,
-          error: `You can claim your daily reward in ${hours}h ${minutes}m`,
+          error: t('commands.economy.daily.cooldown', { hours, minutes }),
         };
       }
 
@@ -198,7 +201,7 @@ export class EconomyService {
       return result;
     } catch (error) {
       console.error('Error claiming daily:', error);
-      return { success: false, error: 'An error occurred while claiming daily reward' };
+      return { success: false, error: t('commands.economy.errors.general') };
     }
   }
 
@@ -211,12 +214,12 @@ export class EconomyService {
       if (isOnCooldown) {
         const cooldown = await economyRepository.getCooldown(userId, guildId, 'work');
         if (!cooldown) {
-          return { success: false, error: 'Cooldown not found' };
+          return { success: false, error: t('common.error') };
         }
         const timeLeft = cooldown.nextAvailable.getTime() - Date.now();
         const minutes = Math.floor(timeLeft / 1000 / 60);
         const seconds = Math.floor((timeLeft / 1000) % 60);
-        return { success: false, error: `You can work again in ${minutes}m ${seconds}s` };
+        return { success: false, error: t('commands.economy.work.cooldown', { minutes, seconds }) };
       }
 
       // Random amount between min and max
@@ -237,23 +240,24 @@ export class EconomyService {
       });
 
       // Random work descriptions
-      const workDescriptions = [
-        'You worked as a programmer and fixed bugs',
-        'You delivered pizzas around town',
-        'You helped at the local store',
-        'You did some freelance work',
-        'You mowed lawns in the neighborhood',
-        'You sold lemonade at a stand',
-        'You walked dogs for your neighbors',
-        'You tutored students online',
+      const workJobKeys = [
+        'programmer',
+        'pizza',
+        'store',
+        'freelance',
+        'lawn',
+        'lemonade',
+        'dogwalker',
+        'tutor',
       ];
 
-      const description = workDescriptions[Math.floor(Math.random() * workDescriptions.length)];
+      const jobKey = workJobKeys[Math.floor(Math.random() * workJobKeys.length)];
+      const description = t(`commands.economy.work.jobs.${jobKey}`);
 
       return await this.addMoney(userId, guildId, amount, 'work', description);
     } catch (error) {
       console.error('Error working:', error);
-      return { success: false, error: 'An error occurred while working' };
+      return { success: false, error: t('commands.economy.errors.general') };
     }
   }
 
@@ -263,19 +267,19 @@ export class EconomyService {
       const settings = await economyRepository.ensureSettings(guildId);
 
       if (!settings.robEnabled) {
-        return { success: false, error: 'Robbing is disabled in this server' };
+        return { success: false, error: t('commands.economy.rob.disabled') };
       }
 
       const isOnCooldown = await economyRepository.isOnCooldown(robberId, guildId, 'rob');
       if (isOnCooldown) {
         const cooldown = await economyRepository.getCooldown(robberId, guildId, 'rob');
         if (!cooldown) {
-          return { success: false, error: 'Cooldown not found' };
+          return { success: false, error: t('common.error') };
         }
         const timeLeft = cooldown.nextAvailable.getTime() - Date.now();
         const hours = Math.floor(timeLeft / 1000 / 60 / 60);
         const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
-        return { success: false, error: `You can rob again in ${hours}h ${minutes}m` };
+        return { success: false, error: t('commands.economy.rob.cooldown', { hours, minutes }) };
       }
 
       // Check if victim has protection
@@ -292,13 +296,13 @@ export class EconomyService {
           nextAvailable,
         });
 
-        return { success: false, protected: true, error: 'This user has rob protection!' };
+        return { success: false, protected: true, error: t('commands.economy.rob.protectedText', { user: '' }) };
       }
 
       const victimBalance = await this.getOrCreateBalance(victimId, guildId);
 
       if (victimBalance.balance < settings.robMinAmount) {
-        return { success: false, error: "This user doesn't have enough money to rob" };
+        return { success: false, error: t('commands.economy.rob.notEnoughMoney') };
       }
 
       // Set cooldown
@@ -362,15 +366,15 @@ export class EconomyService {
             success: false,
             amount: -fine,
             robberBalance: result.balance ?? ({} as EconomyBalance),
-            error: `You were caught and fined ${fine} ${settings.currencyName}!`,
+            error: t('commands.economy.rob.failedText', { user: '' }) + ` (${fine} ${settings.currencyName})`,
           };
         }
 
-        return { success: false, error: 'You failed to rob the user!' };
+        return { success: false, error: t('commands.economy.rob.failedText', { user: '' }) };
       }
     } catch (error) {
       console.error('Error robbing:', error);
-      return { success: false, error: 'An error occurred while attempting to rob' };
+      return { success: false, error: t('commands.economy.errors.general') };
     }
   }
 
@@ -384,28 +388,37 @@ export class EconomyService {
     try {
       const item = await economyRepository.getShopItem(itemId);
       if (!item || item.guildId !== guildId) {
-        return { success: false, error: 'Item not found' };
+        return { success: false, error: t('commands.economy.errors.itemNotFound') };
       }
 
       if (!item.enabled) {
-        return { success: false, error: 'This item is not available for purchase' };
+        return { success: false, error: t('commands.economy.errors.itemNotFound') };
       }
 
       if (item.stock !== null && item.stock !== -1 && item.stock < quantity) {
-        return { success: false, error: 'Not enough stock available' };
+        return { success: false, error: t('commands.economy.errors.notEnoughStock') };
       }
 
       const totalCost = item.price * quantity;
       const balance = await this.getOrCreateBalance(userId, guildId);
 
       if (balance.balance < totalCost) {
-        return { success: false, error: 'Insufficient funds' };
+        return { success: false, error: t('commands.economy.errors.insufficientFunds') };
       }
 
       // Check role requirement
       if (item.requiresRole) {
-        // This would need to be checked in the command handler with Discord.js
-        // For now, we'll skip this check in the service layer
+        try {
+          const guild = client.guilds.cache.get(guildId);
+          if (guild) {
+            const member = await guild.members.fetch(userId).catch(() => null);
+            if (member && !member.roles.cache.has(item.requiresRole)) {
+              return { success: false, error: t('commands.economy.errors.missingRole') };
+            }
+          }
+        } catch (err) {
+          logger.error('Failed to check role requirements for shop item:', err);
+        }
       }
 
       // Deduct money
@@ -432,7 +445,7 @@ export class EconomyService {
           quantity: existingItem.quantity + quantity,
         });
         if (!updatedItem) {
-          return { success: false, error: 'Failed to update item quantity' };
+          return { success: false, error: t('commands.economy.errors.general') };
         }
         userItem = updatedItem;
       } else {
@@ -471,7 +484,7 @@ export class EconomyService {
       };
     } catch (error) {
       console.error('Error purchasing item:', error);
-      return { success: false, error: 'An error occurred while purchasing the item' };
+      return { success: false, error: t('commands.economy.errors.general') };
     }
   }
 

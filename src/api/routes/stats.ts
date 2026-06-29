@@ -69,7 +69,7 @@ router.get('/', async (_req: Request, res: Response) => {
           xp: stats.features.xp,
         },
       },
-      version: '3.2.1',
+      version: process.env.npm_package_version || '1.0.0',
       cache_age: statsAggregator.getStatsAge(),
     };
 

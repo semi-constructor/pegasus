@@ -6,13 +6,16 @@ import {
   guildSettings,
   economyBalances,
   economyShopItems,
-  members,
+  economySettings,
   modCases,
+  modLogSettings,
   tickets,
   ticketPanels,
   giveaways,
   giveawayEntries,
   xpRewards,
+  auditLogs,
+  userXp,
 } from '../../database/schema';
 import { eq, desc, and, sql, gte } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
@@ -45,14 +48,20 @@ router.get('/:guildId/economy', async (req: Request, res: Response) => {
       .orderBy(desc(sql`${economyBalances.balance} + ${economyBalances.bankBalance}`))
       .limit(10);
 
+    const [ecoSettings] = await db
+      .select()
+      .from(economySettings)
+      .where(eq(economySettings.guildId, guildId))
+      .limit(1);
+
     const response = {
       settings: {
         enabled: true,
-        currency_name: 'coins',
-        currency_symbol: '🪙',
-        starting_balance: 100,
-        daily_amount: 50,
-        daily_streak_bonus: 10,
+        currency_name: ecoSettings?.currencyName || 'coins',
+        currency_symbol: ecoSettings?.currencySymbol || '🪙',
+        starting_balance: ecoSettings?.startingBalance ?? 100,
+        daily_amount: ecoSettings?.dailyAmount ?? 50,
+        daily_streak_bonus: ecoSettings?.dailyStreakBonus ?? 10,
       },
       shopItems: shopItems.map((item: any) => ({
         id: item.id,
@@ -139,6 +148,18 @@ router.get('/:guildId/moderation', async (req: Request, res: Response) => {
       }
     });
 
+    const [gSettings] = await db
+      .select()
+      .from(guildSettings)
+      .where(eq(guildSettings.guildId, guildId))
+      .limit(1);
+
+    const [modLog] = await db
+      .select()
+      .from(modLogSettings)
+      .where(and(eq(modLogSettings.guildId, guildId), eq(modLogSettings.category, 'moderation')))
+      .limit(1);
+
     const response = {
       warnings: warnings.map((w: any) => ({
         id: w.id,
@@ -157,10 +178,10 @@ router.get('/:guildId/moderation', async (req: Request, res: Response) => {
       })),
       stats: moderationStats,
       settings: {
-        enabled: true,
-        auto_mod_enabled: false,
-        log_channel: null,
-        mute_role: null,
+        enabled: gSettings?.securityEnabled ?? true,
+        auto_mod_enabled: gSettings?.antiSpamEnabled ?? false,
+        log_channel: modLog?.channelId || gSettings?.logsChannel || null,
+        mute_role: gSettings?.securityAlertRole || null,
       },
     };
 
@@ -193,8 +214,15 @@ router.get('/:guildId/tickets', async (req: Request, res: Response) => {
     const openTickets = allTickets.filter(t => t.status === 'open');
     const closedTickets = allTickets.filter(t => t.status === 'closed');
 
-    // Calculate average response time (simulated)
-    const avgResponseTime = 300000; // 5 minutes in ms
+    // Calculate average response time
+    let avgResponseTime = 300000; // 5 minutes in ms default
+    if (closedTickets.length > 0) {
+      const totalDuration = closedTickets.reduce((acc, t) => {
+        const closed = t.closedAt ? t.closedAt.getTime() : t.createdAt.getTime() + 300000;
+        return acc + (closed - t.createdAt.getTime());
+      }, 0);
+      avgResponseTime = Math.round(totalDuration / closedTickets.length);
+    }
 
     const response = {
       tickets: openTickets.slice(0, 10).map(t => ({
@@ -244,15 +272,14 @@ router.get('/:guildId/xp', async (req: Request, res: Response) => {
     // Fetch leaderboard
     const leaderboard = await db
       .select({
-        userId: members.userId,
-        xp: members.xp,
-        level: members.level,
-        messages: members.messages,
-        rank: sql<number>`ROW_NUMBER() OVER (ORDER BY ${members.xp} DESC)`,
+        userId: userXp.userId,
+        xp: userXp.xp,
+        level: userXp.level,
+        rank: sql<number>`ROW_NUMBER() OVER (ORDER BY ${userXp.xp} DESC)`,
       })
-      .from(members)
-      .where(eq(members.guildId, guildId))
-      .orderBy(desc(members.xp))
+      .from(userXp)
+      .where(eq(userXp.guildId, guildId))
+      .orderBy(desc(userXp.xp))
       .limit(10);
 
     const settings = await db
@@ -276,7 +303,14 @@ router.get('/:guildId/xp', async (req: Request, res: Response) => {
         xp: user.xp || 0,
         level: user.level || 0,
         rank: Number(user.rank) || 1,
-        messages: user.messages || 0,
+        messages: 0,
+      })),
+      topUsers: leaderboard.map(user => ({
+        userId: user.userId,
+        xp: user.xp || 0,
+        level: user.level || 0,
+        rank: Number(user.rank) || 1,
+        messages: 0,
       })),
       settings: {
         enabled: guildConfig?.xpEnabled ?? true,
@@ -491,12 +525,39 @@ router.get('/:guildId/members', async (req: Request, res: Response): Promise<Res
 });
 
 // GET /guilds/{guildId}/logs
-router.get('/:guildId/logs', async (_req: Request, res: Response) => {
+router.get('/:guildId/logs', async (req: Request, res: Response) => {
+  const { guildId } = req.params;
+  const db = getDatabase();
+
   try {
-    // For now, return empty logs (would be populated from audit log table)
+    const limitParam = parseInt(req.query.limit as string) || 50;
+    const offsetParam = parseInt(req.query.offset as string) || 0;
+
+    const logs = await db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.guildId, guildId))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limitParam)
+      .offset(offsetParam);
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(auditLogs)
+      .where(eq(auditLogs.guildId, guildId));
+
     const response = {
-      logs: [],
-      total: 0,
+      logs: logs.map(l => ({
+        id: l.id,
+        action: l.action,
+        userId: l.userId,
+        guildId: l.guildId,
+        targetId: l.targetId,
+        targetType: l.targetType,
+        details: l.details || {},
+        createdAt: l.createdAt.toISOString(),
+      })),
+      total: Number(count) || 0,
     };
 
     res.json(response);

@@ -13,6 +13,8 @@ type CommandModule = {
   data?: Command['data'];
   execute?: Command['execute'];
   autocomplete?: Command['autocomplete'];
+  isSubcommand?: boolean;
+  default?: any;
 };
 
 export async function loadCommands(client: Client): Promise<void> {
@@ -30,6 +32,10 @@ export async function loadCommands(client: Client): Promise<void> {
       try {
         const filePath = join(categoryPath, file);
         const commandModule = (await import(filePath)) as CommandModule;
+
+        if (commandModule.isSubcommand || (commandModule.default && commandModule.default.isSubcommand)) {
+          continue;
+        }
 
         if (commandModule.data && commandModule.execute) {
           const command = commandModule as Command;

@@ -20,9 +20,20 @@ async function createAllTables() {
         bot BOOLEAN DEFAULT FALSE NOT NULL,
         rank_card_data TEXT,
         preferred_locale VARCHAR(5) DEFAULT 'en',
+        name VARCHAR(255),
+        email VARCHAR(255),
+        "emailVerified" TIMESTAMP,
+        image VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       )
+    `;
+    await connection`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS name VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS email VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS "emailVerified" TIMESTAMP,
+      ADD COLUMN IF NOT EXISTS image VARCHAR(255)
     `;
 
     // Create guilds table
@@ -192,12 +203,16 @@ async function createAllTables() {
         guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
         xp INTEGER DEFAULT 0 NOT NULL,
         level INTEGER DEFAULT 0 NOT NULL,
+        prestige_level INTEGER DEFAULT 0 NOT NULL,
         last_xp_gain TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         last_voice_activity TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         PRIMARY KEY (user_id, guild_id)
       )
+    `;
+    await connection`
+      ALTER TABLE user_xp ADD COLUMN IF NOT EXISTS prestige_level INTEGER DEFAULT 0 NOT NULL
     `;
 
     await connection`
@@ -772,6 +787,221 @@ async function createAllTables() {
       CREATE INDEX IF NOT EXISTS api_keys_active_idx ON api_keys(active)
     `;
 
+    // Create JTC tables
+    await connection`
+      CREATE TABLE IF NOT EXISTS jtc_configs (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL UNIQUE,
+        base_voice_channel_id VARCHAR(20) NOT NULL,
+        category_id VARCHAR(20) NOT NULL,
+        panel_channel_id VARCHAR(20) NOT NULL,
+        panel_message_id VARCHAR(20),
+        channel_name_format VARCHAR(100) DEFAULT '{user}\''s Channel' NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS jtc_channels (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        channel_id VARCHAR(20) NOT NULL UNIQUE,
+        owner_id VARCHAR(20) NOT NULL,
+        base_voice_channel_id VARCHAR(20) NOT NULL,
+        is_locked BOOLEAN DEFAULT FALSE NOT NULL,
+        user_limit INTEGER DEFAULT 0 NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+
+    // Create AutoMod tables
+    await connection`
+      CREATE TABLE IF NOT EXISTS auto_mod_rules (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        event_type VARCHAR(50) NOT NULL,
+        trigger_type VARCHAR(50) NOT NULL,
+        trigger_metadata JSONB DEFAULT '{}'::jsonb NOT NULL,
+        conditions JSONB DEFAULT '{}'::jsonb NOT NULL,
+        exempt_roles JSONB DEFAULT '[]'::jsonb NOT NULL,
+        exempt_channels JSONB DEFAULT '[]'::jsonb NOT NULL,
+        actions JSONB DEFAULT '[]'::jsonb NOT NULL,
+        enabled BOOLEAN DEFAULT TRUE NOT NULL,
+        created_by VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS auto_mod_rules_guild_event_idx ON auto_mod_rules(guild_id, event_type)
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS auto_mod_rules_enabled_idx ON auto_mod_rules(enabled)
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS auto_mod_infractions (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        rule_id UUID REFERENCES auto_mod_rules(id) ON DELETE SET NULL,
+        points INTEGER DEFAULT 1 NOT NULL,
+        action_taken VARCHAR(50) NOT NULL,
+        reason TEXT,
+        active BOOLEAN DEFAULT TRUE NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS auto_mod_infractions_guild_user_idx ON auto_mod_infractions(guild_id, user_id)
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS auto_mod_infractions_active_idx ON auto_mod_infractions(active)
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS quarantine_vault (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        original_roles JSONB DEFAULT '[]'::jsonb NOT NULL,
+        reason TEXT,
+        jailed_by VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL,
+        released BOOLEAN DEFAULT FALSE NOT NULL,
+        released_by VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL,
+        released_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS quarantine_vault_guild_user_active_idx ON quarantine_vault(guild_id, user_id, released)
+    `;
+
+    // Create Engagement tables
+    await connection`
+      CREATE TABLE IF NOT EXISTS achievements (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        achievement_id VARCHAR(50) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        requirement_type VARCHAR(50) NOT NULL,
+        requirement_value INTEGER NOT NULL,
+        reward_xp INTEGER DEFAULT 0 NOT NULL,
+        reward_coins INTEGER DEFAULT 0 NOT NULL,
+        custom_icon VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        UNIQUE(guild_id, achievement_id)
+      )
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS user_achievements (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        achievement_id UUID REFERENCES achievements(id) ON DELETE CASCADE NOT NULL,
+        unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        UNIQUE(guild_id, user_id, achievement_id)
+      )
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS engagement_quests (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        quest_id VARCHAR(50) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        type VARCHAR(20) NOT NULL,
+        target_type VARCHAR(50) NOT NULL,
+        target_value INTEGER NOT NULL,
+        reward_xp INTEGER DEFAULT 0 NOT NULL,
+        reward_coins INTEGER DEFAULT 0 NOT NULL,
+        active_until TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS engagement_quests_guild_type_idx ON engagement_quests(guild_id, type)
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS user_quest_progress (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        quest_id UUID REFERENCES engagement_quests(id) ON DELETE CASCADE NOT NULL,
+        progress INTEGER DEFAULT 0 NOT NULL,
+        completed BOOLEAN DEFAULT FALSE NOT NULL,
+        completed_at TIMESTAMP,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        UNIQUE(guild_id, user_id, quest_id)
+      )
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS user_reputation (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        sender_id VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL NOT NULL,
+        reason TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS user_reputation_guild_user_idx ON user_reputation(guild_id, user_id)
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS user_reputation_guild_sender_idx ON user_reputation(guild_id, sender_id)
+    `;
+
+    // Create Ticket Workflows tables
+    await connection`
+      CREATE TABLE IF NOT EXISTS ticket_departments (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        panel_id UUID REFERENCES ticket_panels(id) ON DELETE CASCADE NOT NULL,
+        department_id VARCHAR(50) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        description VARCHAR(255) NOT NULL,
+        emoji VARCHAR(50),
+        category_id VARCHAR(20),
+        support_roles JSONB DEFAULT '[]'::jsonb NOT NULL,
+        modal_fields JSONB DEFAULT '[]'::jsonb NOT NULL,
+        welcome_message TEXT,
+        sla_timeout_minutes INTEGER DEFAULT 60 NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS ticket_departments_panel_idx ON ticket_departments(panel_id)
+    `;
+    await connection`
+      CREATE TABLE IF NOT EXISTS ticket_ratings (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        guild_id VARCHAR(20) REFERENCES guilds(id) ON DELETE CASCADE NOT NULL,
+        ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE NOT NULL,
+        user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        claimed_by VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL,
+        rating INTEGER NOT NULL,
+        feedback TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS ticket_ratings_guild_staff_idx ON ticket_ratings(guild_id, claimed_by)
+    `;
+    await connection`
+      CREATE INDEX IF NOT EXISTS ticket_ratings_ticket_idx ON ticket_ratings(ticket_id)
+    `;
+
+    await connection`
+      ALTER TABLE tickets
+      ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES ticket_departments(id) ON DELETE SET NULL,
+      ADD COLUMN IF NOT EXISTS sla_breached BOOLEAN DEFAULT FALSE NOT NULL,
+      ADD COLUMN IF NOT EXISTS rating_id UUID REFERENCES ticket_ratings(id) ON DELETE SET NULL
+    `;
+
     // Create indexes for better performance
     await connection`CREATE INDEX IF NOT EXISTS idx_members_guild ON members(guild_id)`;
     await connection`CREATE INDEX IF NOT EXISTS idx_members_xp ON members(guild_id, xp DESC)`;
@@ -837,9 +1067,11 @@ export async function initializeDatabase() {
     };
 
     const sslPreference = process.env.DB_SSL?.toLowerCase();
-    if (sslPreference === 'true' || sslPreference === 'require') {
+    if (connectionString.includes('sslmode=require') || connectionString.includes('.neon.tech')) {
       connectionOptions.ssl = 'require';
-    } else if (connectionString.includes('sslmode=require')) {
+    } else if (sslPreference === 'false') {
+      connectionOptions.ssl = false;
+    } else {
       connectionOptions.ssl = 'require';
     }
 

@@ -27,7 +27,7 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
 
   if (!channel) {
     await interaction.editReply({
-      content: 'Channel not found',
+      content: t('commands.giveaway.error'),
     });
     return;
   }
@@ -140,14 +140,14 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
       const reqLines = [];
       if (requirements.roleIds?.length > 0) {
         reqLines.push(
-          `• Roles: ${requirements.roleIds.map((id: string) => `<@&${id}>`).join(', ')}`
+          `• ${t('commands.config.subcommands.xp.buttons.roles')}: ${requirements.roleIds.map((id: string) => `<@&${id}>`).join(', ')}`
         );
       }
       if (requirements.minLevel) {
-        reqLines.push(`• Minimum Level: ${requirements.minLevel}`);
+        reqLines.push(`• ${t('commands.warn.subcommands.issue.success.level')}: ${requirements.minLevel}`);
       }
       if (requirements.minTimeInServer) {
-        reqLines.push(`• Time in Server: ${requirements.minTimeInServer}`);
+        reqLines.push(`• ${t('commands.moderation.subcommands.mute.success.duration')}: ${requirements.minTimeInServer}`);
       }
       embed.addFields({
         name: t('commands.giveaway.embed.requirements'),
@@ -161,11 +161,11 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
       const bonusLines = [];
       if (bonusEntries.roles) {
         for (const [roleId, multiplier] of Object.entries(bonusEntries.roles)) {
-          bonusLines.push(`• <@&${roleId}>: ${multiplier}x entries`);
+          bonusLines.push(`• <@&${roleId}>: ${multiplier}x ${t('commands.giveaway.info.entries')}`);
         }
       }
       if (bonusEntries.booster) {
-        bonusLines.push(`• Server Booster: ${bonusEntries.booster}x entries`);
+        bonusLines.push(`• ${t('commands.config.subcommands.xp.embed.fields.boosterRole')}: ${bonusEntries.booster}x ${t('commands.giveaway.info.entries')}`);
       }
       embed.addFields({
         name: t('commands.giveaway.embed.bonusEntries'),
@@ -216,7 +216,7 @@ async function handleGiveawayConfigure(interaction: ModalSubmitInteraction, give
 
   if (isNaN(winners) || winners < 1 || winners > 20) {
     await interaction.editReply({
-      content: 'Winner count must be between 1 and 20',
+      content: t('common.error'),
     });
     return;
   }

@@ -1,6 +1,7 @@
 import { modCaseRepository } from '../repositories/modCaseRepository';
 import { logger } from '../utils/logger';
 import type { Client } from 'discord.js';
+import { t } from '../i18n';
 
 interface TempBanSchedule {
   caseId: number;
@@ -73,7 +74,7 @@ class ModerationScheduler {
 
         if (isBanned) {
           await guild.members
-            .unban(payload.userId, 'Temporary ban expired')
+            .unban(payload.userId, t('commands.moderation.subcommands.ban.expired', { defaultValue: 'Temporary ban expired' }))
             .catch(error =>
               logger.warn(`Failed to auto-unban ${payload.userId} in ${payload.guildId}:`, error)
             );

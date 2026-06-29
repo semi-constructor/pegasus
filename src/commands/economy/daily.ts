@@ -4,15 +4,15 @@ import { economyService } from '../../services/economyService';
 import { economyRepository } from '../../repositories/economyRepository';
 import { embedBuilder } from '../../handlers/embedBuilder';
 import { logger } from '../../utils/logger';
+import { t, getGuildLocale } from '../../i18n';
+import { createLocalizationMap, subcommandDescriptions } from '../../utils/localization';
+
+export const isSubcommand = true;
 
 export const data = new SlashCommandBuilder()
   .setName('daily')
-  .setDescription('Claim your daily reward')
-  .setDescriptionLocalizations({
-    'es-ES': 'Reclama tu recompensa diaria',
-    fr: 'Réclamez votre récompense quotidienne',
-    de: 'Fordere deine tägliche Belohnung an',
-  });
+  .setDescription(t('commands.economy.subcommands.daily.description', { defaultValue: 'Claim your daily reward' }))
+  .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.daily));
 
 export const category = CommandCategory.Economy;
 export const cooldown = 3;
@@ -22,6 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const userId = interaction.user.id;
   const guildId = interaction.guildId!;
+  const locale = interaction.guildId ? getGuildLocale(interaction.guildId) : 'en';
 
   try {
     const result = await economyService.claimDaily(userId, guildId);
@@ -38,34 +39,39 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const streakDays = metadata?.streakDays || 1;
 
     const embed = new EmbedBuilder()
-      .setTitle('Daily Reward Claimed!')
-      .setDescription(`You received your daily reward!`)
+      .setTitle(t('commands.economy.subcommands.daily.embed.title', { defaultValue: 'Daily Reward Claimed!', lng: locale }))
+      .setDescription(t('commands.economy.subcommands.daily.embed.description', { defaultValue: 'You received your daily reward!', lng: locale }))
       .setColor(0x2ecc71)
       .setThumbnail(interaction.user.displayAvatarURL())
       .addFields(
         {
-          name: 'Reward',
+          name: t('commands.economy.subcommands.daily.embed.reward', { defaultValue: 'Reward', lng: locale }),
           value: `${settings.currencySymbol} ${result.transaction!.amount.toLocaleString()}`,
           inline: true,
         },
         {
-          name: 'Streak',
-          value: `${streakDays} day${streakDays > 1 ? 's' : ''}`,
+          name: t('commands.economy.subcommands.daily.embed.streak', { defaultValue: 'Streak', lng: locale }),
+          value: `${streakDays} ${t('commands.economy.subcommands.daily.embed.days', { defaultValue: streakDays > 1 ? 'days' : 'day', count: streakDays, lng: locale })}`,
           inline: true,
         },
         {
-          name: 'New Balance',
+          name: t('commands.economy.subcommands.daily.embed.newBalance', { defaultValue: 'New Balance', lng: locale }),
           value: `${settings.currencySymbol} ${result.balance!.balance.toLocaleString()}`,
           inline: true,
         }
       )
-      .setFooter({ text: 'Come back tomorrow for more rewards!' })
+      .setFooter({ text: t('commands.economy.subcommands.daily.embed.footer', { defaultValue: 'Come back tomorrow for more rewards!', lng: locale }) })
       .setTimestamp();
 
     if (streakDays > 1) {
       embed.addFields({
-        name: 'Streak Bonus',
-        value: `You earned ${settings.currencySymbol}${settings.dailyStreakBonus * (streakDays - 1)} extra for your ${streakDays} day streak!`,
+        name: t('commands.economy.subcommands.daily.embed.streakBonus', { defaultValue: 'Streak Bonus', lng: locale }),
+        value: t('commands.economy.subcommands.daily.embed.streakBonusValue', {
+          defaultValue: `You earned ${settings.currencySymbol}${settings.dailyStreakBonus * (streakDays - 1)} extra for your ${streakDays} day streak!`,
+          amount: `${settings.currencySymbol}${settings.dailyStreakBonus * (streakDays - 1)}`,
+          days: streakDays,
+          lng: locale,
+        }),
         inline: false,
       });
     }
@@ -75,7 +81,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     logger.error('Error in daily command:', error);
     await interaction.editReply({
       embeds: [
-        embedBuilder.createErrorEmbed('Failed to claim daily reward. Please try again later.'),
+        embedBuilder.createErrorEmbed(
+          t('commands.economy.subcommands.daily.error', { defaultValue: 'Failed to claim daily reward. Please try again later.', lng: locale })
+        ),
       ],
     });
   }

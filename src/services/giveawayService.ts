@@ -13,6 +13,7 @@ import { auditLogger } from '../security/audit';
 import { t } from '../i18n';
 import { logger } from '../utils/logger';
 import { generateId } from '../utils/id';
+import { xpRepository } from '../repositories/xpRepository';
 
 export interface GiveawayRequirements {
   roleIds?: string[];
@@ -120,20 +121,20 @@ export class GiveawayService {
     const giveaway = await giveawayRepository.getGiveaway(giveawayId);
 
     if (!giveaway) {
-      return { success: false, error: 'Giveaway not found' };
+      return { success: false, error: t('commands.giveaway.notFound') };
     }
 
     if (giveaway.status !== 'active') {
-      return { success: false, error: 'This giveaway has ended' };
+      return { success: false, error: t('commands.giveaway.notActive') };
     }
 
     // Check requirements
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) {
-      return { success: false, error: 'Member not found' };
+      return { success: false, error: t('common.invalidUser') };
     }
 
-    const requirementCheck = this.checkRequirements(
+    const requirementCheck = await this.checkRequirements(
       member,
       giveaway.requirements as GiveawayRequirements
     );
@@ -161,11 +162,11 @@ export class GiveawayService {
     const giveaway = await giveawayRepository.getGiveaway(giveawayId);
 
     if (!giveaway) {
-      return { success: false, error: 'Giveaway not found' };
+      return { success: false, error: t('commands.giveaway.notFound') };
     }
 
     if (giveaway.status !== 'active') {
-      return { success: false, error: 'This giveaway has ended' };
+      return { success: false, error: t('commands.giveaway.notActive') };
     }
 
     await giveawayRepository.removeEntry(giveawayId, userId);
@@ -176,11 +177,11 @@ export class GiveawayService {
     const giveaway = await giveawayRepository.getGiveaway(giveawayId);
 
     if (!giveaway) {
-      return { success: false, error: 'Giveaway not found' };
+      return { success: false, error: t('commands.giveaway.notFound') };
     }
 
     if (giveaway.status !== 'active') {
-      return { success: false, error: 'Giveaway already ended' };
+      return { success: false, error: t('commands.giveaway.notActive') };
     }
 
     // Get entries and select winners
@@ -232,11 +233,11 @@ export class GiveawayService {
     const giveaway = await giveawayRepository.getGiveaway(giveawayId);
 
     if (!giveaway) {
-      return { success: false, error: 'Giveaway not found' };
+      return { success: false, error: t('commands.giveaway.notFound') };
     }
 
     if (giveaway.status !== 'ended') {
-      return { success: false, error: 'Giveaway must be ended before rerolling' };
+      return { success: false, error: t('commands.giveaway.error') };
     }
 
     const winnerCount = newWinnerCount || giveaway.winnerCount;
@@ -273,7 +274,7 @@ export class GiveawayService {
     const giveaway = await giveawayRepository.getGiveaway(giveawayId);
 
     if (!giveaway || giveaway.status !== 'active') {
-      throw new Error('Giveaway not found or not active');
+      throw new Error(t('commands.giveaway.notFound'));
     }
 
     await giveawayRepository.updateGiveaway(giveawayId, updates);
@@ -294,31 +295,34 @@ export class GiveawayService {
     });
   }
 
-  private checkRequirements(
+  private async checkRequirements(
     member: GuildMember,
     requirements: GiveawayRequirements
-  ): { met: boolean; reason?: string } {
+  ): Promise<{ met: boolean; reason?: string }> {
     // Check role requirements
     if (requirements.roleIds && requirements.roleIds.length > 0) {
       const hasRequiredRole = requirements.roleIds.some((roleId: string) =>
         member.roles.cache.has(roleId)
       );
       if (!hasRequiredRole) {
-        return { met: false, reason: 'You must have one of the required roles' };
+        return { met: false, reason: t('commands.giveaway.requirementsNotMet') };
       }
     }
 
     // Check level requirement
     if (requirements.minLevel) {
-      // This would check XP system
-      // For now, we'll skip this check
+      const userXP = await xpRepository.getUserXP(member.id, member.guild.id);
+      const userLevel = userXP?.level || 0;
+      if (userLevel < requirements.minLevel) {
+        return { met: false, reason: t('commands.giveaway.requirementsNotMet') };
+      }
     }
 
     // Check time in server requirement
     if (requirements.minTimeInServer) {
       const joinedAt = member.joinedAt;
       if (!joinedAt) {
-        return { met: false, reason: 'Could not verify join date' };
+        return { met: false, reason: t('commands.giveaway.requirementsNotMet') };
       }
 
       const timeInServer = Date.now() - joinedAt.getTime();
@@ -327,7 +331,7 @@ export class GiveawayService {
       if (timeInServer < requiredTime) {
         return {
           met: false,
-          reason: `You must be in the server for at least ${requirements.minTimeInServer}`,
+          reason: t('commands.giveaway.requirementsNotMet'),
         };
       }
     }

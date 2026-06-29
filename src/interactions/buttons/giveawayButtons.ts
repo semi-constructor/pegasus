@@ -121,13 +121,13 @@ async function handleGiveawayInfo(interaction: ButtonInteraction, giveawayId: st
     const reqLines = [];
     const requirements = giveaway.requirements as any;
     if (requirements.roleIds?.length > 0) {
-      reqLines.push(`• Roles: ${requirements.roleIds.map((id: string) => `<@&${id}>`).join(', ')}`);
+      reqLines.push(`• ${t('commands.config.subcommands.xp.buttons.roles')}: ${requirements.roleIds.map((id: string) => `<@&${id}>`).join(', ')}`);
     }
     if (requirements.minLevel) {
-      reqLines.push(`• Minimum Level: ${requirements.minLevel}`);
+      reqLines.push(`• ${t('commands.warn.subcommands.issue.success.level')}: ${requirements.minLevel}`);
     }
     if (requirements.minTimeInServer) {
-      reqLines.push(`• Time in Server: ${requirements.minTimeInServer}`);
+      reqLines.push(`• ${t('commands.moderation.subcommands.mute.success.duration')}: ${requirements.minTimeInServer}`);
     }
     if (reqLines.length > 0) {
       embed.addFields({
@@ -144,11 +144,11 @@ async function handleGiveawayInfo(interaction: ButtonInteraction, giveawayId: st
     const bonusEntries = giveaway.bonusEntries as any;
     if (bonusEntries.roles) {
       for (const [roleId, multiplier] of Object.entries(bonusEntries.roles)) {
-        bonusLines.push(`• <@&${roleId}>: ${multiplier}x entries`);
+        bonusLines.push(`• <@&${roleId}>: ${multiplier}x ${t('commands.giveaway.info.entries')}`);
       }
     }
     if (bonusEntries.booster) {
-      bonusLines.push(`• Server Booster: ${bonusEntries.booster}x entries`);
+      bonusLines.push(`• ${t('commands.config.subcommands.xp.embed.fields.boosterRole')}: ${bonusEntries.booster}x ${t('commands.giveaway.info.entries')}`);
     }
     if (bonusLines.length > 0) {
       embed.addFields({

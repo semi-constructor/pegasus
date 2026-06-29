@@ -710,7 +710,7 @@ async function handleXPChannelsModal(interaction: ModalSubmitInteraction, type: 
     const invalidChannels = channels.filter(id => !interaction.guild!.channels.cache.has(id));
     if (invalidChannels.length > 0) {
       await interaction.editReply({
-        content: `Invalid channel IDs: ${invalidChannels.join(', ')}`,
+        content: t('common.error'),
       });
       return;
     }
@@ -733,10 +733,10 @@ async function handleXPChannelsModal(interaction: ModalSubmitInteraction, type: 
 
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('XP Channels Updated')
+      .setTitle(t('commands.config.subcommands.xp.title'))
       .setDescription(`${type.replace('_', ' ')} channels have been updated`)
       .addFields({
-        name: 'Channels',
+        name: t('commands.config.subcommands.xp.buttons.channels'),
         value: channels.length > 0 ? channels.map(id => `<#${id}>`).join('\n') : t('common.none'),
         inline: false,
       })
@@ -761,14 +761,14 @@ async function handleXPRewardAddModal(interaction: ModalSubmitInteraction) {
     // Validate inputs
     if (isNaN(level) || level < 1 || level > 100) {
       await interaction.editReply({
-        content: 'Level must be between 1 and 100',
+        content: t('common.error'),
       });
       return;
     }
 
     if (!interaction.guild!.roles.cache.has(roleId)) {
       await interaction.editReply({
-        content: 'Invalid role ID',
+        content: t('common.error'),
       });
       return;
     }
@@ -777,16 +777,16 @@ async function handleXPRewardAddModal(interaction: ModalSubmitInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('XP Reward Added')
+      .setTitle(t('commands.config.subcommands.xp.title'))
       .setDescription(`Role reward has been added`)
       .addFields(
         {
-          name: 'Level',
+          name: t('commands.warn.subcommands.issue.success.level'),
           value: level.toString(),
           inline: true,
         },
         {
-          name: 'Role',
+          name: t('commands.config.subcommands.xp.buttons.roles'),
           value: `<@&${roleId}>`,
           inline: true,
         }
@@ -810,7 +810,7 @@ async function handleXPRewardRemoveModal(interaction: ModalSubmitInteraction) {
 
     if (isNaN(level)) {
       await interaction.editReply({
-        content: 'Invalid level',
+        content: t('common.error'),
       });
       return;
     }
@@ -819,7 +819,7 @@ async function handleXPRewardRemoveModal(interaction: ModalSubmitInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('XP Reward Removed')
+      .setTitle(t('commands.config.subcommands.xp.title'))
       .setDescription(`Role reward for level ${level} has been removed`)
       .setTimestamp();
 
@@ -845,14 +845,14 @@ async function handleEcoShopAddModal(interaction: ModalSubmitInteraction) {
     // Validate inputs
     if (isNaN(price) || price < 0) {
       await interaction.editReply({
-        content: 'Invalid price',
+        content: t('common.error'),
       });
       return;
     }
 
     if (isNaN(stock)) {
       await interaction.editReply({
-        content: 'Invalid stock amount',
+        content: t('common.error'),
       });
       return;
     }
@@ -860,7 +860,7 @@ async function handleEcoShopAddModal(interaction: ModalSubmitInteraction) {
     const validTypes = ['protection', 'booster', 'role', 'custom'];
     if (!validTypes.includes(type)) {
       await interaction.editReply({
-        content: `Invalid type. Must be one of: ${validTypes.join(', ')}`,
+        content: t('common.error'),
       });
       return;
     }
@@ -893,7 +893,7 @@ async function handleEcoShopAddModal(interaction: ModalSubmitInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('Shop Item Added')
+      .setTitle(t('config.eco.shop.title'))
       .setDescription(`Item "${name}" has been added to the shop`)
       .addFields(
         {
@@ -902,13 +902,13 @@ async function handleEcoShopAddModal(interaction: ModalSubmitInteraction) {
           inline: true,
         },
         {
-          name: 'Price',
+          name: t('commands.economy.shop.view.price', { defaultValue: 'Price' }),
           value: price.toString(),
           inline: true,
         },
         {
-          name: 'Stock',
-          value: stock === -1 ? 'Unlimited' : stock.toString(),
+          name: t('commands.economy.shop.view.stock'),
+          value: stock === -1 ? t('commands.economy.shop.view.unlimited') : stock.toString(),
           inline: true,
         }
       )
@@ -936,7 +936,7 @@ async function handleEcoShopEditModal(interaction: ModalSubmitInteraction) {
 
     if (!item) {
       await interaction.editReply({
-        content: 'Item not found',
+        content: t('commands.economy.shop.buy.notFound'),
       });
       return;
     }
@@ -944,7 +944,7 @@ async function handleEcoShopEditModal(interaction: ModalSubmitInteraction) {
     // In a real implementation, you'd have more fields to edit
     const embed = new EmbedBuilder()
       .setColor(0x0099ff)
-      .setTitle('Shop Item Edit')
+      .setTitle(t('config.eco.shop.title'))
       .setDescription(
         'To edit items, please use the shop manager to remove and re-add with new settings'
       )
@@ -970,7 +970,7 @@ async function handleEcoShopRemoveModal(interaction: ModalSubmitInteraction) {
 
     if (!item) {
       await interaction.editReply({
-        content: 'Item not found',
+        content: t('commands.economy.shop.buy.notFound'),
       });
       return;
     }
@@ -979,7 +979,7 @@ async function handleEcoShopRemoveModal(interaction: ModalSubmitInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('Shop Item Removed')
+      .setTitle(t('config.eco.shop.title'))
       .setDescription(`Item "${item.name}" has been removed from the shop`)
       .setTimestamp();
 

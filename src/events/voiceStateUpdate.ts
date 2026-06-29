@@ -3,6 +3,8 @@ import { xpService } from '../services/xpService';
 import { configurationService } from '../services/configurationService';
 import { guildService } from '../services/guildService';
 import { logger } from '../utils/logger';
+import { jtcService } from '../services/jtcService';
+import { engagementService } from '../services/engagementService';
 
 export const name = Events.VoiceStateUpdate;
 export const once = false;
@@ -33,6 +35,8 @@ export async function execute(oldState: VoiceState, newState: VoiceState) {
 async function handleVoiceJoin(state: VoiceState) {
   if (!state.guild || !state.member) return;
 
+  await jtcService.handleVoiceJoin(state);
+
   try {
     // Ensure guild exists in database
     await guildService.ensureGuild(state.guild);
@@ -58,9 +62,21 @@ async function handleVoiceJoin(state: VoiceState) {
 async function handleVoiceLeave(state: VoiceState) {
   if (!state.guild || !state.member) return;
 
+  await jtcService.handleVoiceLeave(state);
+
   try {
+    const voiceStates = xpService.getAllVoiceStates();
+    const startTime = voiceStates.get(`${state.member.id}-${state.guild.id}`);
+    if (startTime) {
+      const minutes = Math.floor((Date.now() - startTime) / 60000);
+      if (minutes > 0) {
+        await engagementService.trackVoiceActivity(state.member.id, state.guild.id, state.member, minutes);
+      }
+    }
+
     // Stop tracking and award XP
     const result = await xpService.stopVoiceTracking(state.member.id, state.guild.id, state.member);
+
 
     // Handle level up if needed (similar to messageCreate)
     if (result && result.leveledUp) {

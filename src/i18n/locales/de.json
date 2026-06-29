@@ -24,7 +24,12 @@
     "disable": "Deaktivieren",
     "enable": "Aktivieren",
     "notYourButton": "Sie können diese Schaltfläche nicht verwenden",
-    "featureNotImplemented": "Diese Funktion ist noch nicht implementiert"
+    "featureNotImplemented": "Diese Funktion ist noch nicht implementiert",
+    "devOnly": "Dieser Befehl ist nur für Bot-Entwickler zugänglich.",
+    "cannotWarnSelf": "Sie können sich nicht selbst verwarnen!",
+    "cannotWarnBot": "Sie können keine Bots verwarnen!",
+    "funDisabled": "Fun-Befehle sind derzeit deaktiviert.",
+    "fetchError": "Ein Fehler ist beim Abrufen von Inhalten aufgetreten. Bitte versuchen Sie es später erneut."
   },
   "commands": {
     "ping": {
@@ -91,6 +96,18 @@
         "visibilityFriendsOnly": "Nur Freunde",
         "visibilityPublic": "Öffentlich"
       },
+      "geizhals": {
+        "notFound": "Keine Produkte auf Geizhals gefunden",
+        "error": "Fehler beim Abrufen der Geizhals-Produkte",
+        "bestPrice": "Bester Preis",
+        "rating": "Bewertung",
+        "offers": "Angebote",
+        "unknownProduct": "Unbekanntes Produkt",
+        "footer": "Geizhals Produktsuche",
+        "mockTitle": "{{query}} (Mock-Version)",
+        "mockDescription": "Dies ist eine Mock-Produktdarstellung der Geizhals-API.",
+        "mockFooter": "{{footer}} (Mock)"
+      },
       "userinfo": {
         "title": "Benutzerinformationen - {{user}}",
         "username": "Benutzername",
@@ -147,6 +164,35 @@
         "description": "Benötigst du Hilfe mit Pegasus? Tritt unserem Support-Server bei!",
         "link": "Support-Server-Link",
         "footer": "Pegasus Support"
+      },
+      "stats": {
+        "title": "📊 Bot-Statistiken & Systeminformationen",
+        "botStats": "🤖 Bot-Statistiken",
+        "guilds": "Gilden",
+        "users": "Benutzer",
+        "channels": "Kanäle",
+        "commands": "Befehle",
+        "uptime": "Betriebszeit",
+        "ping": "Ping",
+        "sysInfo": "💻 Systeminformationen",
+        "os": "Betriebssystem",
+        "platform": "Plattform",
+        "hostname": "Hostname",
+        "cpu": "CPU",
+        "cpuCores": "CPU-Kerne",
+        "cpuUsage": "CPU-Auslastung",
+        "memUsage": "💾 Speichernutzung",
+        "totalRam": "Gesamt-RAM",
+        "usedRam": "Genutzter RAM",
+        "freeRam": "Freier RAM",
+        "botRss": "Bot RSS",
+        "botHeap": "Bot Heap",
+        "botExternal": "Bot Extern",
+        "versions": "📦 Versionen",
+        "processInfo": "⚙️ Prozessinformationen",
+        "memLimit": "Speicherlimit",
+        "footer": "Angefordert von {{user}}",
+        "error": "Ein Fehler ist beim Abrufen der Statistiken aufgetreten."
       }
     },
     "economy": {

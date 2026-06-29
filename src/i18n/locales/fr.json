@@ -24,7 +24,12 @@
     "disable": "Désactiver",
     "enable": "Activer",
     "notYourButton": "Vous ne pouvez pas utiliser ce bouton",
-    "featureNotImplemented": "Cette fonctionnalité n'est pas encore implémentée"
+    "featureNotImplemented": "Cette fonctionnalité n'est pas encore implémentée",
+    "devOnly": "Cette commande est réservée aux développeurs du bot.",
+    "cannotWarnSelf": "Vous ne pouvez pas vous avertir vous-même!",
+    "cannotWarnBot": "Vous ne pouvez pas avertir les bots!",
+    "funDisabled": "Les commandes fun sont actuellement désactivées.",
+    "fetchError": "Une erreur est survenue lors de la récupération du contenu. Veuillez réessayer plus tard."
   },
   "commands": {
     "ping": {
@@ -91,6 +96,18 @@
         "visibilityFriendsOnly": "Amis uniquement",
         "visibilityPublic": "Public"
       },
+      "geizhals": {
+        "notFound": "Aucun produit trouvé sur Geizhals",
+        "error": "Échec de la récupération des produits Geizhals",
+        "bestPrice": "Meilleur prix",
+        "rating": "Évaluation",
+        "offers": "Offres",
+        "unknownProduct": "Produit inconnu",
+        "footer": "Recherche de produits Geizhals",
+        "mockTitle": "{{query}} (Édition Mock)",
+        "mockDescription": "Ceci est une représentation fictive de produit de l'API Geizhals.",
+        "mockFooter": "{{footer}} (Mock)"
+      },
       "userinfo": {
         "title": "Informations de l'Utilisateur - {{user}}",
         "username": "Nom d'utilisateur",
@@ -147,6 +164,35 @@
         "description": "Besoin d'aide avec Pegasus? Rejoignez notre serveur de support!",
         "link": "Lien du Serveur de Support",
         "footer": "Support Pegasus"
+      },
+      "stats": {
+        "title": "📊 Statistiques du Bot et Informations Système",
+        "botStats": "🤖 Statistiques du Bot",
+        "guilds": "Serveurs",
+        "users": "Utilisateurs",
+        "channels": "Salons",
+        "commands": "Commandes",
+        "uptime": "Temps de fonctionnement",
+        "ping": "Ping",
+        "sysInfo": "💻 Informations Système",
+        "os": "Système d'exploitation",
+        "platform": "Plateforme",
+        "hostname": "Nom d'hôte",
+        "cpu": "CPU",
+        "cpuCores": "Cœurs de CPU",
+        "cpuUsage": "Utilisation du CPU",
+        "memUsage": "💾 Utilisation de la Mémoire",
+        "totalRam": "RAM Totale",
+        "usedRam": "RAM Utilisée",
+        "freeRam": "RAM Libre",
+        "botRss": "Bot RSS",
+        "botHeap": "Bot Heap",
+        "botExternal": "Bot Externe",
+        "versions": "📦 Versions",
+        "processInfo": "⚙️ Informations sur le Processus",
+        "memLimit": "Limite de mémoire",
+        "footer": "Demandé par {{user}}",
+        "error": "Une erreur est survenue lors de la récupération des statistiques."
       }
     },
     "economy": {

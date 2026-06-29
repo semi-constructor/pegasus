@@ -21,9 +21,12 @@ import {
 import { Command } from '../../types/command';
 import { TicketService } from '../../services/ticketService';
 import { TicketRepository } from '../../repositories/ticketRepository';
-import { t } from '../../i18n';
+import { t, getGuildLocale, withLocale } from '../../i18n';
+import { createLocalizationMap, commandNames, commandDescriptions, subcommandDescriptions } from '../../utils/localization';
 // import { GuildService } from '../../services/guildService';
 import { CommandCategory } from '../../types/command';
+import { ticketWorkflowService } from '../../services/ticketWorkflowService';
+import { ticketWorkflowRepository } from '../../repositories/ticketWorkflowRepository';
 
 interface PanelDraft {
   panelId: string;
@@ -140,15 +143,19 @@ export const ticket: Command = {
   category: CommandCategory.Tickets,
   data: new SlashCommandBuilder()
     .setName('ticket')
-    .setDescription('Manage ticket system')
+    .setDescription(t('commands.ticket.description', { defaultValue: 'Manage ticket system' }))
+    .setNameLocalizations(createLocalizationMap(commandNames.ticket))
+    .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.ticket))
     .addSubcommandGroup(group =>
       group
         .setName('panel')
-        .setDescription('Manage ticket panels')
+        .setDescription(t('commands.ticket.subcommands.panel.description', { defaultValue: 'Manage ticket panels' }))
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.group))
         .addSubcommand(subcommand =>
           subcommand
             .setName('create')
-            .setDescription('Create a new ticket panel configuration')
+            .setDescription(t('commands.ticket.subcommands.panel.create.description', { defaultValue: 'Create a new ticket panel configuration' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.create))
             .addStringOption(option =>
               option
                 .setName('panel_id')
@@ -182,10 +189,10 @@ export const ticket: Command = {
                 .setName('button_style')
                 .setDescription('Button style')
                 .addChoices(
-                  { name: 'Primary (Blue)', value: ButtonStyle.Primary },
-                  { name: 'Secondary (Gray)', value: ButtonStyle.Secondary },
-                  { name: 'Success (Green)', value: ButtonStyle.Success },
-                  { name: 'Danger (Red)', value: ButtonStyle.Danger }
+                  { name: 'Primary (Blue)', value: ButtonStyle.Primary, name_localizations: { de: 'Primär (Blau)', 'es-ES': 'Primario (Azul)', fr: 'Primaire (Bleu)' } },
+                  { name: 'Secondary (Gray)', value: ButtonStyle.Secondary, name_localizations: { de: 'Sekundär (Grau)', 'es-ES': 'Secundario (Gris)', fr: 'Secondaire (Gris)' } },
+                  { name: 'Success (Green)', value: ButtonStyle.Success, name_localizations: { de: 'Erfolg (Grün)', 'es-ES': 'Éxito (Verde)', fr: 'Succès (Vert)' } },
+                  { name: 'Danger (Red)', value: ButtonStyle.Danger, name_localizations: { de: 'Gefahr (Rot)', 'es-ES': 'Peligro (Rojo)', fr: 'Danger (Rouge)' } }
                 )
             )
             .addChannelOption(option =>
@@ -214,7 +221,8 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('load')
-            .setDescription('Load and send a ticket panel')
+            .setDescription(t('commands.ticket.subcommands.panel.load.description', { defaultValue: 'Load and send a ticket panel' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.load))
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel to load').setRequired(true)
             )
@@ -229,7 +237,8 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('delete')
-            .setDescription('Delete a ticket panel')
+            .setDescription(t('commands.ticket.subcommands.panel.delete.description', { defaultValue: 'Delete a ticket panel' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.delete))
             .addStringOption(option =>
               option
                 .setName('panel_id')
@@ -238,24 +247,80 @@ export const ticket: Command = {
             )
         )
         .addSubcommand(subcommand =>
-          subcommand.setName('list').setDescription('List all ticket panels in this server')
+          subcommand
+            .setName('list')
+            .setDescription(t('commands.ticket.subcommands.panel.list.description', { defaultValue: 'List all ticket panels in this server' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.list))
         )
         .addSubcommand(subcommand =>
           subcommand
             .setName('edit')
-            .setDescription('Edit an existing ticket panel')
+            .setDescription(t('commands.ticket.subcommands.panel.edit.description', { defaultValue: 'Edit an existing ticket panel' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.edit))
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel to edit').setRequired(true)
             )
         )
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('add_dept')
+            .setDescription(t('commands.ticket.subcommands.panel.add_dept.description', { defaultValue: 'Add a department to a ticket panel' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.add_dept))
+            .addStringOption(option =>
+              option.setName('panel_id').setDescription('ID of the panel').setRequired(true)
+            )
+            .addStringOption(option =>
+              option.setName('dept_id').setDescription('Unique department ID').setRequired(true)
+            )
+            .addStringOption(option =>
+              option.setName('name').setDescription('Department name').setRequired(true)
+            )
+            .addStringOption(option =>
+              option.setName('description').setDescription('Department description').setRequired(true)
+            )
+            .addRoleOption(option =>
+              option.setName('support_role').setDescription('Support role for this department')
+            )
+            .addChannelOption(option =>
+              option.setName('category').setDescription('Category for this department').addChannelTypes(ChannelType.GuildCategory)
+            )
+            .addStringOption(option =>
+              option.setName('welcome_message').setDescription('Welcome message for this department')
+            )
+        )
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('list_depts')
+            .setDescription(t('commands.ticket.subcommands.panel.list_depts.description', { defaultValue: 'List all departments for a ticket panel' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.list_depts))
+            .addStringOption(option =>
+              option.setName('panel_id').setDescription('ID of the panel').setRequired(true)
+            )
+        )
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('remove_dept')
+            .setDescription(t('commands.ticket.subcommands.panel.remove_dept.description', { defaultValue: 'Remove a department from a ticket panel' }))
+            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.remove_dept))
+            .addStringOption(option =>
+              option.setName('panel_id').setDescription('ID of the panel').setRequired(true)
+            )
+            .addStringOption(option =>
+              option.setName('dept_id').setDescription('ID of the department to remove').setRequired(true)
+            )
+        )
     )
     .addSubcommand(subcommand =>
-      subcommand.setName('claim').setDescription('Claim a ticket (for support staff)')
+      subcommand
+        .setName('claim')
+        .setDescription(t('commands.ticket.subcommands.claim.description', { defaultValue: 'Claim a ticket (for support staff)' }))
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.claim))
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('close')
-        .setDescription('Close a ticket')
+        .setDescription(t('commands.ticket.subcommands.close.description', { defaultValue: 'Close a ticket' }))
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.close))
         .addStringOption(option =>
           option
             .setName('reason')
@@ -273,46 +338,57 @@ export const ticket: Command = {
     const subcommand = interaction.options.getSubcommand();
     const ticketService = new TicketService();
     const ticketRepository = new TicketRepository();
-    const locale = 'en'; // Default to English for now
+    const locale = interaction.guildId ? getGuildLocale(interaction.guildId) : 'en';
 
-    try {
-      if (subcommandGroup === 'panel') {
-        switch (subcommand) {
-          case 'create':
-            await handlePanelCreate(interaction, ticketService, locale);
-            break;
-          case 'load':
-            await handlePanelLoad(interaction, ticketService, locale);
-            break;
-          case 'delete':
-            await handlePanelDelete(interaction, ticketService, locale);
-            break;
-          case 'list':
-            await handlePanelList(interaction, ticketRepository, locale);
-            break;
-          case 'edit':
-            await handlePanelEdit(interaction, ticketService, locale);
-            break;
+    await withLocale(locale, async () => {
+      try {
+        if (subcommandGroup === 'panel') {
+          switch (subcommand) {
+            case 'create':
+              await handlePanelCreate(interaction, ticketService, locale);
+              break;
+            case 'load':
+              await handlePanelLoad(interaction, ticketService, locale);
+              break;
+            case 'delete':
+              await handlePanelDelete(interaction, ticketService, locale);
+              break;
+            case 'list':
+              await handlePanelList(interaction, ticketRepository, locale);
+              break;
+            case 'edit':
+              await handlePanelEdit(interaction, ticketService, locale);
+              break;
+            case 'add_dept':
+              await handlePanelAddDept(interaction, locale);
+              break;
+            case 'list_depts':
+              await handlePanelListDepts(interaction, locale);
+              break;
+            case 'remove_dept':
+              await handlePanelRemoveDept(interaction, locale);
+              break;
+          }
+        } else {
+          switch (subcommand) {
+            case 'claim':
+              await handleClaim(interaction, ticketService, ticketRepository, locale);
+              break;
+            case 'close':
+              await handleClose(interaction, ticketService, ticketRepository, locale);
+              break;
+            case 'stats':
+              await handleStats(interaction, ticketRepository, locale);
+              break;
+          }
         }
-      } else {
-        switch (subcommand) {
-          case 'claim':
-            await handleClaim(interaction, ticketService, ticketRepository, locale);
-            break;
-          case 'close':
-            await handleClose(interaction, ticketService, ticketRepository, locale);
-            break;
-          case 'stats':
-            await handleStats(interaction, ticketRepository, locale);
-            break;
-        }
+      } catch (error: any) {
+        await interaction.reply({
+          content: t('common.error', { lng: locale }) + ': ' + t(error.message, { defaultValue: error.message, lng: locale }),
+          ephemeral: true,
+        });
       }
-    } catch (error: any) {
-      await interaction.reply({
-        content: t('common.error') + ': ' + error.message,
-        ephemeral: true,
-      });
-    }
+    });
   },
 };
 
@@ -326,7 +402,7 @@ async function handlePanelCreate(
   const panelId = interaction.options.getString('panel_id', true);
   const title = interaction.options.getString('title', true);
   const description = interaction.options.getString('description', true);
-  const buttonLabel = interaction.options.getString('button_label') || 'Create Ticket';
+  const buttonLabel = interaction.options.getString('button_label') || t('tickets.defaultButtonLabel', { defaultValue: 'Create Ticket' });
   const buttonStyle = interaction.options.getInteger('button_style') || ButtonStyle.Primary;
   const category = interaction.options.getChannel('category');
   const supportRole = interaction.options.getRole('support_role');
@@ -423,7 +499,7 @@ async function handlePanelCreate(
           collector.stop();
         } catch (error: any) {
           await buttonInteraction.reply({
-            content: t('common.error') + ': ' + error.message,
+            content: t('common.error') + ': ' + t(error.message, { defaultValue: error.message }),
             ephemeral: true,
           });
         }
@@ -440,7 +516,7 @@ async function handlePanelCreate(
                 .setCustomId('roleIds')
                 .setLabel(t('tickets.modals.addRolesLabel'))
                 .setStyle(TextInputStyle.Paragraph)
-                .setPlaceholder('123456789012345678')
+                .setPlaceholder(t('tickets.modals.placeholders.roleId', { defaultValue: '123456789012345678' }))
                 .setRequired(false)
             )
           );
@@ -504,7 +580,7 @@ async function handlePanelCreate(
                 .setCustomId('imageUrl')
                 .setLabel(t('tickets.modals.imageLabel'))
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder('https://example.com/panel.png')
+                .setPlaceholder(t('tickets.modals.placeholders.imageUrl', { defaultValue: 'https://example.com/panel.png' }))
                 .setRequired(false)
                 .setMaxLength(512)
             )
@@ -627,8 +703,8 @@ async function handlePanelCreate(
 
 async function handlePanelLoad(
   interaction: ChatInputCommandInteraction,
-  ticketService: TicketService,
-  locale: string
+  _ticketService: TicketService,
+  _locale: string
 ) {
   await interaction.deferReply({ ephemeral: true });
 
@@ -636,7 +712,7 @@ async function handlePanelLoad(
   const channel = interaction.options.getChannel('channel', true) as TextChannel;
 
   try {
-    await ticketService.loadPanel(interaction.guild!, panelId, channel, locale);
+    await ticketWorkflowService.sendPanelWithDepartments(interaction.guild!, channel, panelId);
 
     await interaction.editReply({
       content: t('tickets.panelLoaded', {
@@ -646,15 +722,104 @@ async function handlePanelLoad(
     });
   } catch (error: any) {
     await interaction.editReply({
-      content: t('common.error', { error: error.message }),
+      content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }),
     });
+  }
+}
+
+async function handlePanelAddDept(interaction: ChatInputCommandInteraction, _locale: string) {
+  await interaction.deferReply({ ephemeral: true });
+  const guildId = interaction.guildId!;
+  const panelCustomId = interaction.options.getString('panel_id', true);
+  const departmentId = interaction.options.getString('dept_id', true);
+  const name = interaction.options.getString('name', true);
+  const description = interaction.options.getString('description', true);
+  const supportRole = interaction.options.getRole('support_role');
+  const category = interaction.options.getChannel('category');
+  const welcomeMessage = interaction.options.getString('welcome_message');
+
+  try {
+    const panel = await ticketWorkflowRepository.getPanelByCustomId(guildId, panelCustomId);
+    if (!panel) {
+      await interaction.editReply({ content: t('tickets.panelNotFound') });
+      return;
+    }
+
+    await ticketWorkflowRepository.createDepartment({
+      guildId,
+      panelId: panel.id,
+      departmentId,
+      name,
+      description,
+      supportRoles: supportRole ? [supportRole.id] : [],
+      categoryId: category?.id,
+      welcomeMessage: welcomeMessage ?? undefined,
+    });
+
+    await interaction.editReply({ content: `✅ Department **${name}** added successfully to panel **${panelCustomId}**.` });
+  } catch (error: any) {
+    await interaction.editReply({ content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }) });
+  }
+}
+
+async function handlePanelListDepts(interaction: ChatInputCommandInteraction, _locale: string) {
+  await interaction.deferReply({ ephemeral: true });
+  const guildId = interaction.guildId!;
+  const panelCustomId = interaction.options.getString('panel_id', true);
+
+  try {
+    const panel = await ticketWorkflowRepository.getPanelByCustomId(guildId, panelCustomId);
+    if (!panel) {
+      await interaction.editReply({ content: t('tickets.panelNotFound') });
+      return;
+    }
+
+    const depts = await ticketWorkflowRepository.listDepartmentsByPanel(guildId, panel.id);
+    if (depts.length === 0) {
+      await interaction.editReply({ content: `No departments found for panel **${panelCustomId}**.` });
+      return;
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle(`Departments for Panel: ${panelCustomId}`)
+      .setColor(0x5865f2)
+      .setDescription(depts.map(d => `• **${d.name}** (\`${d.departmentId}\`): ${d.description}`).join('\n'));
+
+    await interaction.editReply({ embeds: [embed] });
+  } catch (error: any) {
+    await interaction.editReply({ content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }) });
+  }
+}
+
+async function handlePanelRemoveDept(interaction: ChatInputCommandInteraction, _locale: string) {
+  await interaction.deferReply({ ephemeral: true });
+  const guildId = interaction.guildId!;
+  const panelCustomId = interaction.options.getString('panel_id', true);
+  const departmentId = interaction.options.getString('dept_id', true);
+
+  try {
+    const panel = await ticketWorkflowRepository.getPanelByCustomId(guildId, panelCustomId);
+    if (!panel) {
+      await interaction.editReply({ content: t('tickets.panelNotFound') });
+      return;
+    }
+
+    const removed = await ticketWorkflowRepository.deleteDepartment(guildId, panel.id, departmentId);
+    if (!removed) {
+      await interaction.editReply({ content: `Department \`${departmentId}\` not found on panel **${panelCustomId}**.` });
+      return;
+    }
+
+    await interaction.editReply({ content: `✅ Department \`${departmentId}\` removed from panel **${panelCustomId}**.` });
+  } catch (error: any) {
+    await interaction.editReply({ content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }) });
   }
 }
 
 async function handlePanelDelete(
   interaction: ChatInputCommandInteraction,
   ticketService: TicketService,
-  _locale: string
+  locale: string
 ) {
   await interaction.deferReply({ ephemeral: true });
 
@@ -664,11 +829,11 @@ async function handlePanelDelete(
     await ticketService.deletePanel(interaction.guild!, panelId);
 
     await interaction.editReply({
-      content: t('tickets.panelDeleted', { id: panelId }),
+      content: t('tickets.panelDeleted', { lng: locale, id: panelId }),
     });
   } catch (error: any) {
     await interaction.editReply({
-      content: t('common.error', { error: error.message }),
+      content: t('common.error', { lng: locale, error: t(error.message, { defaultValue: error.message, lng: locale }) }),
     });
   }
 }
@@ -676,7 +841,7 @@ async function handlePanelDelete(
 async function handlePanelList(
   interaction: ChatInputCommandInteraction,
   ticketRepository: TicketRepository,
-  _locale: string
+  locale: string
 ) {
   await interaction.deferReply({ ephemeral: true });
 
@@ -684,22 +849,22 @@ async function handlePanelList(
 
   if (panels.length === 0) {
     await interaction.editReply({
-      content: t('tickets.noPanels'),
+      content: t('tickets.noPanels', { lng: locale }),
     });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setTitle(t('tickets.panelList'))
+    .setTitle(t('tickets.panelList', { lng: locale }))
     .setColor(0x5865f2)
     .setDescription(
       panels
         .map(
           panel =>
             `**${panel.panelId}**\n` +
-            `${t('tickets.title')}: ${panel.title}\n` +
-            `${t('tickets.status')}: ${panel.isActive ? '✅' : '❌'}\n` +
-            `${t('tickets.created')}: <t:${Math.floor(panel.createdAt.getTime() / 1000)}:R>`
+            `${t('tickets.title', { lng: locale })}: ${panel.title}\n` +
+            `${t('tickets.status', { lng: locale })}: ${panel.isActive ? '✅' : '❌'}\n` +
+            `${t('tickets.created', { lng: locale })}: <t:${Math.floor(panel.createdAt.getTime() / 1000)}:R>`
         )
         .join('\n\n')
     );
@@ -1007,7 +1172,7 @@ async function handlePanelEdit(
                   .setCustomId('value')
                   .setLabel(t('tickets.modals.buttonStyleLabel'))
                   .setStyle(TextInputStyle.Short)
-                  .setPlaceholder('primary | secondary | success | danger | link')
+                  .setPlaceholder(t('tickets.modals.placeholders.buttonStyle', { defaultValue: 'primary | secondary | success | danger | link' }))
                   .setRequired(true)
               )
             );
@@ -1106,7 +1271,7 @@ async function handlePanelEdit(
                   .setLabel(t('tickets.modals.imageLabel'))
                   .setStyle(TextInputStyle.Short)
                   .setValue(panelDraft.imageUrl ?? '')
-                  .setPlaceholder('https://example.com/panel.png')
+                  .setPlaceholder(t('tickets.modals.placeholders.imageUrl', { defaultValue: 'https://example.com/panel.png' }))
                   .setRequired(false)
               )
             );
@@ -1366,7 +1531,7 @@ async function handleClaim(
     });
   } catch (error: any) {
     await interaction.reply({
-      content: t('common.error', { error: error.message }),
+      content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }),
       ephemeral: true,
     });
   }
@@ -1412,7 +1577,7 @@ async function handleClose(
     }, 5000);
   } catch (error: any) {
     await interaction.reply({
-      content: t('common.error', { error: error.message }),
+      content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }),
       ephemeral: true,
     });
   }
@@ -1421,43 +1586,43 @@ async function handleClose(
 async function handleStats(
   interaction: ChatInputCommandInteraction,
   ticketRepository: TicketRepository,
-  _locale: string
+  locale: string
 ) {
   await interaction.deferReply({ ephemeral: true });
 
   const stats = await ticketRepository.getTicketStats(interaction.guildId!);
 
   const embed = new EmbedBuilder()
-    .setTitle(t('tickets.statistics'))
+    .setTitle(t('tickets.statistics', { lng: locale }))
     .setColor(0x5865f2)
     .addFields([
       {
-        name: t('tickets.totalTickets'),
+        name: t('tickets.totalTickets', { lng: locale }),
         value: stats.total.toString(),
         inline: true,
       },
       {
-        name: t('tickets.openTickets'),
+        name: t('tickets.openTickets', { lng: locale }),
         value: stats.open.toString(),
         inline: true,
       },
       {
-        name: t('tickets.claimedTickets'),
+        name: t('tickets.claimedTickets', { lng: locale }),
         value: stats.claimed.toString(),
         inline: true,
       },
       {
-        name: t('tickets.closedTickets'),
+        name: t('tickets.closedTickets', { lng: locale }),
         value: stats.closed.toString(),
         inline: true,
       },
       {
-        name: t('tickets.lockedTickets'),
+        name: t('tickets.lockedTickets', { lng: locale }),
         value: stats.locked.toString(),
         inline: true,
       },
       {
-        name: t('tickets.frozenTickets'),
+        name: t('tickets.frozenTickets', { lng: locale }),
         value: stats.frozen.toString(),
         inline: true,
       },

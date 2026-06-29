@@ -1,4 +1,5 @@
 import { EmbedBuilder, Message } from 'discord.js';
+import { t } from '../i18n';
 import { readFileSync, watch } from 'node:fs';
 import path from 'node:path';
 import { logger } from '../utils/logger';
@@ -177,14 +178,14 @@ export class ListCommandService {
 
       embed.setTitle(definition.title).setDescription(description);
     } else {
-      const description = definition.description ?? 'Available list commands:';
+      const description = definition.description ?? t('commands.list.available', { defaultValue: 'Available list commands:' });
 
       embed.setTitle(definition.title).setDescription(description);
 
       definition.commands.slice(0, 25).forEach(command => {
         embed.addFields({
           name: command.name,
-          value: command.description ?? 'No description provided.',
+          value: command.description ?? t('common.noDescription', { defaultValue: 'No description provided.' }),
         });
       });
     }

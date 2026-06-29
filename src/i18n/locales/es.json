@@ -24,7 +24,12 @@
     "disable": "Deshabilitar",
     "enable": "Habilitar",
     "notYourButton": "No puedes usar este botón",
-    "featureNotImplemented": "Esta función aún no está implementada"
+    "featureNotImplemented": "Esta función aún no está implementada",
+    "devOnly": "Este comando está restringido solo para desarrolladores del bot.",
+    "cannotWarnSelf": "¡No puedes advertirte a ti mismo!",
+    "cannotWarnBot": "¡No puedes advertir a los bots!",
+    "funDisabled": "Los comandos de diversión están desactivados actualmente.",
+    "fetchError": "Ocurrió un error al obtener el contenido. Por favor, inténtalo de nuevo más tarde."
   },
   "commands": {
     "ping": {
@@ -91,6 +96,18 @@
         "visibilityFriendsOnly": "Solo amigos",
         "visibilityPublic": "Público"
       },
+      "geizhals": {
+        "notFound": "No se encontraron productos en Geizhals",
+        "error": "Error al obtener productos de Geizhals",
+        "bestPrice": "Mejor precio",
+        "rating": "Calificación",
+        "offers": "Ofertas",
+        "unknownProduct": "Producto desconocido",
+        "footer": "Búsqueda de productos en Geizhals",
+        "mockTitle": "{{query}} (Edición Mock)",
+        "mockDescription": "Esta es una representación simulada de producto de la API de Geizhals.",
+        "mockFooter": "{{footer}} (Mock)"
+      },
       "userinfo": {
         "title": "Información del Usuario - {{user}}",
         "username": "Nombre de usuario",
@@ -147,6 +164,35 @@
         "description": "¿Necesitas ayuda con Pegasus? ¡Únete a nuestro servidor de soporte!",
         "link": "Enlace del Servidor de Soporte",
         "footer": "Soporte de Pegasus"
+      },
+      "stats": {
+        "title": "📊 Estadísticas del Bot e Información del Sistema",
+        "botStats": "🤖 Estadísticas del Bot",
+        "guilds": "Servidores",
+        "users": "Usuarios",
+        "channels": "Canales",
+        "commands": "Comandos",
+        "uptime": "Tiempo de actividad",
+        "ping": "Ping",
+        "sysInfo": "💻 Información del Sistema",
+        "os": "SO",
+        "platform": "Plataforma",
+        "hostname": "Nombre de host",
+        "cpu": "CPU",
+        "cpuCores": "Núcleos de CPU",
+        "cpuUsage": "Uso de CPU",
+        "memUsage": "💾 Uso de Memoria",
+        "totalRam": "RAM Total",
+        "usedRam": "RAM Usada",
+        "freeRam": "RAM Libre",
+        "botRss": "Bot RSS",
+        "botHeap": "Bot Heap",
+        "botExternal": "Bot Externo",
+        "versions": "📦 Versiones",
+        "processInfo": "⚙️ Información del Proceso",
+        "memLimit": "Límite de memoria",
+        "footer": "Solicitado por {{user}}",
+        "error": "Ocurrió un error al obtener las estadísticas."
       }
     },
     "economy": {

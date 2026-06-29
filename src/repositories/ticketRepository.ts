@@ -263,3 +263,5 @@ export class TicketRepository {
     return stats;
   }
 }
+
+export const ticketRepository = new TicketRepository();

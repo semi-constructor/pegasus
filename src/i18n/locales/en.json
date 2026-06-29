@@ -24,9 +24,30 @@
     "disable": "Disable",
     "enable": "Enable",
     "notYourButton": "You cannot use this button",
-    "featureNotImplemented": "This feature is not yet implemented"
+    "featureNotImplemented": "This feature is not yet implemented",
+    "devOnly": "This command is restricted to bot developers only.",
+    "cannotWarnSelf": "You cannot warn yourself!",
+    "cannotWarnBot": "You cannot warn bots!",
+    "funDisabled": "Fun commands are currently disabled.",
+    "fetchError": "An error occurred while fetching content. Please try again later."
   },
   "commands": {
+    "jtc": {
+      "description": "Join To Create voice channel system management",
+      "setup": {
+        "description": "Configure the Join To Create system",
+        "baseVoice": "The base voice channel users join to create a temporary channel",
+        "category": "The category where temporary voice channels will be created",
+        "panelChannel": "The text channel where the control panel will be sent",
+        "nameFormat": "The naming format for temporary channels (use {user} for username)"
+      },
+      "disable": {
+        "description": "Disable the Join To Create system"
+      },
+      "panel": {
+        "description": "Resend or update the Join To Create control panel"
+      }
+    },
     "ping": {
       "description": "Check the bot's latency",
       "response": "Pong! Latency: {{latency}}ms | API Latency: {{apiLatency}}ms"
@@ -91,6 +112,18 @@
         "visibilityFriendsOnly": "Friends Only",
         "visibilityPublic": "Public"
       },
+      "geizhals": {
+        "notFound": "No products found on Geizhals",
+        "error": "Failed to fetch Geizhals products",
+        "bestPrice": "Best Price",
+        "rating": "Rating",
+        "offers": "Offers",
+        "unknownProduct": "Unknown Product",
+        "footer": "Geizhals Product Search",
+        "mockTitle": "{{query}} (Mock Edition)",
+        "mockDescription": "This is a mock product representation from Geizhals API.",
+        "mockFooter": "{{footer}} (Mock)"
+      },
       "userinfo": {
         "title": "User Information - {{user}}",
         "username": "Username",
@@ -147,6 +180,35 @@
         "description": "Need help with Pegasus? Join our support server!",
         "link": "Support Server Link",
         "footer": "Pegasus Support"
+      },
+      "stats": {
+        "title": "📊 Bot Statistics & System Information",
+        "botStats": "🤖 Bot Statistics",
+        "guilds": "Guilds",
+        "users": "Users",
+        "channels": "Channels",
+        "commands": "Commands",
+        "uptime": "Uptime",
+        "ping": "Ping",
+        "sysInfo": "💻 System Information",
+        "os": "OS",
+        "platform": "Platform",
+        "hostname": "Hostname",
+        "cpu": "CPU",
+        "cpuCores": "CPU Cores",
+        "cpuUsage": "CPU Usage",
+        "memUsage": "💾 Memory Usage",
+        "totalRam": "Total RAM",
+        "usedRam": "Used RAM",
+        "freeRam": "Free RAM",
+        "botRss": "Bot RSS",
+        "botHeap": "Bot Heap",
+        "botExternal": "Bot External",
+        "versions": "📦 Versions",
+        "processInfo": "⚙️ Process Information",
+        "memLimit": "Memory Limit",
+        "footer": "Requested by {{user}}",
+        "error": "An error occurred while fetching statistics."
       }
     },
     "economy": {
@@ -651,7 +713,12 @@
           "noCases": "No moderation cases have been recorded in this server yet.",
           "titleUser": "Moderation History • {{user}}",
           "titleRecent": "Recent Moderation Cases • {{guild}}",
+          "titleAuditUser": "Server Audit Log • {{user}}",
+          "titleAuditRecent": "Recent Server Audit Log • {{guild}}",
           "entry": "`#{{id}}` • **{{type}}** • {{user}} • {{moderator}} • {{reason}} • {{time}}",
+          "auditEntry": "`•` **{{action}}** • Target: {{target}} • Executed by: {{executor}} • {{reason}} • {{time}}",
+          "noBotActions": "*No bot moderation actions found.*",
+          "noAuditActions": "*No server audit log actions found.*",
           "footer": "{{count}} case(s) shown"
         },
         "case": {
@@ -1716,5 +1783,86 @@
     "notSupportStaff": "You must be support staff to claim tickets",
     "ticketCreatedDesc": "Your ticket has been created in {{channel}}",
     "closingWithReason": "Closing ticket with reason: {{reason}}"
+  },
+  "jtc": {
+    "panel": {
+      "title": "🔊 Join To Create - Control Panel",
+      "description": "Use the buttons and menu below to manage your temporary voice channel."
+    },
+    "buttons": {
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "rename": "Rename",
+      "claim": "Claim"
+    },
+    "menu": {
+      "limitPlaceholder": "Select User Limit",
+      "noLimit": "No Limit",
+      "users": "{{count}} Users"
+    },
+    "error": {
+      "notInVoice": "You are not connected to a voice channel.",
+      "notInTempChannel": "You are not in a temporary voice channel.",
+      "notOwner": "You are not the owner of this voice channel.",
+      "ownerStillPresent": "The owner of this channel is still present."
+    },
+    "modal": {
+      "renameTitle": "Rename Channel",
+      "newNameLabel": "New Channel Name"
+    },
+    "success": {
+      "setup": "Join To Create system successfully configured.",
+      "disabled": "Join To Create system successfully disabled.",
+      "panelUpdated": "Control panel successfully updated.",
+      "locked": "Channel locked successfully.",
+      "unlocked": "Channel unlocked successfully.",
+      "renamed": "Channel renamed successfully.",
+      "limitSet": "User limit set to {{limit}}.",
+      "claimed": "You are now the owner of this channel."
+    }
+  },
+  "security": {
+    "reasons": {
+      "blacklisted": "User is blacklisted",
+      "created24h": "Account created less than 24 hours ago",
+      "created7d": "Account created less than 7 days ago",
+      "suspiciousUsername": "Suspicious username pattern",
+      "noAvatar": "No avatar set",
+      "recentIncidents": "{{count}} recent security incidents"
+    },
+    "raid": {
+      "detected": "Potential raid detected: {{count}} suspicious joins",
+      "kickReason": "Automated raid protection"
+    },
+    "lockdown": {
+      "description": "Server lockdown enabled due to security threat"
+    },
+    "embed": {
+      "title": "Security Incident: {{type}}",
+      "severity": "Severity",
+      "time": "Time",
+      "userId": "User ID",
+      "additionalInfo": "Additional Information",
+      "footer": "Immediate action may be required"
+    },
+    "buttons": {
+      "acknowledge": "Acknowledge",
+      "investigate": "Investigate"
+    }
+  },
+  "automodV2": {
+    "ruleCreated": "AutoMod V2 rule created successfully",
+    "ruleDeleted": "AutoMod V2 rule deleted successfully",
+    "quarantineVault": "Quarantine Vault"
+  },
+  "engagement": {
+    "achievementUnlocked": "Achievement Unlocked!",
+    "questCompleted": "Quest Completed!",
+    "prestigeUp": "Prestige Level Increased!"
+  },
+  "ticketWorkflows": {
+    "selectDepartment": "Please select a department",
+    "departmentNotFound": "Department not found",
+    "ratingSuccess": "Thank you for your rating of {{rating}} stars!"
   }
 }

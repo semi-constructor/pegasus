@@ -95,7 +95,7 @@ export class WarningService {
   async editWarning(warnId: string, title: string, description: string | null, editedBy: User) {
     const warning = await warningRepository.getWarningById(warnId);
     if (!warning) {
-      throw new Error('Warning not found');
+      throw new Error(t('commands.warn.subcommands.edit.notFound', { defaultValue: 'Warning not found' }));
     }
 
     const updated = await warningRepository.updateWarning(warnId, {
@@ -122,7 +122,7 @@ export class WarningService {
   async deleteWarning(warnId: string, moderator: User) {
     const warning = await warningRepository.getWarningById(warnId);
     if (!warning || warning.active === false) {
-      throw new Error('Warning not found');
+      throw new Error(t('commands.warn.subcommands.edit.notFound', { defaultValue: 'Warning not found' }));
     }
 
     const deleted = await warningRepository.deactivateWarning(warnId, moderator.id);

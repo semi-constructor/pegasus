@@ -476,7 +476,7 @@ async function handleEcoConfigButton(interaction: ButtonInteraction, action: str
         for (const item of items.slice(0, 10)) {
           embed.addFields({
             name: `${item.name} - $${item.price}`,
-            value: `${item.description}\nType: ${item.type} | Stock: ${item.stock === -1 ? '∞' : item.stock}`,
+            value: `${item.description}\n${t('config.xp.channels.selectType')}: ${item.type} | ${t('commands.economy.shop.view.stock')}: ${item.stock === -1 ? '∞' : item.stock}`,
             inline: false,
           });
         }
@@ -716,7 +716,7 @@ async function handleAutoroleConfigButton(
       }
 
       const options = config.roles.map(roleId => ({
-        label: interaction.guild!.roles.cache.get(roleId)?.name || 'Unknown Role',
+        label: interaction.guild!.roles.cache.get(roleId)?.name || t('commands.config.subcommands.xp.buttons.roles'),
         value: roleId,
       }));
 
@@ -917,7 +917,7 @@ export async function refreshXPConfigEmbed(
           name: t('commands.config.subcommands.xp.embed.fields.roleRewards'),
           value:
             roleRewards.length > 0
-              ? roleRewards.map(r => `Level ${r.level}: <@&${r.roleId}>`).join('\n')
+              ? roleRewards.map(r => `${t('commands.warn.subcommands.issue.success.level')} ${r.level}: <@&${r.roleId}>`).join('\n')
               : t('common.none'),
           inline: false,
         }

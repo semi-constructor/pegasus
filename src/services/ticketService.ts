@@ -30,7 +30,7 @@ export class TicketService {
     // Validate panel ID is unique for guild
     const existing = await this.ticketRepository.getPanel(data.panelId, guild.id);
     if (existing) {
-      throw new Error('Panel ID already exists');
+      throw new Error(t('common.error'));
     }
 
     return await this.ticketRepository.createPanel({
@@ -46,7 +46,7 @@ export class TicketService {
   async updatePanel(guild: Guild, panelId: string, updates: Partial<TicketPanelData>) {
     const updated = await this.ticketRepository.updatePanel(panelId, guild.id, updates);
     if (!updated) {
-      throw new Error('Panel not found');
+      throw new Error(t('tickets.panelNotFound'));
     }
     return updated;
   }
@@ -54,11 +54,11 @@ export class TicketService {
   async loadPanel(guild: Guild, panelId: string, channel: TextChannel, _locale: string) {
     const panel = await this.ticketRepository.getPanel(panelId, guild.id);
     if (!panel) {
-      throw new Error('Panel not found');
+      throw new Error(t('tickets.panelNotFound'));
     }
 
     if (!panel.isActive) {
-      throw new Error('Panel is not active');
+      throw new Error(t('tickets.panelNotFound'));
     }
 
     // Create panel embed
@@ -98,7 +98,7 @@ export class TicketService {
   async deletePanel(guild: Guild, panelId: string) {
     const panel = await this.ticketRepository.getPanel(panelId, guild.id);
     if (!panel) {
-      throw new Error('Panel not found');
+      throw new Error(t('tickets.panelNotFound'));
     }
 
     // Delete panel message if exists
@@ -130,7 +130,7 @@ export class TicketService {
   ) {
     const guild = interaction.guild;
     if (!guild) {
-      throw new Error('Guild not found');
+      throw new Error(t('common.guildOnly'));
     }
     const member = interaction.member as GuildMember;
 
@@ -277,7 +277,7 @@ export class TicketService {
   async claimTicket(ticketId: string, claimedBy: GuildMember, _locale: string) {
     const ticket = await this.ticketRepository.getTicket(ticketId);
     if (!ticket) {
-      throw new Error('Ticket not found');
+      throw new Error(t('tickets.ticketNotFound'));
     }
 
     if (ticket.status !== 'open') {
@@ -297,11 +297,11 @@ export class TicketService {
   async closeTicket(ticketId: string, closedBy: GuildMember, reason?: string, _locale?: string) {
     const ticket = await this.ticketRepository.getTicket(ticketId);
     if (!ticket) {
-      throw new Error('Ticket not found');
+      throw new Error(t('tickets.ticketNotFound'));
     }
 
     if (ticket.status === 'closed') {
-      throw new Error('Ticket already closed');
+      throw new Error(t('common.error'));
     }
 
     // Generate transcript
@@ -328,11 +328,11 @@ export class TicketService {
   async lockTicket(ticketId: string, lockedBy: GuildMember, guild: Guild, _locale: string) {
     const ticket = await this.ticketRepository.getTicket(ticketId);
     if (!ticket) {
-      throw new Error('Ticket not found');
+      throw new Error(t('tickets.ticketNotFound'));
     }
 
     if (ticket.status === 'closed') {
-      throw new Error('Cannot lock closed ticket');
+      throw new Error(t('common.error'));
     }
 
     // Update permissions
@@ -354,11 +354,11 @@ export class TicketService {
   async freezeTicket(ticketId: string, frozenBy: GuildMember, guild: Guild, _locale: string) {
     const ticket = await this.ticketRepository.getTicket(ticketId);
     if (!ticket) {
-      throw new Error('Ticket not found');
+      throw new Error(t('tickets.ticketNotFound'));
     }
 
     if (ticket.status === 'closed') {
-      throw new Error('Cannot freeze closed ticket');
+      throw new Error(t('common.error'));
     }
 
     // Update permissions - freeze prevents everyone except admins from sending

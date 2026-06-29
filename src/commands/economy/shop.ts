@@ -14,54 +14,38 @@ import { economyRepository } from '../../repositories/economyRepository';
 import { embedBuilder } from '../../handlers/embedBuilder';
 import { logger } from '../../utils/logger';
 
+export const isSubcommand = true;
+import { t, getGuildLocale } from '../../i18n';
+import { createLocalizationMap, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
+
 export const data = new SlashCommandBuilder()
   .setName('shop')
-  .setDescription('View and purchase items from the shop')
-  .setDescriptionLocalizations({
-    'es-ES': 'Ver y comprar artículos de la tienda',
-    fr: 'Voir et acheter des articles dans la boutique',
-    de: 'Artikel im Shop anzeigen und kaufen',
-  })
+  .setDescription(t('commands.economy.subcommands.shop.description', { defaultValue: 'View and purchase items from the shop' }))
+  .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.group))
   .addSubcommand(subcommand =>
     subcommand
       .setName('view')
-      .setDescription('View available shop items')
-      .setDescriptionLocalizations({
-        'es-ES': 'Ver artículos disponibles en la tienda',
-        fr: 'Voir les articles disponibles dans la boutique',
-        de: 'Verfügbare Shop-Artikel anzeigen',
-      })
+      .setDescription(t('commands.economy.subcommands.shop.view.description', { defaultValue: 'View available shop items' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.view))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('buy')
-      .setDescription('Purchase an item from the shop')
-      .setDescriptionLocalizations({
-        'es-ES': 'Comprar un artículo de la tienda',
-        fr: 'Acheter un article dans la boutique',
-        de: 'Einen Artikel aus dem Shop kaufen',
-      })
+      .setDescription(t('commands.economy.subcommands.shop.buy.description', { defaultValue: 'Purchase an item from the shop' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.buy))
       .addStringOption(option =>
         option
           .setName('item')
-          .setDescription('The item to purchase')
-          .setDescriptionLocalizations({
-            'es-ES': 'El artículo a comprar',
-            fr: "L'article à acheter",
-            de: 'Der zu kaufende Artikel',
-          })
+          .setDescription(t('commands.economy.subcommands.shop.buy.options.item', { defaultValue: 'The item to purchase' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.buyItem))
           .setRequired(true)
           .setAutocomplete(true)
       )
       .addIntegerOption(option =>
         option
           .setName('quantity')
-          .setDescription('Quantity to purchase')
-          .setDescriptionLocalizations({
-            'es-ES': 'Cantidad a comprar',
-            fr: 'Quantité à acheter',
-            de: 'Zu kaufende Menge',
-          })
+          .setDescription(t('commands.economy.subcommands.shop.buy.options.quantity', { defaultValue: 'Quantity to purchase' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.buyQuantity))
           .setMinValue(1)
           .setMaxValue(99)
       )
@@ -69,12 +53,8 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('inventory')
-      .setDescription('View your purchased items')
-      .setDescriptionLocalizations({
-        'es-ES': 'Ver tus artículos comprados',
-        fr: 'Voir vos articles achetés',
-        de: 'Ihre gekauften Artikel anzeigen',
-      })
+      .setDescription(t('commands.economy.subcommands.shop.inventory.description', { defaultValue: 'View your purchased items' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.inventory))
   );
 
 export const category = CommandCategory.Economy;
@@ -101,6 +81,7 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
 
   const guildId = interaction.guildId!;
   const userId = interaction.user.id;
+  const locale = getGuildLocale(guildId);
 
   try {
     const items = await economyRepository.getShopItems(guildId, true);
@@ -116,7 +97,7 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
         await interaction.editReply({
           embeds: [
             embedBuilder.createErrorEmbed(
-              'The shop is currently empty. Please contact an administrator.'
+              t('commands.economy.shop.view.empty', { lng: locale })
             ),
           ],
         });
@@ -135,23 +116,23 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
       const pageItems = items.slice(start, start + itemsPerPage);
 
       const embed = new EmbedBuilder()
-        .setTitle(`${settings.currencySymbol} Shop`)
+        .setTitle(t('commands.economy.shop.view.title', { lng: locale, symbol: settings.currencySymbol }))
         .setDescription(
-          `Your balance: ${settings.currencySymbol}${balance.balance.toLocaleString()}`
+          t('commands.economy.shop.view.balance', { lng: locale, symbol: settings.currencySymbol, amount: balance.balance.toLocaleString() })
         )
         .setColor(0x3498db)
-        .setFooter({ text: `Page ${page + 1}/${totalPages} • Use /shop buy <item> to purchase` })
+        .setFooter({ text: t('commands.economy.shop.view.page', { lng: locale, current: page + 1, total: totalPages }) })
         .setTimestamp();
 
       pageItems.forEach((item, index) => {
-        const stockText = item.stock === -1 ? 'Unlimited' : `${item.stock} left`;
+        const stockText = item.stock === -1 ? t('commands.economy.shop.view.unlimited', { lng: locale }) : t('commands.economy.shop.view.left', { lng: locale, amount: item.stock });
         const affordableEmoji = balance.balance >= item.price ? '✅' : '❌';
 
         embed.addFields({
           name: `${affordableEmoji} ${start + index + 1}. ${item.name}`,
-          value: `${item.description}\n**Price:** ${settings.currencySymbol}${item.price.toLocaleString()} | **Stock:** ${stockText}${
+          value: `${item.description}\n**${t('commands.economy.shop.view.price', { lng: locale })}:** ${settings.currencySymbol}${item.price.toLocaleString()} | **${t('commands.economy.shop.view.stock', { lng: locale })}:** ${stockText}${
             item.effectType
-              ? `\n**Effect:** ${formatEffect(item.effectType, item.effectValue)}`
+              ? `\n**${t('commands.economy.shop.view.effect', { lng: locale })}:** ${formatEffect(item.effectType, item.effectValue, locale)}`
               : ''
           }`,
           inline: false,
@@ -203,7 +184,7 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
 
       collector.on('collect', async (i: ButtonInteraction) => {
         if (i.user.id !== userId) {
-          await i.reply({ content: 'This shop view is not for you!', ephemeral: true });
+          await i.reply({ content: t('commands.economy.shop.view.notForYou', { lng: locale }), ephemeral: true });
           return;
         }
 
@@ -240,7 +221,7 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     logger.error('Error viewing shop:', error);
     await interaction.editReply({
-      embeds: [embedBuilder.createErrorEmbed('Failed to load shop. Please try again later.')],
+      embeds: [embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale }))],
     });
   }
 }
@@ -252,6 +233,7 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
   const quantity = interaction.options.getInteger('quantity') || 1;
   const userId = interaction.user.id;
   const guildId = interaction.guildId!;
+  const locale = getGuildLocale(guildId);
 
   try {
     const items = await economyRepository.getShopItems(guildId, true);
@@ -259,7 +241,7 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
 
     if (!item) {
       await interaction.editReply({
-        embeds: [embedBuilder.createErrorEmbed('Item not found in the shop!')],
+        embeds: [embedBuilder.createErrorEmbed(t('commands.economy.shop.buy.itemNotFound', { lng: locale }))],
       });
       return;
     }
@@ -275,18 +257,18 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('Purchase Successful!')
-      .setDescription(`You purchased **${quantity}x ${item.name}**!`)
+      .setTitle(t('commands.economy.shop.buy.success', { lng: locale }))
+      .setDescription(t('commands.economy.shop.buy.purchased', { lng: locale, quantity, item: item.name }))
       .setColor(0x2ecc71)
       .setThumbnail(interaction.user.displayAvatarURL())
       .addFields(
         {
-          name: 'Total Cost',
+          name: t('commands.economy.shop.buy.totalCost', { lng: locale }),
           value: `${settings.currencySymbol}${(item.price * quantity).toLocaleString()}`,
           inline: true,
         },
         {
-          name: 'New Balance',
+          name: t('commands.economy.gamble.common.newBalance', { lng: locale }),
           value: `${settings.currencySymbol}${result.balance!.balance.toLocaleString()}`,
           inline: true,
         }
@@ -295,8 +277,8 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
 
     if (item.effectType) {
       embed.addFields({
-        name: 'Effect',
-        value: formatEffect(item.effectType, item.effectValue),
+        name: t('commands.economy.shop.view.effect', { lng: locale }),
+        value: formatEffect(item.effectType, item.effectValue, locale),
         inline: false,
       });
     }
@@ -305,7 +287,7 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     logger.error('Error buying item:', error);
     await interaction.editReply({
-      embeds: [embedBuilder.createErrorEmbed('Failed to purchase item. Please try again later.')],
+      embeds: [embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale }))],
     });
   }
 }
@@ -315,6 +297,7 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
 
   const userId = interaction.user.id;
   const guildId = interaction.guildId!;
+  const locale = getGuildLocale(guildId);
 
   try {
     const userItems = await economyRepository.getUserItems(userId, guildId, true);
@@ -323,7 +306,7 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
       await interaction.editReply({
         embeds: [
           embedBuilder.createInfoEmbed(
-            'Your inventory is empty! Visit the shop to purchase items.'
+            t('commands.economy.shop.inventory.empty', { lng: locale })
           ),
         ],
       });
@@ -331,22 +314,22 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('📦 Your Inventory')
-      .setDescription(`You have ${userItems.length} unique item${userItems.length > 1 ? 's' : ''}`)
+      .setTitle(t('commands.economy.shop.inventory.title', { lng: locale }))
+      .setDescription(t('commands.economy.shop.inventory.itemCount', { lng: locale, count: userItems.length, s: userItems.length > 1 ? 's' : '' }))
       .setColor(0x3498db)
       .setThumbnail(interaction.user.displayAvatarURL())
       .setTimestamp();
 
     userItems.forEach(userItem => {
       const expiryText = userItem.expiresAt
-        ? `\nExpires: <t:${Math.floor(userItem.expiresAt.getTime() / 1000)}:R>`
+        ? `\n${t('commands.economy.shop.inventory.expires', { lng: locale })}: <t:${Math.floor(userItem.expiresAt.getTime() / 1000)}:R>`
         : '';
 
       embed.addFields({
         name: `${userItem.item.name} (x${userItem.quantity})`,
         value: `${userItem.item.description}${
           userItem.item.effectType
-            ? `\n**Effect:** ${formatEffect(userItem.item.effectType, userItem.item.effectValue)}`
+            ? `\n**${t('commands.economy.shop.inventory.effect', { lng: locale })}:** ${formatEffect(userItem.item.effectType, userItem.item.effectValue, locale)}`
             : ''
         }${expiryText}`,
         inline: false,
@@ -357,7 +340,7 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     logger.error('Error viewing inventory:', error);
     await interaction.editReply({
-      embeds: [embedBuilder.createErrorEmbed('Failed to load inventory. Please try again later.')],
+      embeds: [embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale }))],
     });
   }
 }
@@ -384,19 +367,19 @@ export async function autocomplete(interaction: any) {
   }
 }
 
-function formatEffect(effectType: string, effectValue: any): string {
+function formatEffect(effectType: string, effectValue: any, locale: string): string {
   switch (effectType) {
     case 'rob_protection':
       const duration = effectValue?.duration || 86400;
-      return `🛡️ Protection from robbery for ${duration / 3600} hours`;
+      return t('commands.economy.shop.effects.robProtection', { lng: locale, hours: duration / 3600 });
     case 'xp_boost':
       const multiplier = effectValue?.multiplier || 2;
       const xpDuration = effectValue?.duration || 3600;
-      return `📈 ${multiplier}x XP boost for ${xpDuration / 3600} hours`;
+      return t('commands.economy.shop.effects.xpBoost', { lng: locale, multiplier, hours: xpDuration / 3600 });
     case 'role':
-      return `🎭 Grants a special role`;
+      return t('commands.economy.shop.effects.role', { lng: locale });
     default:
-      return '✨ Special effect';
+      return t('commands.economy.shop.effects.special', { lng: locale });
   }
 }
 

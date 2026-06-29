@@ -21,6 +21,7 @@ export const userXp = pgTable(
       .notNull(),
     xp: integer('xp').default(0).notNull(),
     level: integer('level').default(0).notNull(),
+    prestigeLevel: integer('prestige_level').default(0).notNull(),
     lastXpGain: timestamp('last_xp_gain').defaultNow().notNull(),
     lastVoiceActivity: timestamp('last_voice_activity'),
     createdAt: timestamp('created_at').defaultNow().notNull(),

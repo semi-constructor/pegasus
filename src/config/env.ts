@@ -47,6 +47,8 @@ const EnvSchema = z.object({
   STEAM_API_KEY: z.string().optional(),
   WEATHER_API_KEY: z.string().optional(),
   NEWS_API_KEY: z.string().optional(),
+  GEIZHALS_API_KEY: z.string().optional(),
+  GEIZHALS_USERNAME: z.string().optional(),
 
   // Caching & Performance
   REDIS_URL: z.string().url().optional(),

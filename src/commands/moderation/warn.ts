@@ -107,11 +107,7 @@ export const data = new SlashCommandBuilder()
     subcommand
       .setName('delete')
       .setDescription('Delete a warning by ID')
-      .setDescriptionLocalizations({
-        'de': 'Eine Warnung anhand der ID löschen',
-        'es-ES': 'Eliminar una advertencia por ID',
-        fr: 'Supprimer un avertissement par identifiant',
-      })
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.warn.delete))
       .addStringOption(option =>
         option
           .setName('warnid')
@@ -150,11 +146,7 @@ export const data = new SlashCommandBuilder()
     group
       .setName('automation')
       .setDescription('Manage warning automations')
-      .setDescriptionLocalizations({
-        de: 'Warnungsautomatisierungen verwalten',
-        'es-ES': 'Gestionar automatizaciones de advertencia',
-        fr: "Gérer les automatisations d'avertissement",
-      })
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.warn.automation.group))
       .addSubcommand(subcommand =>
         subcommand
           .setName('create')
@@ -169,8 +161,8 @@ export const data = new SlashCommandBuilder()
               .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.triggerType))
               .setRequired(true)
               .addChoices(
-                { name: 'Warn Count', value: 'warn_count' },
-                { name: 'Warn Level', value: 'warn_level' }
+                { name: 'Warn Count', value: 'warn_count', name_localizations: { de: 'Warnungsanzahl', 'es-ES': 'Conteo de advertencias', fr: "Nombre d'avertissements" } },
+                { name: 'Warn Level', value: 'warn_level', name_localizations: { de: 'Warnungsstufe', 'es-ES': 'Nivel de advertencia', fr: "Niveau d'avertissement" } }
               )
           )
           .addIntegerOption(option =>
@@ -212,11 +204,7 @@ export const data = new SlashCommandBuilder()
             option
               .setName('automationid')
               .setDescription('The automation ID to delete')
-              .setDescriptionLocalizations({
-                de: 'Die zu löschende Automatisierungs-ID',
-                'es-ES': 'El ID de automatización a eliminar',
-                fr: "L'ID d'automatisation à supprimer",
-              })
+              .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.automationid))
               .setRequired(true)
           )
       )
@@ -278,47 +266,47 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 async function handleWarnHelp(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)
-    .setTitle('Warning System Commands')
-    .setDescription('Available warning commands:')
+    .setTitle(t('commands.warn.subcommands.help.title', { defaultValue: 'Warning System Commands' }))
+    .setDescription(t('commands.warn.subcommands.help.description', { defaultValue: 'Available warning commands:' }))
     .addFields(
       {
         name: '/warn create',
-        value: 'Warn a user with title, description, level, and proof',
+        value: t('commands.warn.subcommands.help.create', { defaultValue: 'Warn a user with title, description, level, and proof' }),
         inline: false,
       },
       {
         name: '/warn edit',
-        value: 'Edit an existing warning',
+        value: t('commands.warn.subcommands.help.edit', { defaultValue: 'Edit an existing warning' }),
         inline: false,
       },
       {
         name: '/warn lookup',
-        value: 'Lookup a specific warning by ID',
+        value: t('commands.warn.subcommands.help.lookup', { defaultValue: 'Lookup a specific warning by ID' }),
         inline: false,
       },
       {
         name: '/warn delete',
-        value: 'Delete a warning by ID',
+        value: t('commands.warn.subcommands.help.delete', { defaultValue: 'Delete a warning by ID' }),
         inline: false,
       },
       {
         name: '/warn view',
-        value: 'View all warnings for a user',
+        value: t('commands.warn.subcommands.help.view', { defaultValue: 'View all warnings for a user' }),
         inline: false,
       },
       {
         name: '/warn automation create',
-        value: 'Create an automation for warning thresholds',
+        value: t('commands.warn.subcommands.help.automationCreate', { defaultValue: 'Create an automation for warning thresholds' }),
         inline: false,
       },
       {
         name: '/warn automation view',
-        value: 'View all configured automations',
+        value: t('commands.warn.subcommands.help.automationView', { defaultValue: 'View all configured automations' }),
         inline: false,
       },
       {
         name: '/warn automation delete',
-        value: 'Delete an automation',
+        value: t('commands.warn.subcommands.help.automationDelete', { defaultValue: 'Delete an automation' }),
         inline: false,
       }
     )
@@ -339,14 +327,14 @@ async function handleWarnCreate(interaction: ChatInputCommandInteraction): Promi
   // Check if user is trying to warn themselves
   if (user.id === interaction.user.id) {
     return interaction.editReply({
-      content: 'You cannot warn yourself!',
+      content: t('common.cannotWarnSelf'),
     });
   }
 
   // Check if user is trying to warn a bot
   if (user.bot) {
     return interaction.editReply({
-      content: 'You cannot warn bots!',
+      content: t('common.cannotWarnBot'),
     });
   }
 
@@ -385,21 +373,21 @@ async function handleWarnCreate(interaction: ChatInputCommandInteraction): Promi
     try {
       const dmEmbed = new EmbedBuilder()
         .setColor(0xffa500)
-        .setTitle('You have been warned')
-        .setDescription(`You have been warned in **${interaction.guild!.name}**`)
+        .setTitle(t('commands.warn.dm.title', { defaultValue: 'You have been warned' }))
+        .setDescription(t('commands.warn.dm.description', { defaultValue: 'You have been warned in **{{guild}}**', guild: interaction.guild!.name }))
         .addFields(
           {
-            name: 'Title',
+            name: t('commands.warn.dm.fields.title', { defaultValue: 'Title' }),
             value: title,
             inline: false,
           },
           {
-            name: 'Description',
-            value: description || 'No description provided',
+            name: t('commands.warn.dm.fields.description', { defaultValue: 'Description' }),
+            value: description || t('commands.warn.dm.noDescription', { defaultValue: 'No description provided' }),
             inline: false,
           },
           {
-            name: 'Level',
+            name: t('commands.warn.dm.fields.level', { defaultValue: 'Level' }),
             value: level.toString(),
             inline: true,
           }
@@ -547,15 +535,15 @@ async function handleWarnView(interaction: ChatInputCommandInteraction): Promise
   const warningsToShow = warnings.slice(0, 10);
   for (const warning of warningsToShow) {
     embed.addFields({
-      name: `${warning.warnId} - Level ${warning.level}`,
-      value: `**${warning.title}**\n${warning.description || 'No description'}\n<t:${Math.floor(warning.createdAt.getTime() / 1000)}:R>`,
+      name: t('commands.warn.subcommands.view.warningHeader', { defaultValue: '{{id}} - Level {{level}}', id: warning.warnId, level: warning.level }),
+      value: `**${warning.title}**\n${warning.description || t('commands.warn.subcommands.view.noDescription', { defaultValue: 'No description' })}\n<t:${Math.floor(warning.createdAt.getTime() / 1000)}:R>`,
       inline: false,
     });
   }
 
   if (warnings.length > 10) {
     embed.setFooter({
-      text: `Showing 10 of ${warnings.length} warnings`,
+      text: t('commands.warn.subcommands.view.footer', { defaultValue: 'Showing 10 of {{total}} warnings', total: warnings.length }),
     });
   }
 
@@ -667,7 +655,8 @@ async function handleAutomationView(interaction: ChatInputCommandInteraction): P
     .setTimestamp();
 
   for (const automation of automations) {
-    const triggerText = `${automation.triggerType === 'warn_count' ? 'Count' : 'Level'} >= ${automation.triggerValue}`;
+    const triggerLabel = automation.triggerType === 'warn_count' ? t('commands.warn.subcommands.automation.view.triggerCount', { defaultValue: 'Count' }) : t('commands.warn.subcommands.automation.view.triggerLevel', { defaultValue: 'Level' });
+    const triggerText = `${triggerLabel} >= ${automation.triggerValue}`;
     const actionsText = (automation.actions as WarningAction[])
       .map(action => formatAutomationAction(action))
       .join(', ');
@@ -719,17 +708,17 @@ async function handleAutomationDelete(interaction: ChatInputCommandInteraction):
 function formatAutomationAction(action: WarningAction): string {
   switch (action.type) {
     case 'ban':
-      return 'Ban';
+      return t('commands.warn.subcommands.automation.actions.ban', { defaultValue: 'Ban' });
     case 'kick':
-      return 'Kick';
+      return t('commands.warn.subcommands.automation.actions.kick', { defaultValue: 'Kick' });
     case 'timeout':
-      return action.duration ? `Timeout (${formatAutomationDuration(action.duration)})` : 'Timeout';
+      return action.duration ? t('commands.warn.subcommands.automation.actions.timeoutDuration', { defaultValue: 'Timeout ({{duration}})', duration: formatAutomationDuration(action.duration) }) : t('commands.warn.subcommands.automation.actions.timeout', { defaultValue: 'Timeout' });
     case 'mute':
-      return action.duration ? `Mute (${formatAutomationDuration(action.duration)})` : 'Mute';
+      return action.duration ? t('commands.warn.subcommands.automation.actions.muteDuration', { defaultValue: 'Mute ({{duration}})', duration: formatAutomationDuration(action.duration) }) : t('commands.warn.subcommands.automation.actions.mute', { defaultValue: 'Mute' });
     case 'message':
-      return 'Send Message';
+      return t('commands.warn.subcommands.automation.actions.message', { defaultValue: 'Send Message' });
     case 'role':
-      return 'Role Action';
+      return t('commands.warn.subcommands.automation.actions.role', { defaultValue: 'Role Action' });
     default:
       return action.type;
   }
@@ -737,24 +726,24 @@ function formatAutomationAction(action: WarningAction): string {
 
 function formatAutomationDuration(minutes?: number): string {
   if (!minutes || Number.isNaN(minutes)) {
-    return 'N/A';
+    return t('common.na', { defaultValue: 'N/A' });
   }
 
   if (minutes % (60 * 24 * 7) === 0) {
     const weeks = minutes / (60 * 24 * 7);
-    return `${weeks}w`;
+    return t('common.durationShort.weeks', { defaultValue: '{{count}}w', count: weeks });
   }
 
   if (minutes % (60 * 24) === 0) {
     const days = minutes / (60 * 24);
-    return `${days}d`;
+    return t('common.durationShort.days', { defaultValue: '{{count}}d', count: days });
   }
 
   if (minutes % 60 === 0) {
-    return `${minutes / 60}h`;
+    return t('common.durationShort.hours', { defaultValue: '{{count}}h', count: minutes / 60 });
   }
 
-  return `${minutes}m`;
+  return t('common.durationShort.minutes', { defaultValue: '{{count}}m', count: minutes });
 }
 
 async function ensureDeferred(

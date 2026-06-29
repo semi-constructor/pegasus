@@ -1,5 +1,6 @@
 import { economyService } from './economyService';
 import type { GamblingResult } from './economyService';
+import { t } from '../i18n';
 
 export interface DiceResult {
   playerRoll: number;
@@ -62,7 +63,7 @@ export class EconomyGamblingService {
   async playDice(userId: string, guildId: string, bet: number): Promise<GamblingResult> {
     const canAfford = await economyService.canAffordBet(userId, guildId, bet);
     if (!canAfford.canAfford) {
-      throw new Error('Insufficient funds or invalid bet amount');
+      throw new Error(t('commands.economy.errors.insufficientFunds'));
     }
 
     const playerRoll = Math.floor(Math.random() * 6) + 1;
@@ -99,7 +100,7 @@ export class EconomyGamblingService {
   ): Promise<GamblingResult> {
     const canAfford = await economyService.canAffordBet(userId, guildId, bet);
     if (!canAfford.canAfford) {
-      throw new Error('Insufficient funds or invalid bet amount');
+      throw new Error(t('commands.economy.errors.insufficientFunds'));
     }
 
     const result = Math.random() < 0.5 ? 'heads' : 'tails';
@@ -127,7 +128,7 @@ export class EconomyGamblingService {
   async playSlots(userId: string, guildId: string, bet: number): Promise<GamblingResult> {
     const canAfford = await economyService.canAffordBet(userId, guildId, bet);
     if (!canAfford.canAfford) {
-      throw new Error('Insufficient funds or invalid bet amount');
+      throw new Error(t('commands.economy.errors.insufficientFunds'));
     }
 
     // Generate 3 random slot symbols
@@ -184,7 +185,7 @@ export class EconomyGamblingService {
   async playBlackjack(userId: string, guildId: string, bet: number): Promise<GamblingResult> {
     const canAfford = await economyService.canAffordBet(userId, guildId, bet);
     if (!canAfford.canAfford) {
-      throw new Error('Insufficient funds or invalid bet amount');
+      throw new Error(t('commands.economy.errors.insufficientFunds'));
     }
 
     const deck = this.createDeck();
@@ -197,7 +198,7 @@ export class EconomyGamblingService {
     const dealerCard2 = deck.pop();
 
     if (!playerCard1 || !playerCard2 || !dealerCard1 || !dealerCard2) {
-      throw new Error('Failed to deal cards');
+      throw new Error(t('common.error'));
     }
 
     const playerHand: Card[] = [playerCard1, playerCard2];
@@ -287,7 +288,7 @@ export class EconomyGamblingService {
   ): Promise<GamblingResult> {
     const canAfford = await economyService.canAffordBet(userId, guildId, bet);
     if (!canAfford.canAfford) {
-      throw new Error('Insufficient funds or invalid bet amount');
+      throw new Error(t('commands.economy.errors.insufficientFunds'));
     }
 
     const number = Math.floor(Math.random() * 37); // 0-36

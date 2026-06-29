@@ -42,7 +42,7 @@ async function handleWarningAction(
 
   if (!member) {
     await interaction.reply({
-      content: 'Member not found in this server',
+      content: t('commands.moderation.subcommands.ban.memberNotFound'),
       ephemeral: true,
     });
     return;
@@ -54,7 +54,7 @@ async function handleWarningAction(
 
   if (member.roles.highest.position >= botMember.roles.highest.position) {
     await interaction.reply({
-      content: 'I cannot moderate this member due to role hierarchy',
+      content: t('commands.moderation.subcommands.ban.botHierarchy'),
       ephemeral: true,
     });
     return;
@@ -62,7 +62,7 @@ async function handleWarningAction(
 
   if (member.roles.highest.position >= executorMember.roles.highest.position) {
     await interaction.reply({
-      content: 'You cannot moderate this member due to role hierarchy',
+      content: t('commands.moderation.subcommands.ban.higherRole'),
       ephemeral: true,
     });
     return;
@@ -75,14 +75,14 @@ async function handleWarningAction(
       case 'ban':
         await member.ban({ reason: 'Warning threshold reached' });
         await interaction.editReply({
-          content: `Successfully banned ${member.user.tag}`,
+          content: t('commands.moderation.subcommands.ban.success.description', { user: member.user.tag, moderator: interaction.user.tag }),
         });
         break;
 
       case 'kick':
         await member.kick('Warning threshold reached');
         await interaction.editReply({
-          content: `Successfully kicked ${member.user.tag}`,
+          content: t('commands.moderation.subcommands.kick.success.description', { user: member.user.tag, moderator: interaction.user.tag }),
         });
         break;
 
@@ -92,7 +92,7 @@ async function handleWarningAction(
 
         if (!member.moderatable) {
           await interaction.editReply({
-            content: 'I cannot timeout this member.',
+            content: t('commands.moderation.subcommands.timeout.cannotTimeout'),
           });
           return;
         }
@@ -100,7 +100,7 @@ async function handleWarningAction(
         await member.timeout(durationMs, 'Warning threshold reached');
 
         await interaction.editReply({
-          content: `Timed out ${member.user.tag} for ${formatActionDuration(durationMinutes)}`,
+          content: t('commands.moderation.subcommands.timeout.success.description', { user: member.user.tag, duration: formatActionDuration(durationMinutes), moderator: interaction.user.tag }),
         });
         break;
       }
@@ -111,7 +111,7 @@ async function handleWarningAction(
 
         if (!muteRole) {
           await interaction.editReply({
-            content: 'Mute role not found. Please create a role named "Muted"',
+            content: t('commands.moderation.subcommands.mute.error'),
           });
           return;
         }
@@ -131,13 +131,13 @@ async function handleWarningAction(
         );
 
         await interaction.editReply({
-          content: `Successfully muted ${member.user.tag} for ${duration} minutes`,
+          content: t('commands.moderation.subcommands.mute.success.description', { user: member.user.tag, moderator: interaction.user.tag }) + ` (${duration}m)`,
         });
         break;
 
       default:
         await interaction.editReply({
-          content: 'Unknown action',
+          content: t('common.error'),
         });
         return;
     }
@@ -148,7 +148,7 @@ async function handleWarningAction(
 
     if (embed) {
       const updatedEmbed = EmbedBuilder.from(embed).addFields({
-        name: 'Action Taken',
+        name: t('commands.warn.subcommands.automation.create.modal.action'),
         value: `${action.charAt(0).toUpperCase() + action.slice(1)} by ${interaction.user.tag}`,
         inline: false,
       });
@@ -158,7 +158,7 @@ async function handleWarningAction(
   } catch (error) {
     console.error('Error executing warning action:', error);
     await interaction.editReply({
-      content: 'Failed to execute action',
+      content: t('common.error'),
     });
   }
 }
@@ -215,14 +215,14 @@ async function handleWarningView(interaction: ButtonInteraction, userId: string)
   for (const warning of warningsToShow) {
     embed.addFields({
       name: `${warning.warnId} - Level ${warning.level}`,
-      value: `**${warning.title}**\n${warning.description || 'No description'}\n<t:${Math.floor(warning.createdAt.getTime() / 1000)}:R>`,
+      value: `**${warning.title}**\n${warning.description || t('common.noReasonProvided')}\n<t:${Math.floor(warning.createdAt.getTime() / 1000)}:R>`,
       inline: false,
     });
   }
 
   if (warnings.length > 10) {
     embed.setFooter({
-      text: `Showing 10 of ${warnings.length} warnings`,
+      text: t('commands.warn.subcommands.view.stats', { count: warnings.length, level: stats.totalLevel }),
     });
   }
 
@@ -279,7 +279,7 @@ async function handleAutomationModalButton(
     .setLabel(truncateLabel(t('commands.warn.subcommands.automation.create.modal.action')))
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
-    .setPlaceholder('1d Timeout, 1w Timeout, kick, ban, sendMessageOnly');
+    .setPlaceholder(t('commands.warn.subcommands.automation.create.modal.action'));
 
   const messageInput = new TextInputBuilder()
     .setCustomId('message')
@@ -287,7 +287,7 @@ async function handleAutomationModalButton(
     .setStyle(TextInputStyle.Paragraph)
     .setRequired(false)
     .setMaxLength(1000)
-    .setPlaceholder('Optional message sent to the user when this triggers');
+    .setPlaceholder(t('commands.warn.subcommands.automation.create.modal.message'));
 
   const rows = [
     new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(nameInput),

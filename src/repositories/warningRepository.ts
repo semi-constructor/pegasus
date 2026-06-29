@@ -52,9 +52,9 @@ export class WarningRepository {
         userId: data.userId,
         moderatorId: data.moderatorId,
         title: data.title,
-        description: data.description,
+        description: data.description ?? null,
         level: data.level || 1,
-        proof: data.proof,
+        proof: data.proof ?? null,
       })
       .returning();
 
@@ -62,12 +62,14 @@ export class WarningRepository {
   }
 
   async updateWarning(warnId: string, data: UpdateWarningData) {
+    const updatePayload: Record<string, any> = { editedAt: new Date() };
+    if (data.title !== undefined) updatePayload.title = data.title;
+    if (data.description !== undefined) updatePayload.description = data.description ?? null;
+    if (data.editedBy !== undefined) updatePayload.editedBy = data.editedBy;
+
     const [updated] = await this.db
       .update(warnings)
-      .set({
-        ...data,
-        editedAt: new Date(),
-      })
+      .set(updatePayload)
       .where(eq(warnings.warnId, warnId))
       .returning();
 
@@ -134,13 +136,13 @@ export class WarningRepository {
         automationId,
         guildId: data.guildId,
         name: data.name,
-        description: data.description,
+        description: data.description ?? null,
         triggerType: data.triggerType,
         triggerValue: data.triggerValue,
         actions: data.actions,
         createdBy: data.createdBy,
-        notifyChannelId: data.notifyChannelId,
-        notifyMessage: data.notifyMessage,
+        notifyChannelId: data.notifyChannelId ?? null,
+        notifyMessage: data.notifyMessage ?? null,
       })
       .returning();
 

@@ -13,9 +13,11 @@ import {
   Role,
   GuildBasedChannel,
   Guild,
+  AuditLogEvent,
 } from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
+import { createLocalizationMap, commandNames, commandDescriptions } from '../../utils/localization';
 import { auditLogger } from '../../security/audit';
 import { getDatabase } from '../../database/connection';
 import { userXp } from '../../database/schema/xp';
@@ -26,17 +28,9 @@ import { modCaseRepository } from '../../repositories/modCaseRepository';
 
 export const data = new SlashCommandBuilder()
   .setName('moderation')
-  .setDescription(t('commands.moderation.description'))
-  .setNameLocalizations({
-    'es-ES': 'moderacion',
-    fr: 'modération',
-    de: 'moderation',
-  })
-  .setDescriptionLocalizations({
-    'es-ES': 'Comandos de moderación',
-    fr: 'Commandes de modération',
-    de: 'Moderations-Befehle',
-  })
+  .setDescription(t('commands.moderation.description', { defaultValue: 'Moderation commands' }))
+  .setNameLocalizations(createLocalizationMap(commandNames.moderation))
+  .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.moderation))
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
   .addSubcommand(subcommand =>
     subcommand
@@ -100,18 +94,18 @@ export const data = new SlashCommandBuilder()
           .setMinValue(1)
           .setMaxValue(40320) // 28 days in minutes
           .addChoices(
-            { name: '60 seconds', value: 1 },
-            { name: '5 minutes', value: 5 },
-            { name: '10 minutes', value: 10 },
-            { name: '30 minutes', value: 30 },
-            { name: '1 hour', value: 60 },
-            { name: '6 hours', value: 360 },
-            { name: '12 hours', value: 720 },
-            { name: '1 day', value: 1440 },
-            { name: '3 days', value: 4320 },
-            { name: '1 week', value: 10080 },
-            { name: '2 weeks', value: 20160 },
-            { name: '4 weeks', value: 40320 }
+            { name: '60 seconds', value: 1, name_localizations: { de: '60 Sekunden', 'es-ES': '60 segundos', fr: '60 secondes' } },
+            { name: '5 minutes', value: 5, name_localizations: { de: '5 Minuten', 'es-ES': '5 minutos', fr: '5 minutes' } },
+            { name: '10 minutes', value: 10, name_localizations: { de: '10 Minuten', 'es-ES': '10 minutos', fr: '10 minutes' } },
+            { name: '30 minutes', value: 30, name_localizations: { de: '30 Minuten', 'es-ES': '30 minutos', fr: '30 minutes' } },
+            { name: '1 hour', value: 60, name_localizations: { de: '1 Stunde', 'es-ES': '1 hora', fr: '1 heure' } },
+            { name: '6 hours', value: 360, name_localizations: { de: '6 Stunden', 'es-ES': '6 horas', fr: '6 heures' } },
+            { name: '12 hours', value: 720, name_localizations: { de: '12 Stunden', 'es-ES': '12 horas', fr: '12  heures' } },
+            { name: '1 day', value: 1440, name_localizations: { de: '1 Tag', 'es-ES': '1 día', fr: '1 jour' } },
+            { name: '3 days', value: 4320, name_localizations: { de: '3 Tage', 'es-ES': '3 días', fr: '3 jours' } },
+            { name: '1 week', value: 10080, name_localizations: { de: '1 Woche', 'es-ES': '1 semana', fr: '1  semaine' } },
+            { name: '2 weeks', value: 20160, name_localizations: { de: '2 Wochen', 'es-ES': '2 semanas', fr: '2  semaines' } },
+            { name: '4 weeks', value: 40320, name_localizations: { de: '4 Wochen', 'es-ES': '4 semanas', fr: '4  semaines' } }
           )
       )
       .addStringOption(option =>
@@ -1389,10 +1383,30 @@ async function handleModlog(interaction: ChatInputCommandInteraction): Promise<a
   const limit = interaction.options.getInteger('limit') ?? 10;
 
   const cases = targetUser
-    ? await modCaseRepository.getByUser(interaction.guild!.id, targetUser.id, limit)
+    ? await modCaseRepository.getByUserOrModerator(interaction.guild!.id, targetUser.id, limit)
     : await modCaseRepository.getRecent(interaction.guild!.id, limit);
 
-  if (cases.length === 0) {
+  let auditEntries: any[] = [];
+  try {
+    const auditLogs = await interaction.guild!.fetchAuditLogs({
+      limit: targetUser ? 100 : limit,
+    });
+
+    const entries = Array.from(auditLogs.entries.values());
+    if (targetUser) {
+      auditEntries = entries
+        .filter(
+          entry => entry.executorId === targetUser.id || entry.targetId === targetUser.id
+        )
+        .slice(0, limit);
+    } else {
+      auditEntries = entries.slice(0, limit);
+    }
+  } catch (error) {
+    logger.warn('Failed to fetch audit logs for modlog command:', error);
+  }
+
+  if (cases.length === 0 && auditEntries.length === 0) {
     return interaction.editReply({
       content: targetUser
         ? t('commands.moderation.subcommands.modlog.noUserCases', { user: targetUser.tag })
@@ -1400,7 +1414,7 @@ async function handleModlog(interaction: ChatInputCommandInteraction): Promise<a
     });
   }
 
-  const embed = new EmbedBuilder()
+  const botEmbed = new EmbedBuilder()
     .setColor(0x95a5a6)
     .setTitle(
       targetUser
@@ -1410,26 +1424,76 @@ async function handleModlog(interaction: ChatInputCommandInteraction): Promise<a
           })
     )
     .setDescription(
-      cases
-        .map(record => {
-          const timestamp = Math.floor(new Date(record.createdAt).getTime() / 1000);
-          return t('commands.moderation.subcommands.modlog.entry', {
-            id: record.id,
-            type: record.type.toUpperCase(),
-            user: `<@${record.userId}>`,
-            moderator: `<@${record.moderatorId}>`,
-            reason: record.reason || t('common.noReasonProvided'),
-            time: `<t:${timestamp}:R>`,
-          });
-        })
-        .join('\n')
+      cases.length > 0
+        ? cases
+            .map(record => {
+              const timestamp = Math.floor(new Date(record.createdAt).getTime() / 1000);
+              return t('commands.moderation.subcommands.modlog.entry', {
+                id: record.id,
+                type: record.type.toUpperCase(),
+                user: `<@${record.userId}>`,
+                moderator: `<@${record.moderatorId}>`,
+                reason: record.reason || t('common.noReasonProvided'),
+                time: `<t:${timestamp}:R>`,
+              });
+            })
+            .join('\n')
+        : t('commands.moderation.subcommands.modlog.noBotActions')
     )
     .setFooter({
       text: t('commands.moderation.subcommands.modlog.footer', { count: cases.length }),
     })
     .setTimestamp();
 
-  await interaction.editReply({ embeds: [embed] });
+  const auditEmbed = new EmbedBuilder()
+    .setColor(0x3498db)
+    .setTitle(
+      targetUser
+        ? t('commands.moderation.subcommands.modlog.titleAuditUser', { user: targetUser.tag })
+        : t('commands.moderation.subcommands.modlog.titleAuditRecent', {
+            guild: interaction.guild!.name,
+          })
+    )
+    .setDescription(
+      auditEntries.length > 0
+        ? auditEntries
+            .map(entry => {
+              const timestamp = Math.floor(entry.createdTimestamp / 1000);
+              const actionName = AuditLogEvent[entry.action as AuditLogEvent] ?? `Action (${entry.action})`;
+              const executor = entry.executorId ? `<@${entry.executorId}>` : t('common.unknown');
+
+              let targetStr = t('common.unknown');
+              if (entry.target) {
+                if ('tag' in entry.target) {
+                  targetStr = entry.target.tag;
+                } else if ('user' in entry.target && entry.target.user) {
+                  targetStr = entry.target.user.tag;
+                } else if ('name' in entry.target) {
+                  targetStr = `${entry.target.name} (ID: ${entry.targetId})`;
+                } else if (entry.targetId) {
+                  targetStr = `ID: ${entry.targetId}`;
+                }
+              } else if (entry.targetId) {
+                targetStr = `ID: ${entry.targetId}`;
+              }
+
+              return t('commands.moderation.subcommands.modlog.auditEntry', {
+                action: actionName,
+                target: targetStr,
+                executor: executor,
+                reason: entry.reason || t('common.noReasonProvided'),
+                time: `<t:${timestamp}:R>`,
+              });
+            })
+            .join('\n')
+        : t('commands.moderation.subcommands.modlog.noAuditActions')
+    )
+    .setFooter({
+      text: t('commands.moderation.subcommands.modlog.footer', { count: auditEntries.length }),
+    })
+    .setTimestamp();
+
+  await interaction.editReply({ embeds: [botEmbed, auditEmbed] });
 }
 
 async function handleCaseView(interaction: ChatInputCommandInteraction): Promise<any> {
@@ -1595,27 +1659,32 @@ async function handleResetXP(interaction: ChatInputCommandInteraction): Promise<
 }
 
 function formatDuration(minutes: number): string {
+  const minStr = t('common.duration.minutes', { count: minutes, defaultValue: `${minutes} minute${minutes !== 1 ? 's' : ''}` });
   if (minutes < 60) {
-    return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    return minStr;
   }
 
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
+  const hrStr = t('common.duration.hours', { count: hours, defaultValue: `${hours} hour${hours !== 1 ? 's' : ''}` });
 
   if (hours < 24) {
     if (remainingMinutes === 0) {
-      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+      return hrStr;
     }
-    return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
+    const remMinStr = t('common.duration.minutes', { count: remainingMinutes, defaultValue: `${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}` });
+    return `${hrStr} ${remMinStr}`;
   }
 
   const days = Math.floor(hours / 24);
   const remainingHours = hours % 24;
+  const dayStr = t('common.duration.days', { count: days, defaultValue: `${days} day${days !== 1 ? 's' : ''}` });
 
   if (remainingHours === 0) {
-    return `${days} day${days !== 1 ? 's' : ''}`;
+    return dayStr;
   }
-  return `${days} day${days !== 1 ? 's' : ''} ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
+  const remHrStr = t('common.duration.hours', { count: remainingHours, defaultValue: `${remainingHours} hour${remainingHours !== 1 ? 's' : ''}` });
+  return `${dayStr} ${remHrStr}`;
 }
 
 type ModerationTextChannel = TextChannel | NewsChannel;

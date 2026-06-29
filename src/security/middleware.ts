@@ -374,10 +374,11 @@ async function handleRateLimit(
     .setFooter({ text: 'Please slow down and try again later' })
     .setTimestamp();
 
-  await interaction.reply({
-    embeds: [embed],
-    ephemeral: true,
-  });
+  if (interaction.deferred || interaction.replied) {
+    await interaction.followUp({ embeds: [embed], ephemeral: true });
+  } else {
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 }
 
 /**
@@ -401,10 +402,11 @@ async function handlePermissionDenied(
     });
   }
 
-  await interaction.reply({
-    embeds: [embed],
-    ephemeral: true,
-  });
+  if (interaction.deferred || interaction.replied) {
+    await interaction.followUp({ embeds: [embed], ephemeral: true });
+  } else {
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 }
 
 /**
@@ -421,10 +423,11 @@ async function handleValidationError(
     .setFooter({ text: 'Please check your input and try again' })
     .setTimestamp();
 
-  await interaction.reply({
-    embeds: [embed],
-    ephemeral: true,
-  });
+  if (interaction.deferred || interaction.replied) {
+    await interaction.followUp({ embeds: [embed], ephemeral: true });
+  } else {
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 }
 
 /**

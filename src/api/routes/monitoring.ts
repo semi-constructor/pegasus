@@ -17,7 +17,7 @@ router.get('/health', async (_req: Request, res: Response): Promise<void> => {
     const health = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
+      uptime: os.uptime(),
       services: {
         cache: cacheManager.getStats(),
         rateLimiter: getRateLimiterStatus(),
@@ -32,8 +32,8 @@ router.get('/health', async (_req: Request, res: Response): Promise<void> => {
       },
       system: {
         memory: {
-          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+          used: Math.round((os.totalmem() - os.freemem()) / 1024 / 1024),
+          total: Math.round(os.totalmem() / 1024 / 1024),
           system: Math.round(os.totalmem() / 1024 / 1024),
           free: Math.round(os.freemem() / 1024 / 1024),
         },
@@ -233,13 +233,12 @@ router.get('/dashboard', async (_req: Request, res: Response): Promise<void> => 
     ]);
 
     const aggregatorStats = statsAggregator.getStats();
-    const systemMemory = process.memoryUsage();
 
     res.json({
       timestamp: new Date().toISOString(),
       summary: {
         healthy: true,
-        uptime: formatUptime(process.uptime()),
+        uptime: formatUptime(os.uptime()),
         cacheHitRate: `${cacheStats.hitRate.toFixed(1)}%`,
         activeConnections: poolStats.active,
         rateLimitedIPs: rateLimitStats.activeKeys,
@@ -256,8 +255,8 @@ router.get('/dashboard', async (_req: Request, res: Response): Promise<void> => 
           waiting: poolStats.waitingRequests,
         },
         memory: {
-          used: `${Math.round(systemMemory.heapUsed / 1024 / 1024)} MB`,
-          total: `${Math.round(systemMemory.heapTotal / 1024 / 1024)} MB`,
+          used: `${Math.round((os.totalmem() - os.freemem()) / 1024 / 1024)} MB`,
+          total: `${Math.round(os.totalmem() / 1024 / 1024)} MB`,
         },
       },
       traffic: {

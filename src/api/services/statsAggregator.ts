@@ -1,3 +1,5 @@
+import os from 'os';
+import * as si from 'systeminformation';
 import { client } from '../../index';
 import { getDatabase } from '../../database/connection';
 import { economyTransactions, members, modCases, tickets, giveaways } from '../../database/schema';
@@ -192,7 +194,7 @@ class StatsAggregator {
     });
 
     // Get active users from database (cached query)
-    let activeToday = Math.floor(totalUsers * 0.03); // Default estimate
+    let activeToday = 0;
 
     try {
       const db = getDatabase();
@@ -205,10 +207,10 @@ class StatsAggregator {
         .execute();
 
       if (activeUsersResult[0]) {
-        activeToday = Number(activeUsersResult[0].count) || activeToday;
+        activeToday = Number(activeUsersResult[0].count) || 0;
       }
     } catch (error) {
-      logger.debug('Failed to get active users from database, using estimate');
+      logger.debug('Failed to get active users from database');
     }
 
     return {
@@ -234,25 +236,7 @@ class StatsAggregator {
       .slice(0, 5)
       .map(([name, count]) => ({ name, count }));
 
-    // Fill in default top commands if we don't have enough data
-    if (topCommands.length < 5) {
-      const defaults = [
-        { name: 'help', ratio: 0.18 },
-        { name: 'balance', ratio: 0.15 },
-        { name: 'rank', ratio: 0.12 },
-        { name: 'daily', ratio: 0.1 },
-        { name: 'work', ratio: 0.08 },
-      ];
-
-      defaults.forEach(({ name, ratio }) => {
-        if (!topCommands.find(cmd => cmd.name === name)) {
-          topCommands.push({
-            name,
-            count: Math.floor(this.commandStats.total * ratio),
-          });
-        }
-      });
-    }
+    // Only return actual executed commands without mock defaults
 
     return {
       totalExecuted: this.commandStats.total,
@@ -267,18 +251,17 @@ class StatsAggregator {
    * Get system statistics
    */
   private async getSystemStats() {
-    const memUsage = process.memoryUsage();
+    const memTotal = os.totalmem();
+    const memFree = os.freemem();
+    const memUsage = memTotal - memFree;
 
-    // Simple CPU usage approximation
-    const cpuUsage = Math.min(
-      95,
-      Math.max(5, 20 + Math.random() * 15 + client.guilds.cache.size * 0.1)
-    );
+    // Real CPU usage calculation using systeminformation
+    const cpuUsageData = await si.currentLoad().catch(() => ({ currentLoad: 0 }));
 
     return {
-      memoryUsage: Math.round(memUsage.heapUsed / 1024 / 1024),
-      memoryTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
-      cpuUsage: Math.round(cpuUsage),
+      memoryUsage: memUsage,
+      memoryTotal: memTotal,
+      cpuUsage: Math.round(cpuUsageData.currentLoad),
     };
   }
 

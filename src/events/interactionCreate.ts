@@ -26,6 +26,10 @@ import { handleGiveawayButtons } from '../interactions/buttons/giveawayButtons';
 import { handleWordFilterActionButtons } from '../interactions/buttons/wordFilterActions';
 import { securityMiddleware } from '../security/middleware';
 import { SecurityErrorHandler } from '../security/errors';
+import { handleJTCButtons } from '../interactions/buttons/jtcButtons';
+import { handleJTCModals } from '../interactions/modals/jtcModals';
+import { handleJTCSelectMenus } from '../interactions/selectMenus/jtcSelectMenus';
+import { ticketWorkflowService } from '../services/ticketWorkflowService';
 
 export const name = Events.InteractionCreate;
 
@@ -62,7 +66,7 @@ async function handleCommand(interaction: ChatInputCommandInteraction) {
 
   if (!command) {
     logger.error(`No command matching ${interaction.commandName} was found.`);
-    await interaction.reply({ content: 'Command not found!', ephemeral: true });
+    await interaction.reply({ content: t('commands.help.commandNotFound'), ephemeral: true });
     return;
   }
 
@@ -138,7 +142,7 @@ async function sendSecurityFailureResponse(
   interaction: ChatInputCommandInteraction,
   message?: string
 ) {
-  const content = message || 'Security check failed';
+  const content = message || t('common.noPermission');
 
   if (interaction.deferred && !interaction.replied) {
     try {
@@ -200,6 +204,15 @@ async function handleButton(interaction: ButtonInteraction) {
       return;
     }
 
+    // Handle ticket rate buttons
+    if (interaction.customId.startsWith('ticket_rate:')) {
+      const parts = interaction.customId.split(':');
+      const ticketId = parts[1];
+      const rating = parseInt(parts[2], 10);
+      await ticketWorkflowService.handleTicketRating(interaction, ticketId, rating);
+      return;
+    }
+
     // Handle ticket buttons
     if (interaction.customId.startsWith('ticket_')) {
       await handleTicketButton(interaction);
@@ -219,6 +232,11 @@ async function handleButton(interaction: ButtonInteraction) {
       interaction.customId.startsWith('gw_info:')
     ) {
       await handleGiveawayButtons(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith('jtc_')) {
+      await handleJTCButtons(interaction);
       return;
     }
 
@@ -262,6 +280,16 @@ async function handleModal(interaction: ModalSubmitInteraction) {
       return;
     }
 
+    // Handle ticket department modal submit
+    if (interaction.customId.startsWith('ticket_modal_dept:')) {
+      const parts = interaction.customId.split(':');
+      const panelDbId = parts[1];
+      const departmentId = parts[2];
+      const reason = interaction.fields.getTextInputValue('reason');
+      await ticketWorkflowService.createDepartmentTicket(interaction, panelDbId, departmentId, reason);
+      return;
+    }
+
     // Handle ticket modals
     if (interaction.customId.startsWith('ticket_')) {
       await handleTicketModal(interaction);
@@ -277,6 +305,11 @@ async function handleModal(interaction: ModalSubmitInteraction) {
     // Handle giveaway modals
     if (interaction.customId.startsWith('gw_')) {
       await handleGiveawayModals(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith('jtc_')) {
+      await handleJTCModals(interaction);
       return;
     }
 
@@ -311,6 +344,24 @@ async function handleSelectMenu(
       return;
     }
 
+    // Handle ticket department select menu
+    if (interaction.customId.startsWith('ticket_dept_select:')) {
+      if (interaction.isStringSelectMenu()) {
+        const parts = interaction.customId.split(':');
+        const panelDbId = parts[1];
+        const departmentId = interaction.values[0];
+        await ticketWorkflowService.handleDepartmentSelect(interaction, panelDbId, departmentId);
+      }
+      return;
+    }
+
+    if (interaction.customId.startsWith('jtc_')) {
+      if (interaction.isStringSelectMenu()) {
+        await handleJTCSelectMenus(interaction);
+      }
+      return;
+    }
+
     // Add other select menu handlers here as needed
   } catch (error) {
     logger.error(`Error handling select menu ${interaction.customId}:`, error);
@@ -323,3 +374,4 @@ async function handleSelectMenu(
     }
   }
 }
+

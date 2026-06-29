@@ -136,6 +136,17 @@ export interface LocaleObject {
         title: string;
         [key: string]: string;
       };
+      card: {
+        invalidColor: string;
+        savedNoPreview: string;
+        savedTitle: string;
+        savedDescription: string;
+        backgroundColor: string;
+        progressBarColor: string;
+        textColor: string;
+        accentColor: string;
+        [key: string]: string;
+      };
       [key: string]: Record<string, unknown>;
     };
     [key: string]: Record<string, unknown>;
@@ -212,14 +223,38 @@ export async function withLocale<T>(locale: string, callback: () => Promise<T>):
   return localeContext.run(locale, callback);
 }
 
+function isObject(item: any): boolean {
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+function deepMerge(target: any, ...sources: any[]): any {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        deepMerge(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+
+  return deepMerge(target, ...sources);
+}
+
 export async function getTranslation(guildId: string, userId: string): Promise<LocaleObject> {
   const locale = await resolveLocale(userId, guildId);
   const bundle = i18next.getResourceBundle(locale, 'translation') as LocaleObject | undefined;
-  if (bundle) {
-    return bundle;
+  const enBundle = (i18next.getResourceBundle('en', 'translation') as LocaleObject) || ({} as LocaleObject);
+
+  if (bundle && locale !== 'en') {
+    return deepMerge({}, enBundle, bundle);
   }
 
-  return (i18next.getResourceBundle('en', 'translation') as LocaleObject) || ({} as LocaleObject);
+  return enBundle;
 }
 
 async function ensureLocaleResources(locale: string): Promise<void> {

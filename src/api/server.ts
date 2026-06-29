@@ -12,6 +12,9 @@ import { settingsRouter } from './routes/settings';
 import { batchRouter } from './routes/batch';
 import { monitoringRouter } from './routes/monitoring';
 import { dashboardRouter } from './routes/dashboard';
+import { geizhalsRouter } from './routes/geizhals';
+import { ticketsApiRouter } from './routes/ticketsApi';
+import { jtcApiRouter } from './routes/jtcApi';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
 import {
@@ -150,6 +153,12 @@ app.use(
 );
 
 app.use('/dashboard', authenticateToken, cacheMiddleware(CacheTTL.STATS), dashboardRouter);
+app.use('/geizhals', authenticateToken, cacheMiddleware(CacheTTL.STATS), geizhalsRouter);
+
+// Dashboard direct management API routes
+app.use('/api/tickets', authenticateToken, invalidateCache(() => `*tickets*`), ticketsApiRouter);
+app.use('/api/jtc', authenticateToken, invalidateCache(() => `*jtc*`), jtcApiRouter);
+app.use('/api/j2c', authenticateToken, invalidateCache(() => `*jtc*`), jtcApiRouter);
 
 // Batch API for optimized multi-guild fetching
 app.use(
@@ -179,45 +188,63 @@ app.use(
 
 // Management API routes (mutations - invalidate cache)
 app.use(
-  '/economy',
+  '/:guildId/economy',
   authenticateToken,
   invalidateCache(() => `*economy*`),
-  economyRouter
+  (req, res, next) => {
+    req.url = req.baseUrl + req.url;
+    economyRouter(req, res, next);
+  }
 );
 
 app.use(
-  '/moderation',
+  '/:guildId/moderation',
   authenticateToken,
   invalidateCache(() => `*moderation*`),
-  moderationRouter
+  (req, res, next) => {
+    req.url = req.baseUrl + req.url;
+    moderationRouter(req, res, next);
+  }
 );
 
 app.use(
-  '/xp',
+  '/:guildId/xp',
   authenticateToken,
   invalidateCache(() => `*xp*`),
-  xpRouter
+  (req, res, next) => {
+    req.url = req.baseUrl + req.url;
+    xpRouter(req, res, next);
+  }
 );
 
 app.use(
-  '/tickets',
+  '/:guildId/tickets',
   authenticateToken,
   invalidateCache(() => `*tickets*`),
-  ticketsRouter
+  (req, res, next) => {
+    req.url = req.baseUrl + req.url;
+    ticketsRouter(req, res, next);
+  }
 );
 
 app.use(
-  '/giveaways',
+  '/:guildId/giveaways',
   authenticateToken,
   invalidateCache(() => `*giveaways*`),
-  giveawaysRouter
+  (req, res, next) => {
+    req.url = req.baseUrl + req.url;
+    giveawaysRouter(req, res, next);
+  }
 );
 
 app.use(
-  '/settings',
+  '/:guildId/settings',
   authenticateToken,
   invalidateCache(() => `*settings*`),
-  settingsRouter
+  (req, res, next) => {
+    req.url = req.baseUrl + req.url;
+    settingsRouter(req, res, next);
+  }
 );
 
 app.use((req: Request, res: Response) => {

@@ -140,11 +140,11 @@ async function handleXPRewardAction(interaction: StringSelectMenuInteraction): P
     case 'add': {
       const modal = new ModalBuilder()
         .setCustomId('config_xp_reward_add_modal')
-        .setTitle('Add XP Role Reward');
+        .setTitle(t('commands.config.subcommands.xp.title'));
 
       const levelInput = new TextInputBuilder()
         .setCustomId('level')
-        .setLabel('Level')
+        .setLabel(t('commands.warn.subcommands.issue.success.level'))
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
         .setPlaceholder('10');
@@ -170,7 +170,7 @@ async function handleXPRewardAction(interaction: StringSelectMenuInteraction): P
 
       if (rewards.length === 0) {
         await interaction.reply({
-          content: 'No rewards to remove',
+          content: t('common.error'),
           ephemeral: true,
         });
         return;
@@ -178,11 +178,11 @@ async function handleXPRewardAction(interaction: StringSelectMenuInteraction): P
 
       const modal = new ModalBuilder()
         .setCustomId('config_xp_reward_remove_modal')
-        .setTitle('Remove XP Role Reward');
+        .setTitle(t('commands.config.subcommands.xp.title'));
 
       const levelInput = new TextInputBuilder()
         .setCustomId('level')
-        .setLabel('Level to remove')
+        .setLabel(t('commands.warn.subcommands.issue.success.level'))
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
         .setPlaceholder('10');
@@ -205,7 +205,7 @@ async function handleXPRewardAction(interaction: StringSelectMenuInteraction): P
 
       const embed = new EmbedBuilder()
         .setColor(0x00ff00)
-        .setTitle('XP Rewards Cleared')
+        .setTitle(t('commands.config.subcommands.xp.title'))
         .setDescription('All XP role rewards have been removed')
         .setTimestamp();
 
@@ -279,7 +279,7 @@ async function handleEcoShopAction(interaction: StringSelectMenuInteraction): Pr
       const items = await configurationService.getShopItems(interaction.guildId!);
       if (items.length === 0) {
         await interaction.editReply({
-          content: 'No items to ' + action,
+          content: t('common.error'),
           components: [],
         });
         return;
@@ -290,14 +290,14 @@ async function handleEcoShopAction(interaction: StringSelectMenuInteraction): Pr
       // For now, we'll use a modal with item ID
       const modal = new ModalBuilder()
         .setCustomId(`config_eco_shop_${action}_modal`)
-        .setTitle(`${action.charAt(0).toUpperCase() + action.slice(1)} Shop Item`);
+        .setTitle(t('config.eco.shop.title'));
 
       const itemIdInput = new TextInputBuilder()
         .setCustomId('itemId')
         .setLabel('Item ID')
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder('Enter the item ID');
+        .setPlaceholder('Item ID');
 
       modal.addComponents(
         new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(itemIdInput)
@@ -330,7 +330,7 @@ async function handleWelcomeChannelSelect(
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('Welcome Channel Updated')
+    .setTitle(t('commands.config.subcommands.welcome.title'))
     .setDescription(`Welcome messages will now be sent to ${channel}`)
     .setTimestamp();
 
@@ -388,7 +388,7 @@ async function handleGoodbyeChannelSelect(
 
   if (!channel || !('isTextBased' in channel && channel.isTextBased())) {
     await interaction.reply({
-      content: 'Please select a valid text channel',
+      content: t('common.invalidChannel', { defaultValue: t('common.error') }),
       ephemeral: true,
     });
     return;
@@ -402,7 +402,7 @@ async function handleGoodbyeChannelSelect(
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('Goodbye Channel Updated')
+    .setTitle(t('commands.config.subcommands.goodbye.title'))
     .setDescription(`Goodbye messages will now be sent to ${channel}`)
     .setTimestamp();
 
@@ -427,10 +427,10 @@ async function handleAutoroleAddSelect(interaction: RoleSelectMenuInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('Autorole Updated')
+    .setTitle(t('commands.config.subcommands.autorole.title'))
     .setDescription(`Added ${roles.length} role(s) to autorole`)
     .addFields({
-      name: 'Current Roles',
+      name: t('commands.config.subcommands.xp.buttons.roles'),
       value: allRoles.map(id => `<@&${id}>`).join('\n'),
       inline: false,
     })
@@ -456,10 +456,10 @@ async function handleAutoroleRemoveSelect(interaction: StringSelectMenuInteracti
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('Autorole Updated')
+    .setTitle(t('commands.config.subcommands.autorole.title'))
     .setDescription('Removed role from autorole')
     .addFields({
-      name: 'Remaining Roles',
+      name: t('commands.config.subcommands.xp.buttons.roles'),
       value: newRoles.length > 0 ? newRoles.map(id => `<@&${id}>`).join('\n') : t('common.none'),
       inline: false,
     })

@@ -5,7 +5,7 @@ import {
   EmbedBuilder,
 } from 'discord.js';
 import { CommandCategory } from '../../types/command';
-import { t } from '../../i18n';
+import { t, getGuildLocale } from '../../i18n';
 import { getDatabase } from '../../database/connection';
 import { blacklist } from '../../database/schema/security';
 import { eq, and, desc } from 'drizzle-orm';
@@ -15,7 +15,7 @@ import { logger } from '../../utils/logger';
 
 export const data = new SlashCommandBuilder()
   .setName('blacklist')
-  .setDescription('Manage bot blacklist')
+  .setDescription(t('commands.blacklist.description', { defaultValue: 'Manage bot blacklist' }))
   .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.blacklist))
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addSubcommand(subcommand =>
@@ -65,17 +65,19 @@ export const cooldown = 5;
 export const permissions = [PermissionFlagsBits.Administrator];
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  const locale = interaction.guildId ? getGuildLocale(interaction.guildId) : 'en';
+
   // Check if user is a developer
   if (!isDeveloper(interaction.user.id)) {
     return interaction.reply({
-      content: 'This command is restricted to bot developers only.',
+      content: t('common.devOnly', { lng: locale }),
       ephemeral: true,
     });
   }
 
   if (!interaction.guild) {
     return interaction.reply({
-      content: t('common.guildOnly'),
+      content: t('common.guildOnly', { lng: locale }),
       ephemeral: true,
     });
   }
@@ -84,31 +86,31 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   switch (subcommand) {
     case 'user':
-      return handleBlacklistUser(interaction);
+      return handleBlacklistUser(interaction, locale);
     case 'view':
-      return handleBlacklistView(interaction);
+      return handleBlacklistView(interaction, locale);
     case 'remove':
-      return handleBlacklistRemove(interaction);
+      return handleBlacklistRemove(interaction, locale);
     default:
       return interaction.reply({
-        content: t('common.invalidSubcommand'),
+        content: t('common.invalidSubcommand', { lng: locale }),
         ephemeral: true,
       });
   }
 }
 
-async function handleBlacklistUser(interaction: ChatInputCommandInteraction): Promise<void> {
+async function handleBlacklistUser(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
   await interaction.deferReply();
 
   const user = interaction.options.getUser('user', true);
-  const reason = interaction.options.getString('reason') || t('common.noReasonProvided');
+  const reason = interaction.options.getString('reason') || t('common.noReasonProvided', { lng: locale });
 
   // Check if user is already blacklisted
   const db = getDatabase();
   const guildId = interaction.guild?.id;
   if (!guildId) {
     await interaction.editReply({
-      content: t('common.guildOnly'),
+      content: t('common.guildOnly', { lng: locale }),
     });
     return;
   }
@@ -121,7 +123,7 @@ async function handleBlacklistUser(interaction: ChatInputCommandInteraction): Pr
 
   if (existing) {
     await interaction.editReply({
-      content: t('commands.blacklist.subcommands.user.alreadyBlacklisted'),
+      content: t('commands.blacklist.subcommands.user.alreadyBlacklisted', { lng: locale }),
     });
     return;
   }
@@ -129,7 +131,7 @@ async function handleBlacklistUser(interaction: ChatInputCommandInteraction): Pr
   // Check if user is trying to blacklist themselves
   if (user.id === interaction.user.id) {
     await interaction.editReply({
-      content: t('commands.blacklist.subcommands.user.cannotBlacklistSelf'),
+      content: t('commands.blacklist.subcommands.user.cannotBlacklistSelf', { lng: locale }),
     });
     return;
   }
@@ -137,7 +139,7 @@ async function handleBlacklistUser(interaction: ChatInputCommandInteraction): Pr
   // Check if user is trying to blacklist the bot
   if (user.id === interaction.client.user!.id) {
     await interaction.editReply({
-      content: t('commands.blacklist.subcommands.user.cannotBlacklistBot'),
+      content: t('commands.blacklist.subcommands.user.cannotBlacklistBot', { lng: locale }),
     });
     return;
   }
@@ -153,20 +155,21 @@ async function handleBlacklistUser(interaction: ChatInputCommandInteraction): Pr
 
     const embed = new EmbedBuilder()
       .setColor(0xff0000)
-      .setTitle(t('commands.blacklist.subcommands.user.success.title'))
+      .setTitle(t('commands.blacklist.subcommands.user.success.title', { lng: locale }))
       .setDescription(
         t('commands.blacklist.subcommands.user.success.description', {
           user: user.tag,
+          lng: locale,
         })
       )
       .addFields(
         {
-          name: t('commands.blacklist.subcommands.user.success.reason'),
+          name: t('commands.blacklist.subcommands.user.success.reason', { lng: locale }),
           value: reason,
           inline: false,
         },
         {
-          name: t('commands.blacklist.subcommands.user.success.blacklistedBy'),
+          name: t('commands.blacklist.subcommands.user.success.blacklistedBy', { lng: locale }),
           value: interaction.user.tag,
           inline: true,
         }
@@ -177,13 +180,13 @@ async function handleBlacklistUser(interaction: ChatInputCommandInteraction): Pr
   } catch (error) {
     logger.error('Error blacklisting user:', error);
     await interaction.editReply({
-      content: t('commands.blacklist.error'),
+      content: t('commands.blacklist.error', { lng: locale }),
     });
   }
   return;
 }
 
-async function handleBlacklistView(interaction: ChatInputCommandInteraction): Promise<void> {
+async function handleBlacklistView(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
   await interaction.deferReply();
 
   const page = interaction.options.getInteger('page') || 1;
@@ -202,7 +205,7 @@ async function handleBlacklistView(interaction: ChatInputCommandInteraction): Pr
 
   if (blacklistedUsers.length === 0) {
     await interaction.editReply({
-      content: t('commands.blacklist.subcommands.view.noBlacklisted'),
+      content: t('commands.blacklist.subcommands.view.noBlacklisted', { lng: locale }),
     });
     return;
   }
@@ -217,11 +220,12 @@ async function handleBlacklistView(interaction: ChatInputCommandInteraction): Pr
 
   const embed = new EmbedBuilder()
     .setColor(0xff0000)
-    .setTitle(t('commands.blacklist.subcommands.view.title'))
+    .setTitle(t('commands.blacklist.subcommands.view.title', { lng: locale }))
     .setDescription(
       t('commands.blacklist.subcommands.view.description', {
         page,
         totalPages,
+        lng: locale,
       })
     )
     .setTimestamp();
@@ -234,9 +238,9 @@ async function handleBlacklistView(interaction: ChatInputCommandInteraction): Pr
     embed.addFields({
       name: user ? user.tag : entry.entityId,
       value: [
-        `**${t('commands.blacklist.subcommands.view.reason')}:** ${entry.reason}`,
-        `**${t('commands.blacklist.subcommands.view.blacklistedBy')}:** ${blacklistedBy ? blacklistedBy.tag : entry.addedBy}`,
-        `**${t('commands.blacklist.subcommands.view.date')}:** <t:${Math.floor(entry.createdAt.getTime() / 1000)}:F>`,
+        `**${t('commands.blacklist.subcommands.view.reason', { lng: locale })}:** ${entry.reason}`,
+        `**${t('commands.blacklist.subcommands.view.blacklistedBy', { lng: locale })}:** ${blacklistedBy ? blacklistedBy.tag : entry.addedBy}`,
+        `**${t('commands.blacklist.subcommands.view.date', { lng: locale })}:** <t:${Math.floor(entry.createdAt.getTime() / 1000)}:F>`,
       ].join('\n'),
       inline: false,
     });
@@ -246,7 +250,7 @@ async function handleBlacklistView(interaction: ChatInputCommandInteraction): Pr
   return;
 }
 
-async function handleBlacklistRemove(interaction: ChatInputCommandInteraction): Promise<void> {
+async function handleBlacklistRemove(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
   await interaction.deferReply();
 
   const user = interaction.options.getUser('user', true);
@@ -261,17 +265,18 @@ async function handleBlacklistRemove(interaction: ChatInputCommandInteraction): 
 
     if (deleted.length === 0) {
       await interaction.editReply({
-        content: t('commands.blacklist.subcommands.remove.notBlacklisted'),
+        content: t('commands.blacklist.subcommands.remove.notBlacklisted', { lng: locale }),
       });
       return;
     }
 
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle(t('commands.blacklist.subcommands.remove.success.title'))
+      .setTitle(t('commands.blacklist.subcommands.remove.success.title', { lng: locale }))
       .setDescription(
         t('commands.blacklist.subcommands.remove.success.description', {
           user: user.tag,
+          lng: locale,
         })
       )
       .setTimestamp();
@@ -280,7 +285,7 @@ async function handleBlacklistRemove(interaction: ChatInputCommandInteraction): 
   } catch (error) {
     logger.error('Error removing user from blacklist:', error);
     await interaction.editReply({
-      content: t('commands.blacklist.error'),
+      content: t('commands.blacklist.error', { lng: locale }),
     });
   }
   return;

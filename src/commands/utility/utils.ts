@@ -10,180 +10,145 @@ import {
 import { Command, CommandCategory } from '../../types/command';
 import { t, getGuildLocale } from '../../i18n';
 import { SteamService as RealSteamService } from '../../services/steamService';
-import { SteamService as MockSteamService } from '../../services/steamServiceMock';
+import { GeizhalsService as RealGeizhalsService } from '../../services/geizhalsService';
 import { HelpService } from '../../services/helpService';
 import { logger } from '../../utils/logger';
 import * as os from 'os';
 import { version as djsVersion } from 'discord.js';
+import { createLocalizationMap, commandNames, commandDescriptions, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
 
 const realSteamService =
   process.env.STEAM_API_KEY && process.env.STEAM_API_KEY !== ''
     ? new RealSteamService()
     : null;
+const realGeizhalsService =
+  process.env.GEIZHALS_API_KEY && process.env.GEIZHALS_API_KEY !== '' && process.env.GEIZHALS_USERNAME && process.env.GEIZHALS_USERNAME !== ''
+    ? new RealGeizhalsService()
+    : null;
 const helpService = new HelpService();
 
 export const data = new SlashCommandBuilder()
   .setName('utils')
-  .setDescription('Utility commands for various information')
-  .setDescriptionLocalizations({
-    'es-ES': 'Comandos de utilidad para obtener información variada',
-    fr: 'Commandes utilitaires pour diverses informations',
-    de: 'Utility-Befehle für verschiedene Informationen',
-  })
+  .setDescription(t('commands.utils.description', { defaultValue: 'Utility commands for various information' }))
+  .setNameLocalizations(createLocalizationMap(commandNames.utils))
+  .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.utils))
   .addSubcommand(subcommand =>
     subcommand
       .setName('avatar')
-      .setDescription("Get a user's avatar")
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener el avatar de un usuario',
-        fr: "Obtenir l'avatar d'un utilisateur",
-        de: 'Avatar eines Benutzers abrufen',
-      })
+      .setDescription(t('commands.utils.subcommands.avatar.description', { defaultValue: "Get a user's avatar" }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.avatar))
       .addUserOption(option =>
         option
           .setName('user')
-          .setDescription('The user to get avatar for')
-          .setDescriptionLocalizations({
-            'es-ES': 'El usuario del que obtener el avatar',
-            fr: "L'utilisateur dont obtenir l'avatar",
-            de: 'Der Benutzer, dessen Avatar abgerufen werden soll',
-          })
+          .setDescription(t('commands.utils.subcommands.avatar.options.user', { defaultValue: 'The user to get avatar for' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
           .setRequired(false)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('banner')
-      .setDescription("Get a user's banner")
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener el banner de un usuario',
-        fr: "Obtenir la bannière d'un utilisateur",
-        de: 'Banner eines Benutzers abrufen',
-      })
+      .setDescription(t('commands.utils.subcommands.banner.description', { defaultValue: "Get a user's banner" }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.banner))
       .addUserOption(option =>
         option
           .setName('user')
-          .setDescription('The user to get banner for')
-          .setDescriptionLocalizations({
-            'es-ES': 'El usuario del que obtener el banner',
-            fr: "L'utilisateur dont obtenir la bannière",
-            de: 'Der Benutzer, dessen Banner abgerufen werden soll',
-          })
+          .setDescription(t('commands.utils.subcommands.banner.options.user', { defaultValue: 'The user to get banner for' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
           .setRequired(false)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('steam')
-      .setDescription('Get Steam profile information')
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener información del perfil de Steam',
-        fr: 'Obtenir les informations du profil Steam',
-        de: 'Steam-Profilinformationen abrufen',
-      })
+      .setDescription(t('commands.utils.subcommands.steam.description', { defaultValue: 'Get Steam profile information' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.steam))
       .addStringOption(option =>
         option
           .setName('username')
-          .setDescription('Steam username or profile URL')
+          .setDescription(t('commands.utils.subcommands.steam.options.username', { defaultValue: 'Steam username or profile URL' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.username))
+          .setRequired(true)
+      )
+  )
+/*
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName('geizhals')
+      .setDescription('Search for products on Geizhals')
+      .setDescriptionLocalizations({
+        'es-ES': 'Buscar productos en Geizhals',
+        fr: 'Rechercher des YouTube sur Geizhals',
+        de: 'Produkte auf Geizhals suchen',
+      })
+      .addStringOption(option =>
+        option
+          .setName('query')
+          .setDescription('Product search term')
           .setDescriptionLocalizations({
-            'es-ES': 'Nombre de usuario o URL del perfil de Steam',
-            fr: "Nom d'utilisateur ou URL du profil Steam",
-            de: 'Steam-Benutzername oder Profil-URL',
+            'es-ES': 'Término de búsqueda del producto',
+            fr: 'Terme de recherche du produit',
+            de: 'Produkt-Suchbegriff',
           })
           .setRequired(true)
       )
   )
+  */
   .addSubcommand(subcommand =>
     subcommand
       .setName('userinfo')
-      .setDescription('Get detailed user information')
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener información detallada del usuario',
-        fr: "Obtenir des informations détaillées sur l'utilisateur",
-        de: 'Detaillierte Benutzerinformationen abrufen',
-      })
+      .setDescription(t('commands.utils.subcommands.userinfo.description', { defaultValue: 'Get detailed user information' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.userinfo))
       .addUserOption(option =>
         option
           .setName('user')
-          .setDescription('The user to get information for')
-          .setDescriptionLocalizations({
-            'es-ES': 'El usuario del que obtener información',
-            fr: "L'utilisateur dont obtenir les informations",
-            de: 'Der Benutzer, für den Informationen abgerufen werden sollen',
-          })
+          .setDescription(t('commands.utils.subcommands.userinfo.options.user', { defaultValue: 'The user to get information for' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
           .setRequired(false)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('whois')
-      .setDescription('Look up user by ID')
-      .setDescriptionLocalizations({
-        'es-ES': 'Buscar usuario por ID',
-        fr: 'Rechercher un utilisateur par ID',
-        de: 'Benutzer nach ID suchen',
-      })
+      .setDescription(t('commands.utils.subcommands.whois.description', { defaultValue: 'Look up user by ID' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.whois))
       .addStringOption(option =>
         option
           .setName('user_id')
-          .setDescription('The user ID to look up')
-          .setDescriptionLocalizations({
-            'es-ES': 'El ID de usuario a buscar',
-            fr: "L'ID utilisateur à rechercher",
-            de: 'Die zu suchende Benutzer-ID',
-          })
+          .setDescription(t('commands.utils.subcommands.whois.options.user_id', { defaultValue: 'The user ID to look up' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user_id))
           .setRequired(true)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('roleinfo')
-      .setDescription('Get role information')
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener información del rol',
-        fr: 'Obtenir des informations sur le rôle',
-        de: 'Rolleninformationen abrufen',
-      })
+      .setDescription(t('commands.utils.subcommands.roleinfo.description', { defaultValue: 'Get role information' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.roleinfo))
       .addRoleOption(option =>
         option
           .setName('role')
-          .setDescription('The role to get information for')
-          .setDescriptionLocalizations({
-            'es-ES': 'El rol del que obtener información',
-            fr: 'Le rôle dont obtenir les informations',
-            de: 'Die Rolle, für die Informationen abgerufen werden sollen',
-          })
+          .setDescription(t('commands.utils.subcommands.roleinfo.options.role', { defaultValue: 'The role to get information for' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.role))
           .setRequired(true)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('serverinfo')
-      .setDescription('Get server information')
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener información del servidor',
-        fr: 'Obtenir des informations sur le serveur',
-        de: 'Serverinformationen abrufen',
-      })
+      .setDescription(t('commands.utils.subcommands.serverinfo.description', { defaultValue: 'Get server information' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.serverinfo))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('help')
-      .setDescription('Get help for commands')
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener ayuda para los comandos',
-        fr: "Obtenir de l'aide pour les commandes",
-        de: 'Hilfe zu Befehlen erhalten',
-      })
+      .setDescription(t('commands.utils.subcommands.help.description', { defaultValue: 'Get help for commands' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.help))
       .addStringOption(option =>
         option
           .setName('command')
-          .setDescription('The command to get help for')
-          .setDescriptionLocalizations({
-            'es-ES': 'El comando para obtener ayuda',
-            fr: "La commande pour laquelle obtenir de l'aide",
-            de: 'Der Befehl, für den Hilfe benötigt wird',
-          })
+          .setDescription(t('commands.utils.subcommands.help.options.command', { defaultValue: 'The command to get help for' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.command))
           .setRequired(false)
           .setAutocomplete(true)
       )
@@ -191,22 +156,14 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('support')
-      .setDescription('Get support server link')
-      .setDescriptionLocalizations({
-        'es-ES': 'Obtener enlace del servidor de soporte',
-        fr: 'Obtenir le lien du serveur de support',
-        de: 'Support-Server-Link erhalten',
-      })
+      .setDescription(t('commands.utils.subcommands.support.description', { defaultValue: 'Get support server link' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.support))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('stats')
-      .setDescription('View bot statistics and system information')
-      .setDescriptionLocalizations({
-        'es-ES': 'Ver estadísticas del bot e información del sistema',
-        fr: 'Voir les statistiques du bot et les informations système',
-        de: 'Bot-Statistiken und Systeminformationen anzeigen',
-      })
+      .setDescription(t('commands.utils.subcommands.stats.description', { defaultValue: 'View bot statistics and system information' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.stats))
   );
 
 export const category = CommandCategory.Utility;
@@ -226,6 +183,9 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         break;
       case 'steam':
         await handleSteam(interaction, locale);
+        break;
+      case 'geizhals':
+        await handleGeizhals(interaction, locale);
         break;
       case 'userinfo':
         await handleUserInfo(interaction, locale);
@@ -325,76 +285,112 @@ async function handleSteam(
   const username = interaction.options.getString('username', true);
 
   try {
-    if (realSteamService) {
-      const profile = await realSteamService.getProfile(username);
-      if (!profile) {
-        await interaction.editReply({
-          content: t('commands.utils.steam.notFound', { lng: locale }),
-        });
-        return;
-      }
-
-      const embed = new EmbedBuilder()
-        .setTitle(profile.personaname)
-        .setURL(profile.profileurl)
-        .setColor(0x1b2838)
-        .setThumbnail(profile.avatarfull)
-        .addFields(
-          {
-            name: t('commands.utils.steam.status', { lng: locale }),
-            value: realSteamService.getStatusText(profile.personastate, locale),
-            inline: true,
-          },
-          {
-            name: t('commands.utils.steam.visibility', { lng: locale }),
-            value: realSteamService.getVisibilityText(profile.communityvisibilitystate, locale),
-            inline: true,
-          }
-        )
-        .setTimestamp();
-
-      if (profile.timecreated) {
-        embed.addFields({
-          name: t('commands.utils.steam.created', { lng: locale }),
-          value: `<t:${profile.timecreated}:R>`,
-          inline: true,
-        });
-      }
-
-      if (profile.gameextrainfo) {
-        embed.addFields({
-          name: t('commands.utils.steam.playing', { lng: locale }),
-          value: profile.gameextrainfo,
-          inline: true,
-        });
-      }
-
-      if (profile.realname) {
-        embed.addFields({
-          name: t('commands.utils.steam.realName', { lng: locale }),
-          value: profile.realname,
-          inline: true,
-        });
-      }
-
-      if (profile.loccountrycode) {
-        embed.addFields({
-          name: t('commands.utils.steam.country', { lng: locale }),
-          value: profile.loccountrycode,
-          inline: true,
-        });
-      }
-
-      await interaction.editReply({ embeds: [embed] });
+    if (!realSteamService) {
+      await interaction.editReply({
+        content: t('commands.utils.steam.error', { lng: locale }),
+      });
       return;
     }
 
-    const embed = MockSteamService.getPlayerSummary(username);
+    const profile = await realSteamService.getProfile(username);
+    if (!profile) {
+      await interaction.editReply({
+        content: t('commands.utils.steam.notFound', { lng: locale }),
+      });
+      return;
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle(profile.personaname)
+      .setURL(profile.profileurl)
+      .setColor(0x1b2838)
+      .setThumbnail(profile.avatarfull)
+      .addFields(
+        {
+          name: t('commands.utils.steam.status', { lng: locale }),
+          value: realSteamService.getStatusText(profile.personastate, locale),
+          inline: true,
+        },
+        {
+          name: t('commands.utils.steam.visibility', { lng: locale }),
+          value: realSteamService.getVisibilityText(profile.communityvisibilitystate, locale),
+          inline: true,
+        }
+      )
+      .setTimestamp();
+
+    if (profile.timecreated) {
+      embed.addFields({
+        name: t('commands.utils.steam.created', { lng: locale }),
+        value: `<t:${profile.timecreated}:R>`,
+        inline: true,
+      });
+    }
+
+    if (profile.gameextrainfo) {
+      embed.addFields({
+        name: t('commands.utils.steam.playing', { lng: locale }),
+        value: profile.gameextrainfo,
+        inline: true,
+      });
+    }
+
+    if (profile.realname) {
+      embed.addFields({
+        name: t('commands.utils.steam.realName', { lng: locale }),
+        value: profile.realname,
+        inline: true,
+      });
+    }
+
+    if (profile.loccountrycode) {
+      embed.addFields({
+        name: t('commands.utils.steam.country', { lng: locale }),
+        value: profile.loccountrycode,
+        inline: true,
+      });
+    }
+
     await interaction.editReply({ embeds: [embed] });
   } catch (error) {
     logger.error('Error fetching Steam profile:', error);
     await interaction.editReply({
       content: t('commands.utils.steam.error', { lng: locale }),
+    });
+  }
+}
+
+async function handleGeizhals(
+  interaction: ChatInputCommandInteraction,
+  locale: string
+): Promise<void> {
+  await interaction.deferReply();
+
+  const query = interaction.options.getString('query', true);
+
+  try {
+    if (!realGeizhalsService) {
+      await interaction.editReply({
+        content: t('commands.utils.geizhals.error', { lng: locale }),
+      });
+      return;
+    }
+
+    const products = await realGeizhalsService.searchProducts(query, 'de', 'de', 5, locale);
+
+    if (!products || products.length === 0) {
+      await interaction.editReply({
+        content: t('commands.utils.geizhals.notFound', { lng: locale }),
+      });
+      return;
+    }
+
+    const embed = realGeizhalsService.getProductSummary(products[0], locale);
+    await interaction.editReply({ embeds: [embed] });
+  } catch (error) {
+    logger.error('Error fetching Geizhals products:', error);
+    await interaction.editReply({
+      content: t('commands.utils.geizhals.error', { lng: locale }),
     });
   }
 }
@@ -630,7 +626,7 @@ async function handleServerInfo(
 
   const embed = new EmbedBuilder()
     .setTitle(t('commands.utils.serverinfo.title', { lng: locale }))
-    .setThumbnail(guild.iconURL({ size: 512 }) || '')
+    .setThumbnail(guild.iconURL({ size: 512 }) || null)
     .setColor(0x7289da)
     .addFields([
       {
@@ -752,7 +748,7 @@ async function handleSupport(
     .setColor(0x7289da)
     .addFields({
       name: t('commands.utils.support.link', { lng: locale }),
-      value: '[discord.gg/vaultscope](https://discord.gg/vaultscope)',
+      value: t('commands.utils.support.linkValue', { lng: locale, defaultValue: '[discord.gg/vaultscope](https://discord.gg/vaultscope)' }),
       inline: false,
     })
     .setFooter({ text: t('commands.utils.support.footer', { lng: locale }) })
@@ -805,7 +801,7 @@ export async function autocomplete(interaction: AutocompleteInteraction): Promis
 
 async function handleStats(
   interaction: ChatInputCommandInteraction,
-  _locale: string
+  locale: string
 ): Promise<void> {
   await interaction.deferReply();
 
@@ -830,7 +826,7 @@ async function handleStats(
     const freeMem = os.freemem();
     const usedMem = totalMem - freeMem;
     const cpuCores = os.cpus().length;
-    const cpuModel = os.cpus()[0]?.model || 'Unknown';
+    const cpuModel = os.cpus()[0]?.model || t('commands.utils.stats.unknown', { lng: locale, defaultValue: 'Unknown' });
     const osType = os.type();
     const osRelease = os.release();
     const hostname = os.hostname();
@@ -857,18 +853,24 @@ async function handleStats(
       const secs = Math.floor(seconds % 60);
 
       const parts = [];
-      if (days > 0) parts.push(`${days}d`);
-      if (hours > 0) parts.push(`${hours}h`);
-      if (minutes > 0) parts.push(`${minutes}m`);
-      if (secs > 0) parts.push(`${secs}s`);
+      if (days > 0) parts.push(`${days}${t('common.time.daysShort', { lng: locale, defaultValue: 'd' })}`);
+      if (hours > 0) parts.push(`${hours}${t('common.time.hoursShort', { lng: locale, defaultValue: 'h' })}`);
+      if (minutes > 0) parts.push(`${minutes}${t('common.time.minutesShort', { lng: locale, defaultValue: 'm' })}`);
+      if (secs > 0) parts.push(`${secs}${t('common.time.secondsShort', { lng: locale, defaultValue: 's' })}`);
 
-      return parts.join(' ') || '0s';
+      return parts.join(' ') || `0${t('common.time.secondsShort', { lng: locale, defaultValue: 's' })}`;
     };
 
     // Format bytes
     const formatBytes = (bytes: number): string => {
-      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-      if (bytes === 0) return '0 B';
+      const sizes = [
+        t('common.bytes.b', { lng: locale, defaultValue: 'B' }),
+        t('common.bytes.kb', { lng: locale, defaultValue: 'KB' }),
+        t('common.bytes.mb', { lng: locale, defaultValue: 'MB' }),
+        t('common.bytes.gb', { lng: locale, defaultValue: 'GB' }),
+        t('common.bytes.tb', { lng: locale, defaultValue: 'TB' }),
+      ];
+      if (bytes === 0) return `0 ${sizes[0]}`;
       const i = Math.floor(Math.log(bytes) / Math.log(1024));
       return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
     };
@@ -876,67 +878,67 @@ async function handleStats(
     // Create embed
     const embed = new EmbedBuilder()
       .setColor(0x0099ff)
-      .setTitle('📊 Bot Statistics & System Information')
-      .setThumbnail(client.user?.displayAvatarURL() || '')
+      .setTitle(t('commands.utils.stats.title', { lng: locale }))
+      .setThumbnail(client.user?.displayAvatarURL() || null)
       .addFields(
         {
-          name: '🤖 Bot Statistics',
+          name: t('commands.utils.stats.botStats', { lng: locale }),
           value: [
-            `**Guilds:** ${guildCount.toLocaleString()}`,
-            `**Users:** ${userCount.toLocaleString()}`,
-            `**Channels:** ${channelCount.toLocaleString()}`,
-            `**Commands:** ${commandCount}`,
-            `**Uptime:** ${formatUptime(uptime)}`,
-            `**Ping:** ${client.ws.ping}ms`,
+            `**${t('commands.utils.stats.guilds', { lng: locale })}:** ${guildCount.toLocaleString()}`,
+            `**${t('commands.utils.stats.users', { lng: locale })}:** ${userCount.toLocaleString()}`,
+            `**${t('commands.utils.stats.channels', { lng: locale })}:** ${channelCount.toLocaleString()}`,
+            `**${t('commands.utils.stats.commands', { lng: locale })}:** ${commandCount}`,
+            `**${t('commands.utils.stats.uptime', { lng: locale })}:** ${formatUptime(uptime)}`,
+            `**${t('commands.utils.stats.ping', { lng: locale })}:** ${client.ws.ping}ms`,
           ].join('\n'),
           inline: true,
         },
         {
-          name: '💻 System Information',
+          name: t('commands.utils.stats.sysInfo', { lng: locale }),
           value: [
-            `**OS:** ${osType} ${osRelease}`,
-            `**Platform:** ${platform} (${arch})`,
-            `**Hostname:** ${hostname}`,
-            `**CPU:** ${cpuModel}`,
-            `**CPU Cores:** ${cpuCores}`,
-            `**CPU Usage:** ~${cpuUsage}%`,
+            `**${t('commands.utils.stats.os', { lng: locale })}:** ${osType} ${osRelease}`,
+            `**${t('commands.utils.stats.platform', { lng: locale })}:** ${platform} (${arch})`,
+            `**${t('commands.utils.stats.hostname', { lng: locale })}:** ${hostname}`,
+            `**${t('commands.utils.stats.cpu', { lng: locale })}:** ${cpuModel}`,
+            `**${t('commands.utils.stats.cpuCores', { lng: locale })}:** ${cpuCores}`,
+            `**${t('commands.utils.stats.cpuUsage', { lng: locale })}:** ~${cpuUsage}%`,
           ].join('\n'),
           inline: true,
         },
         {
-          name: '💾 Memory Usage',
+          name: t('commands.utils.stats.memUsage', { lng: locale }),
           value: [
-            `**Total RAM:** ${formatBytes(totalMem)}`,
-            `**Used RAM:** ${formatBytes(usedMem)} (${Math.round((usedMem / totalMem) * 100)}%)`,
-            `**Free RAM:** ${formatBytes(freeMem)}`,
-            `**Bot RSS:** ${formatBytes(memUsage.rss)}`,
-            `**Bot Heap:** ${formatBytes(memUsage.heapUsed)} / ${formatBytes(memUsage.heapTotal)}`,
-            `**Bot External:** ${formatBytes(memUsage.external)}`,
+            `**${t('commands.utils.stats.totalRam', { lng: locale })}:** ${formatBytes(totalMem)}`,
+            `**${t('commands.utils.stats.usedRam', { lng: locale })}:** ${formatBytes(usedMem)} (${Math.round((usedMem / totalMem) * 100)}%)`,
+            `**${t('commands.utils.stats.freeRam', { lng: locale })}:** ${formatBytes(freeMem)}`,
+            `**${t('commands.utils.stats.botRss', { lng: locale })}:** ${formatBytes(memUsage.rss)}`,
+            `**${t('commands.utils.stats.botHeap', { lng: locale })}:** ${formatBytes(memUsage.heapUsed)} / ${formatBytes(memUsage.heapTotal)}`,
+            `**${t('commands.utils.stats.botExternal', { lng: locale })}:** ${formatBytes(memUsage.external)}`,
           ].join('\n'),
           inline: false,
         },
         {
-          name: '📦 Versions',
+          name: t('commands.utils.stats.versions', { lng: locale }),
           value: [
-            `**Node.js:** ${nodeVersion}`,
-            `**Discord.js:** v${djsVersion}`,
-            `**TypeScript:** v${require('typescript/package.json').version}`,
+            `**${t('commands.utils.stats.labels.nodejs', { lng: locale, defaultValue: 'Node.js' })}:** ${nodeVersion}`,
+            `**${t('commands.utils.stats.labels.discordjs', { lng: locale, defaultValue: 'Discord.js' })}:** v${djsVersion}`,
+            `**${t('commands.utils.stats.labels.typescript', { lng: locale, defaultValue: 'TypeScript' })}:** v${require('typescript/package.json').version}`,
           ].join('\n'),
           inline: true,
         },
         {
-          name: '⚙️ Process Information',
+          name: t('commands.utils.stats.processInfo', { lng: locale }),
           value: [
-            `**PID:** ${process.pid}`,
-            `**Platform:** ${process.platform}`,
-            `**Architecture:** ${process.arch}`,
-            `**Memory Limit:** ${formatBytes(memUsage.rss)}`,
+            `**${t('commands.utils.stats.labels.pid', { lng: locale, defaultValue: 'PID' })}:** ${process.pid}`,
+            `**${t('commands.utils.stats.labels.platform', { lng: locale, defaultValue: 'Platform' })}:** ${process.platform}`,
+            `**${t('commands.utils.stats.labels.architecture', { lng: locale, defaultValue: 'Architecture' })}:** ${process.arch}`,
+            `**${t('commands.utils.stats.memLimit', { lng: locale })}:** ${formatBytes(memUsage.rss)}`,
           ].join('\n'),
           inline: true,
         }
       )
       .setFooter({
-        text: `Requested by ${interaction.user.tag}`,
+        text: t('commands.utils.stats.footer', { lng: locale, user: interaction.user.tag }),
         iconURL: interaction.user.displayAvatarURL(),
       })
       .setTimestamp();
@@ -957,7 +959,7 @@ async function handleStats(
   } catch (error) {
     logger.error('Error in stats command:', error);
     await interaction.editReply({
-      content: 'An error occurred while fetching statistics.',
+      content: t('commands.utils.stats.error', { lng: locale }),
     });
   }
 }

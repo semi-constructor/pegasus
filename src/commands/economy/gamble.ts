@@ -7,7 +7,16 @@ import { Validator, CommandSchemas } from '../../security/validator';
 import { RateLimitError } from '../../security/errors';
 import { auditLogger } from '../../security/audit';
 import { logger } from '../../utils/logger';
-import { t } from '../../i18n';
+import { t, getGuildLocale } from '../../i18n';
+import {
+  createLocalizationMap,
+  subcommandDescriptions,
+  optionDescriptions,
+  choiceLocalizations,
+} from '../../utils/localization';
+
+export const isSubcommand = true;
+
 import type {
   DiceResult,
   CoinflipResult,
@@ -18,30 +27,18 @@ import type {
 
 export const data = new SlashCommandBuilder()
   .setName('gamble')
-  .setDescription('Play various gambling games')
-  .setDescriptionLocalizations({
-    'es-ES': 'Juega varios juegos de azar',
-    fr: 'Jouez à divers jeux de hasard',
-    de: 'Spiele verschiedene Glücksspiele',
-  })
+  .setDescription(t('commands.economy.subcommands.gamble.description', { defaultValue: 'Play various gambling games' }))
+  .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.gamble.group))
   .addSubcommand(subcommand =>
     subcommand
       .setName('dice')
-      .setDescription('Roll dice against the dealer')
-      .setDescriptionLocalizations({
-        'es-ES': 'Tira los dados contra el crupier',
-        fr: 'Lancez les dés contre le croupier',
-        de: 'Würfle gegen den Dealer',
-      })
+      .setDescription(t('commands.economy.subcommands.gamble.dice.description', { defaultValue: 'Roll dice against the dealer' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.gamble.dice))
       .addIntegerOption(option =>
         option
           .setName('bet')
-          .setDescription('Amount to bet')
-          .setDescriptionLocalizations({
-            'es-ES': 'Cantidad a apostar',
-            fr: 'Montant à parier',
-            de: 'Einsatzbetrag',
-          })
+          .setDescription(t('commands.economy.subcommands.gamble.options.bet', { defaultValue: 'Amount to bet' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.bet))
           .setRequired(true)
           .setMinValue(1)
       )
@@ -49,98 +46,93 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('coinflip')
-      .setDescription('Flip a coin')
-      .setDescriptionLocalizations({
-        'es-ES': 'Lanza una moneda',
-        fr: 'Lancez une pièce',
-        de: 'Wirf eine Münze',
-      })
+      .setDescription(t('commands.economy.subcommands.gamble.coinflip.description', { defaultValue: 'Flip a coin' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.gamble.coinflip))
       .addIntegerOption(option =>
-        option.setName('bet').setDescription('Amount to bet').setRequired(true).setMinValue(1)
+        option
+          .setName('bet')
+          .setDescription(t('commands.economy.subcommands.gamble.options.bet', { defaultValue: 'Amount to bet' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.bet))
+          .setRequired(true)
+          .setMinValue(1)
       )
       .addStringOption(option =>
         option
           .setName('choice')
-          .setDescription('Heads or tails')
-          .setDescriptionLocalizations({
-            'es-ES': 'Cara o cruz',
-            fr: 'Pile ou face',
-            de: 'Kopf oder Zahl',
-          })
+          .setDescription(t('commands.economy.subcommands.gamble.coinflip.options.choice', { defaultValue: 'Heads or tails' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.coinflipChoice))
           .setRequired(true)
-          .addChoices({ name: 'Heads', value: 'heads' }, { name: 'Tails', value: 'tails' })
+          .addChoices(
+            { name: 'Heads', value: 'heads', name_localizations: createLocalizationMap(choiceLocalizations.coinflip.heads) },
+            { name: 'Tails', value: 'tails', name_localizations: createLocalizationMap(choiceLocalizations.coinflip.tails) }
+          )
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('slots')
-      .setDescription('Play the slot machine')
-      .setDescriptionLocalizations({
-        'es-ES': 'Juega a la máquina tragamonedas',
-        fr: 'Jouez à la machine à sous',
-        de: 'Spiele am Spielautomaten',
-      })
+      .setDescription(t('commands.economy.subcommands.gamble.slots.description', { defaultValue: 'Play the slot machine' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.gamble.slots))
       .addIntegerOption(option =>
-        option.setName('bet').setDescription('Amount to bet').setRequired(true).setMinValue(1)
+        option
+          .setName('bet')
+          .setDescription(t('commands.economy.subcommands.gamble.options.bet', { defaultValue: 'Amount to bet' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.bet))
+          .setRequired(true)
+          .setMinValue(1)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('blackjack')
-      .setDescription('Play blackjack against the dealer')
-      .setDescriptionLocalizations({
-        'es-ES': 'Juega al blackjack contra el crupier',
-        fr: 'Jouez au blackjack contre le croupier',
-        de: 'Spiele Blackjack gegen den Dealer',
-      })
+      .setDescription(t('commands.economy.subcommands.gamble.blackjack.description', { defaultValue: 'Play blackjack against the dealer' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.gamble.blackjack))
       .addIntegerOption(option =>
-        option.setName('bet').setDescription('Amount to bet').setRequired(true).setMinValue(1)
+        option
+          .setName('bet')
+          .setDescription(t('commands.economy.subcommands.gamble.options.bet', { defaultValue: 'Amount to bet' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.bet))
+          .setRequired(true)
+          .setMinValue(1)
       )
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('roulette')
-      .setDescription('Play roulette')
-      .setDescriptionLocalizations({
-        'es-ES': 'Juega a la ruleta',
-        fr: 'Jouez à la roulette',
-        de: 'Spiele Roulette',
-      })
+      .setDescription(t('commands.economy.subcommands.gamble.roulette.description', { defaultValue: 'Play roulette' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.gamble.roulette))
       .addIntegerOption(option =>
-        option.setName('bet').setDescription('Amount to bet').setRequired(true).setMinValue(1)
+        option
+          .setName('bet')
+          .setDescription(t('commands.economy.subcommands.gamble.options.bet', { defaultValue: 'Amount to bet' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.bet))
+          .setRequired(true)
+          .setMinValue(1)
       )
       .addStringOption(option =>
         option
           .setName('type')
-          .setDescription('Type of bet')
-          .setDescriptionLocalizations({
-            'es-ES': 'Tipo de apuesta',
-            fr: 'Type de pari',
-            de: 'Art der Wette',
-          })
+          .setDescription(t('commands.economy.subcommands.gamble.roulette.options.type', { defaultValue: 'Type of bet' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.rouletteType))
           .setRequired(true)
           .addChoices(
-            { name: 'Red', value: 'color:red' },
-            { name: 'Black', value: 'color:black' },
-            { name: 'Even', value: 'even' },
-            { name: 'Odd', value: 'odd' },
-            { name: 'Low (1-18)', value: 'low' },
-            { name: 'High (19-36)', value: 'high' },
-            { name: 'Specific Number', value: 'number' },
-            { name: '1st Dozen', value: 'dozen:1' },
-            { name: '2nd Dozen', value: 'dozen:2' },
-            { name: '3rd Dozen', value: 'dozen:3' }
+            { name: 'Red', value: 'color:red', name_localizations: createLocalizationMap(choiceLocalizations.roulette.red) },
+            { name: 'Black', value: 'color:black', name_localizations: createLocalizationMap(choiceLocalizations.roulette.black) },
+            { name: 'Even', value: 'even', name_localizations: createLocalizationMap(choiceLocalizations.roulette.even) },
+            { name: 'Odd', value: 'odd', name_localizations: createLocalizationMap(choiceLocalizations.roulette.odd) },
+            { name: 'Low (1-18)', value: 'low', name_localizations: createLocalizationMap(choiceLocalizations.roulette.low) },
+            { name: 'High (19-36)', value: 'high', name_localizations: createLocalizationMap(choiceLocalizations.roulette.high) },
+            { name: 'Specific Number', value: 'number', name_localizations: createLocalizationMap(choiceLocalizations.roulette.number) },
+            { name: '1st Dozen', value: 'dozen:1', name_localizations: createLocalizationMap(choiceLocalizations.roulette.dozen1) },
+            { name: '2nd Dozen', value: 'dozen:2', name_localizations: createLocalizationMap(choiceLocalizations.roulette.dozen2) },
+            { name: '3rd Dozen', value: 'dozen:3', name_localizations: createLocalizationMap(choiceLocalizations.roulette.dozen3) }
           )
       )
       .addIntegerOption(option =>
         option
           .setName('number')
-          .setDescription('Specific number to bet on (0-36)')
-          .setDescriptionLocalizations({
-            'es-ES': 'Número específico para apostar (0-36)',
-            fr: 'Numéro spécifique sur lequel parier (0-36)',
-            de: 'Spezifische Zahl zum Setzen (0-36)',
-          })
+          .setDescription(t('commands.economy.subcommands.gamble.roulette.options.number', { defaultValue: 'Specific number to bet on (0-36)' }))
+          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.rouletteNumber))
           .setMinValue(0)
           .setMaxValue(36)
       )
@@ -159,7 +151,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const bet = interaction.options.getInteger('bet', true);
   const userId = interaction.user.id;
   const guildId = interaction.guildId!;
-  const locale = interaction.locale ?? interaction.guildLocale ?? 'en';
+  const locale = interaction.guildId ? getGuildLocale(interaction.guildId) : interaction.locale ?? 'en';
 
   try {
     // Validate gambling input
@@ -291,7 +283,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
       default:
         await interaction.editReply({
-          embeds: [embedBuilder.createErrorEmbed('Invalid gambling game')],
+          embeds: [embedBuilder.createErrorEmbed(t('commands.economy.gamble.invalidGame', { defaultValue: 'Invalid gambling game', lng: locale }))],
         });
         return;
     }
@@ -333,7 +325,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const userMessage =
       error instanceof RateLimitError
         ? error.message
-        : 'Failed to process gambling game. Please try again later.';
+        : t('commands.economy.gamble.error', { defaultValue: 'Failed to process gambling game. Please try again later.', lng: locale });
 
     await interaction.editReply({
       embeds: [embedBuilder.createErrorEmbed(userMessage)],
@@ -369,10 +361,10 @@ function createDiceEmbed(result: any, settings: any, locale: string): EmbedBuild
         name: t('commands.economy.gamble.dice.result', { lng: locale }),
         value:
           result.profit > 0
-            ? `Won ${settings.currencySymbol}${result.profit.toLocaleString()}`
+            ? `${t('commands.economy.gamble.dice.resultWon', { defaultValue: 'Won', lng: locale })} ${settings.currencySymbol}${result.profit.toLocaleString()}`
             : result.profit === 0
-              ? 'Push'
-              : `Lost ${settings.currencySymbol}${Math.abs(result.profit).toLocaleString()}`,
+              ? t('commands.economy.gamble.dice.resultPush', { defaultValue: 'Push', lng: locale })
+              : `${t('commands.economy.gamble.dice.resultLost', { defaultValue: 'Lost', lng: locale })} ${settings.currencySymbol}${Math.abs(result.profit).toLocaleString()}`,
         inline: true,
       },
       {

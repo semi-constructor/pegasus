@@ -13,6 +13,7 @@ interface CommandModule {
   cooldown?: number;
   permissions?: Command['permissions'];
   autocomplete?: Command['autocomplete'];
+  isSubcommand?: boolean;
 }
 
 export class HelpService {
@@ -40,6 +41,10 @@ export class HelpService {
           try {
             const filePath = join(categoryPath, file);
             const commandModule = (await import(filePath)) as CommandModule;
+
+            if (commandModule.isSubcommand || (commandModule.default && 'isSubcommand' in commandModule.default && (commandModule.default as any).isSubcommand)) {
+              continue;
+            }
 
             let commandData: Command['data'] | null = null;
             let commandCategory: CommandCategory = this.getCategoryFromPath(category);
@@ -314,13 +319,13 @@ export class HelpService {
       for (const option of options) {
         if (option.type === 1) {
           // Subcommand
-          subcommands.push(`• \`${option.name}\` - ${option.description || 'No description'}`);
+          subcommands.push(`• \`${option.name}\` - ${option.description || t('common.noDescription', { defaultValue: 'No description' })}`);
         } else if (option.type === 2) {
           // Subcommand group
           for (const subOption of option.options || []) {
             if (subOption.type === 1) {
               subcommands.push(
-                `• \`${option.name} ${subOption.name}\` - ${subOption.description || 'No description'}`
+                `• \`${option.name} ${subOption.name}\` - ${subOption.description || t('common.noDescription', { defaultValue: 'No description' })}`
               );
             }
           }

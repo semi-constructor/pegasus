@@ -12,11 +12,12 @@ const maxConnections = parseInt(process.env.DB_MAX_CONNECTIONS || '20', 10);
 // Create postgres connection with connection pooling
 const queryClient = postgres(connectionString, {
   max: maxConnections,
-  idle_timeout: 20,
-  connect_timeout: 10,
+  idle_timeout: 0, // Disable client-side idle timeout to prevent TimeoutNegativeWarning in Node 24+
+  connect_timeout: 30, // Increased timeout for better resilience with Neon serverless pooler
+  fetch_types: false, // Prevents custom type fetching on connection initialization, saving extra round-trips to Neon pooler
   // Connection pool settings optimized for Discord bot workloads
   prepare: true, // Prepared statements for better performance
-  ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+  ssl: connectionString.includes('sslmode=require') || connectionString.includes('.neon.tech') ? 'require' : (process.env.DB_SSL === 'false' ? false : 'require'),
 
   // Error handling
   onnotice: notice => {

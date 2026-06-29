@@ -1,60 +1,55 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import axios from 'axios';
 import { CommandCategory } from '../../types/command';
-import { createLocalizationMap, commandDescriptions } from '../../utils/localization';
+import { createLocalizationMap, commandDescriptions, subcommandDescriptions } from '../../utils/localization';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
+import { t, getGuildLocale } from '../../i18n';
 
 export const data = new SlashCommandBuilder()
   .setName('fun')
-  .setDescription('Fun and entertainment commands')
+  .setDescription(t('commands.fun.description', { defaultValue: 'Fun and entertainment commands' }))
   .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.fun))
   .addSubcommand(subcommand =>
-    subcommand.setName('meme').setDescription('Get a random meme').setDescriptionLocalizations({
-      de: 'Ein zufälliges Meme erhalten',
-      'es-ES': 'Obtener un meme aleatorio',
-      fr: 'Obtenir un mème aléatoire',
-    })
+    subcommand
+      .setName('meme')
+      .setDescription(t('commands.fun.subcommands.meme.description', { defaultValue: 'Get a random meme' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.meme))
   )
   .addSubcommand(subcommand =>
-    subcommand.setName('fact').setDescription('Get a random fact').setDescriptionLocalizations({
-      de: 'Eine zufällige Tatsache erhalten',
-      'es-ES': 'Obtener un dato aleatorio',
-      fr: 'Obtenir un fait aléatoire',
-    })
+    subcommand
+      .setName('fact')
+      .setDescription(t('commands.fun.subcommands.fact.description', { defaultValue: 'Get a random fact' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.fact))
   )
   .addSubcommand(subcommand =>
-    subcommand.setName('quote').setDescription('Get a random quote').setDescriptionLocalizations({
-      de: 'Ein zufälliges Zitat erhalten',
-      'es-ES': 'Obtener una cita aleatoria',
-      fr: 'Obtenir une citation aléatoire',
-    })
+    subcommand
+      .setName('quote')
+      .setDescription(t('commands.fun.subcommands.quote.description', { defaultValue: 'Get a random quote' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.quote))
   )
   .addSubcommand(subcommand =>
-    subcommand.setName('joke').setDescription('Get a random joke').setDescriptionLocalizations({
-      de: 'Einen zufälligen Witz erhalten',
-      'es-ES': 'Obtener un chiste aleatorio',
-      fr: 'Obtenir une blague aléatoire',
-    })
+    subcommand
+      .setName('joke')
+      .setDescription(t('commands.fun.subcommands.joke.description', { defaultValue: 'Get a random joke' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.joke))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('dadjoke')
-      .setDescription('Get a random dad joke')
-      .setDescriptionLocalizations({
-        de: 'Einen zufälligen Dad-Joke erhalten',
-        'es-ES': 'Obtener un chiste de papá aleatorio',
-        fr: 'Obtenir une blague de papa aléatoire',
-      })
+      .setDescription(t('commands.fun.subcommands.dadjoke.description', { defaultValue: 'Get a random dad joke' }))
+      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.dadjoke))
   );
 
 export const category = CommandCategory.Fun;
 export const cooldown = 5;
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
+  const locale = interaction.guildId ? getGuildLocale(interaction.guildId) : 'en';
+
   if (!config.ENABLE_FUN_COMMANDS) {
     await interaction.reply({
-      content: 'Fun commands are currently disabled.',
+      content: t('common.funDisabled', { lng: locale }),
       ephemeral: true,
     });
     return;
@@ -67,30 +62,30 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
   try {
     switch (subcommand) {
       case 'meme':
-        await handleMeme(interaction);
+        await handleMeme(interaction, locale);
         break;
       case 'fact':
-        await handleFact(interaction);
+        await handleFact(interaction, locale);
         break;
       case 'quote':
-        await handleQuote(interaction);
+        await handleQuote(interaction, locale);
         break;
       case 'joke':
-        await handleJoke(interaction);
+        await handleJoke(interaction, locale);
         break;
       case 'dadjoke':
-        await handleDadJoke(interaction);
+        await handleDadJoke(interaction, locale);
         break;
     }
   } catch (error) {
     logger.error('Error in fun command:', error);
     await interaction.editReply({
-      content: 'An error occurred while fetching content. Please try again later.',
+      content: t('common.fetchError', { lng: locale }),
     });
   }
 }
 
-async function handleMeme(interaction: ChatInputCommandInteraction) {
+async function handleMeme(interaction: ChatInputCommandInteraction, locale: string) {
   try {
     // Using Reddit API (no key required)
     const response = await axios.get('https://meme-api.com/gimme', {
@@ -105,9 +100,9 @@ async function handleMeme(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0xff4500)
-      .setTitle(meme.title || 'Random Meme')
+      .setTitle(meme.title || t('commands.fun.meme.fallbackTitle', { defaultValue: 'Random Meme', lng: locale }))
       .setImage(meme.url)
-      .setFooter({ text: `From r/${meme.subreddit || 'memes'}` })
+      .setFooter({ text: t('commands.fun.meme.footer', { defaultValue: 'From r/{{subreddit}}', subreddit: meme.subreddit || 'memes', lng: locale }) })
       .setTimestamp();
 
     if (meme.author) {
@@ -129,7 +124,7 @@ async function handleMeme(interaction: ChatInputCommandInteraction) {
         .setColor(0xff4500)
         .setTitle(randomMeme.name)
         .setImage(randomMeme.url)
-        .setFooter({ text: 'Powered by Imgflip' })
+        .setFooter({ text: t('commands.fun.meme.poweredBy', { defaultValue: 'Powered by Imgflip', lng: locale }) })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -139,7 +134,7 @@ async function handleMeme(interaction: ChatInputCommandInteraction) {
   }
 }
 
-async function handleFact(interaction: ChatInputCommandInteraction) {
+async function handleFact(interaction: ChatInputCommandInteraction, locale: string) {
   try {
     const response = await axios.get('https://uselessfacts.jsph.pl/api/v2/facts/random', {
       timeout: 5000,
@@ -152,9 +147,9 @@ async function handleFact(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x00ae86)
-      .setTitle('Random Fact')
+      .setTitle(t('commands.fun.fact.title', { defaultValue: 'Random Fact', lng: locale }))
       .setDescription(fact.text)
-      .setFooter({ text: fact.source || 'Unknown Source' })
+      .setFooter({ text: fact.source || t('commands.fun.fact.unknownSource', { defaultValue: 'Unknown Source', lng: locale }) })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -172,9 +167,9 @@ async function handleFact(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setColor(0x00ae86)
-        .setTitle('Random Fact')
+        .setTitle(t('commands.fun.fact.title', { defaultValue: 'Random Fact', lng: locale }))
         .setDescription(fact.fact)
-        .setFooter({ text: 'Powered by API Ninjas' })
+        .setFooter({ text: t('commands.fun.fact.poweredBy', { defaultValue: 'Powered by API Ninjas', lng: locale }) })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -192,7 +187,7 @@ async function handleFact(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setColor(0x00ae86)
-        .setTitle('Random Fact')
+        .setTitle(t('commands.fun.fact.title', { defaultValue: 'Random Fact', lng: locale }))
         .setDescription(randomFact)
         .setTimestamp();
 
@@ -201,7 +196,7 @@ async function handleFact(interaction: ChatInputCommandInteraction) {
   }
 }
 
-async function handleQuote(interaction: ChatInputCommandInteraction) {
+async function handleQuote(interaction: ChatInputCommandInteraction, locale: string) {
   try {
     const response = await axios.get('https://api.quotable.io/random', {
       timeout: 5000,
@@ -211,14 +206,14 @@ async function handleQuote(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x9b59b6)
-      .setTitle('Random Quote')
+      .setTitle(t('commands.fun.quote.title', { defaultValue: 'Random Quote', lng: locale }))
       .setDescription(`"${quote.content}"`)
       .setFooter({ text: `— ${quote.author}` })
       .setTimestamp();
 
     if (quote.tags && quote.tags.length > 0) {
       embed.addFields({
-        name: 'Tags',
+        name: t('commands.fun.quote.tags', { defaultValue: 'Tags', lng: locale }),
         value: quote.tags.join(', '),
         inline: true,
       });
@@ -236,7 +231,7 @@ async function handleQuote(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setColor(0x9b59b6)
-        .setTitle('Random Quote')
+        .setTitle(t('commands.fun.quote.title', { defaultValue: 'Random Quote', lng: locale }))
         .setDescription(`"${quote.q}"`)
         .setFooter({ text: `— ${quote.a}` })
         .setTimestamp();
@@ -268,7 +263,7 @@ async function handleQuote(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setColor(0x9b59b6)
-        .setTitle('Random Quote')
+        .setTitle(t('commands.fun.quote.title', { defaultValue: 'Random Quote', lng: locale }))
         .setDescription(`"${randomQuote.content}"`)
         .setFooter({ text: `— ${randomQuote.author}` })
         .setTimestamp();
@@ -278,7 +273,7 @@ async function handleQuote(interaction: ChatInputCommandInteraction) {
   }
 }
 
-async function handleJoke(interaction: ChatInputCommandInteraction) {
+async function handleJoke(interaction: ChatInputCommandInteraction, locale: string) {
   try {
     const response = await axios.get('https://official-joke-api.appspot.com/random_joke', {
       timeout: 5000,
@@ -288,9 +283,9 @@ async function handleJoke(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0xffd700)
-      .setTitle('Random Joke')
+      .setTitle(t('commands.fun.joke.title', { defaultValue: 'Random Joke', lng: locale }))
       .setDescription(`**${joke.setup}**\n\n||${joke.punchline}||`)
-      .setFooter({ text: `Type: ${joke.type || 'General'}` })
+      .setFooter({ text: t('commands.fun.joke.type', { defaultValue: 'Type: {{type}}', type: joke.type || 'General', lng: locale }) })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -305,9 +300,9 @@ async function handleJoke(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setColor(0xffd700)
-        .setTitle('Random Joke')
+        .setTitle(t('commands.fun.joke.title', { defaultValue: 'Random Joke', lng: locale }))
         .setDescription(`**${joke.setup}**\n\n||${joke.delivery}||`)
-        .setFooter({ text: `Category: ${joke.category}` })
+        .setFooter({ text: t('commands.fun.joke.category', { defaultValue: 'Category: {{category}}', category: joke.category, lng: locale }) })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -331,7 +326,7 @@ async function handleJoke(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setColor(0xffd700)
-        .setTitle('Random Joke')
+        .setTitle(t('commands.fun.joke.title', { defaultValue: 'Random Joke', lng: locale }))
         .setDescription(`**${randomJoke.setup}**\n\n||${randomJoke.punchline}||`)
         .setTimestamp();
 
@@ -340,7 +335,7 @@ async function handleJoke(interaction: ChatInputCommandInteraction) {
   }
 }
 
-async function handleDadJoke(interaction: ChatInputCommandInteraction) {
+async function handleDadJoke(interaction: ChatInputCommandInteraction, locale: string) {
   try {
     const response = await axios.get('https://icanhazdadjoke.com/', {
       timeout: 5000,
@@ -354,9 +349,9 @@ async function handleDadJoke(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x1e90ff)
-      .setTitle('Dad Joke')
+      .setTitle(t('commands.fun.dadjoke.title', { defaultValue: 'Dad Joke', lng: locale }))
       .setDescription(joke.joke)
-      .setFooter({ text: 'Powered by icanhazdadjoke.com' })
+      .setFooter({ text: t('commands.fun.dadjoke.poweredBy', { defaultValue: 'Powered by icanhazdadjoke.com', lng: locale }) })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -379,7 +374,7 @@ async function handleDadJoke(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x1e90ff)
-      .setTitle('Dad Joke')
+      .setTitle(t('commands.fun.dadjoke.title', { defaultValue: 'Dad Joke', lng: locale }))
       .setDescription(randomJoke)
       .setTimestamp();
 

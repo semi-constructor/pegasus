@@ -6,6 +6,7 @@ import { logger } from '../utils/logger';
 import { configurationService } from './configurationService';
 import { ensureUserExists } from '../utils/userUtils';
 import type { GuildMember } from 'discord.js';
+import { t } from '../i18n';
 
 export interface XPGainResult {
   xpGained: number;
@@ -286,7 +287,7 @@ export class XPService {
       return {
         userId: userXpData.userId,
         guildId: userXpData.guildId,
-        username: userXpData.username || 'Unknown User',
+        username: userXpData.username || t('common.unknownUser', { defaultValue: 'Unknown User' }),
         avatarUrl: userXpData.avatarUrl || undefined,
         xp: userXpData.xp,
         level: userXpData.level,
@@ -342,7 +343,7 @@ export class XPService {
       // Add rank to entries
       const leaderboardEntries: LeaderboardEntry[] = entries.map((entry, index) => ({
         userId: entry.userId,
-        username: entry.username || 'Unknown User',
+        username: entry.username || t('common.unknownUser', { defaultValue: 'Unknown User' }),
         avatarUrl: entry.avatarUrl || undefined,
         xp: entry.xp,
         level: entry.level,

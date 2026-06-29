@@ -75,5 +75,12 @@ pnpm-lock.yaml
 process.log
 test-api.js
 AGENTS.md
-!API.md
+API.md
 !CACHING_SYSTEM.md
+!API_DOC.md
+
+#Policy
+geizhalsService.ts
+geizhalsServiceMock.ts
+geizhals.ts
+askpass.bat

@@ -15,6 +15,8 @@ import { logger } from '../utils/logger';
 import { getTranslation, t } from '../i18n';
 import { wordFilterService, type WordFilterViolation } from '../services/wordFilterService';
 import { modLogService } from '../services/modLogService';
+import { autoModService } from '../services/autoModService';
+import { engagementService } from '../services/engagementService';
 import type { WordFilterActionConfig, WordFilterSeverity } from '../types';
 
 const WORD_FILTER_SEVERITY_WEIGHT: Record<WordFilterSeverity, number> = {
@@ -57,6 +59,10 @@ export async function execute(message: Message) {
     // Ensure guild exists in database
     await guildService.ensureGuild(message.guild);
 
+    // Evaluate AutoMod V2
+    const autoModTriggered = await autoModService.evaluateMessage(message);
+    if (autoModTriggered) return;
+
     // Handle prefix list commands before processing XP
     const handled = await listCommandService.handle(message);
     if (handled) return;
@@ -64,12 +70,16 @@ export async function execute(message: Message) {
     const filtered = await handleWordFilter(message);
     if (filtered) return;
 
+    // Track message activity for quests and achievements
+    await engagementService.trackMessageActivity(message);
+
     // Process XP gain
     await processXPGain(message);
   } catch (error) {
     logger.error('Error in messageCreate event:', error);
   }
 }
+
 
 interface WordFilterDeletionResult {
   attempted: boolean;

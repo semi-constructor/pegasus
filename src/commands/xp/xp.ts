@@ -15,36 +15,52 @@ import { rankCardService } from '../../services/rankCardService';
 import { configurationService } from '../../services/configurationService';
 import { logger } from '../../utils/logger';
 import { getTranslation, type LocaleObject } from '../../i18n';
+import { createLocalizationMap, commandNames, commandDescriptions, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
 
 const xpCommand: Command = {
   data: new SlashCommandBuilder()
     .setName('xp')
     .setDescription('XP system commands')
+    .setNameLocalizations(createLocalizationMap(commandNames.xp))
+    .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.xp))
     .addSubcommand(subcommand =>
       subcommand
         .setName('rank')
         .setDescription('View your XP rank card')
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.xp.rank))
         .addUserOption(option =>
-          option.setName('user').setDescription('User to view rank for').setRequired(false)
+          option
+            .setName('user')
+            .setDescription('User to view rank for')
+            .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
+            .setRequired(false)
         )
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('leaderboard')
         .setDescription('View the server XP leaderboard')
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.xp.leaderboard))
         .addIntegerOption(option =>
           option
             .setName('page')
             .setDescription('Page number to view')
+            .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.page))
             .setRequired(false)
             .setMinValue(1)
         )
     )
     .addSubcommand(subcommand =>
-      subcommand.setName('configuration').setDescription('View current XP configuration')
+      subcommand
+        .setName('configuration')
+        .setDescription('View current XP configuration')
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.xp.configuration))
     )
     .addSubcommand(subcommand =>
-      subcommand.setName('card').setDescription('Customize your rank card colors')
+      subcommand
+        .setName('card')
+        .setDescription('Customize your rank card colors')
+        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.xp.card))
     ),
   category: CommandCategory.XP,
   cooldown: 5,
@@ -153,11 +169,11 @@ async function handleLeaderboardCommand(
           .map(entry => {
             const medal =
               entry.rank === 1
-                ? '🥇'
+                ? (locale.commands.xp.leaderboard as any).medals?.first || '🥇'
                 : entry.rank === 2
-                  ? '🥈'
+                  ? (locale.commands.xp.leaderboard as any).medals?.second || '🥈'
                   : entry.rank === 3
-                    ? '🥉'
+                    ? (locale.commands.xp.leaderboard as any).medals?.third || '🥉'
                     : `**${entry.rank}.**`;
             return `${medal} <@${entry.userId}> - ${locale.commands.xp.leaderboard.entry
               .replace('{{level}}', entry.level.toString())
@@ -333,7 +349,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.backgroundColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.backgroundColor || '#23272A')
-      .setPlaceholder('#23272A')
+      .setPlaceholder((locale.commands.xp.card as any).placeholders?.backgroundColor || '#23272A')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);
@@ -343,7 +359,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.progressBarColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.progressBarColor || '#5865F2')
-      .setPlaceholder('#5865F2')
+      .setPlaceholder((locale.commands.xp.card as any).placeholders?.progressBarColor || '#5865F2')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);
@@ -353,7 +369,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.textColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.textColor || '#FFFFFF')
-      .setPlaceholder('#FFFFFF')
+      .setPlaceholder((locale.commands.xp.card as any).placeholders?.textColor || '#FFFFFF')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);
@@ -363,7 +379,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.accentColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.accentColor || '#EB459E')
-      .setPlaceholder('#EB459E')
+      .setPlaceholder((locale.commands.xp.card as any).placeholders?.accentColor || '#EB459E')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);

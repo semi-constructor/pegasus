@@ -12,7 +12,7 @@
   <h3>🏆 A Production-Ready, Feature-Rich Discord Bot Built with TypeScript</h3>
   <p>
     <a href="https://discord.gg/vaultscope">Support Server</a> •
-    <a href="https://cptcr.dev">Developer</a> •
+    <a href="https://cptcr.uk">Developer</a> •
     <a href="#-features">Features</a> •
     <a href="#-installation">Installation</a> •
     <a href="#-commands">Commands</a>
