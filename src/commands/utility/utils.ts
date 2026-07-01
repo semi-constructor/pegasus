@@ -10,7 +10,6 @@ import {
 import { Command, CommandCategory } from '../../types/command';
 import { t, getGuildLocale } from '../../i18n';
 import { SteamService as RealSteamService } from '../../services/steamService';
-import { GeizhalsService as RealGeizhalsService } from '../../services/geizhalsService';
 import { HelpService } from '../../services/helpService';
 import { logger } from '../../utils/logger';
 import * as os from 'os';
@@ -20,10 +19,6 @@ import { createLocalizationMap, commandNames, commandDescriptions, subcommandDes
 const realSteamService =
   process.env.STEAM_API_KEY && process.env.STEAM_API_KEY !== ''
     ? new RealSteamService()
-    : null;
-const realGeizhalsService =
-  process.env.GEIZHALS_API_KEY && process.env.GEIZHALS_API_KEY !== '' && process.env.GEIZHALS_USERNAME && process.env.GEIZHALS_USERNAME !== ''
-    ? new RealGeizhalsService()
     : null;
 const helpService = new HelpService();
 
@@ -183,9 +178,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         break;
       case 'steam':
         await handleSteam(interaction, locale);
-        break;
-      case 'geizhals':
-        await handleGeizhals(interaction, locale);
         break;
       case 'userinfo':
         await handleUserInfo(interaction, locale);
@@ -356,41 +348,6 @@ async function handleSteam(
     logger.error('Error fetching Steam profile:', error);
     await interaction.editReply({
       content: t('commands.utils.steam.error', { lng: locale }),
-    });
-  }
-}
-
-async function handleGeizhals(
-  interaction: ChatInputCommandInteraction,
-  locale: string
-): Promise<void> {
-  await interaction.deferReply();
-
-  const query = interaction.options.getString('query', true);
-
-  try {
-    if (!realGeizhalsService) {
-      await interaction.editReply({
-        content: t('commands.utils.geizhals.error', { lng: locale }),
-      });
-      return;
-    }
-
-    const products = await realGeizhalsService.searchProducts(query, 'de', 'de', 5, locale);
-
-    if (!products || products.length === 0) {
-      await interaction.editReply({
-        content: t('commands.utils.geizhals.notFound', { lng: locale }),
-      });
-      return;
-    }
-
-    const embed = realGeizhalsService.getProductSummary(products[0], locale);
-    await interaction.editReply({ embeds: [embed] });
-  } catch (error) {
-    logger.error('Error fetching Geizhals products:', error);
-    await interaction.editReply({
-      content: t('commands.utils.geizhals.error', { lng: locale }),
     });
   }
 }

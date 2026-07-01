@@ -12,7 +12,6 @@ import { settingsRouter } from './routes/settings';
 import { batchRouter } from './routes/batch';
 import { monitoringRouter } from './routes/monitoring';
 import { dashboardRouter } from './routes/dashboard';
-import { geizhalsRouter } from './routes/geizhals';
 import { ticketsApiRouter } from './routes/ticketsApi';
 import { jtcApiRouter } from './routes/jtcApi';
 import { logger } from '../utils/logger';
@@ -153,7 +152,6 @@ app.use(
 );
 
 app.use('/dashboard', authenticateToken, cacheMiddleware(CacheTTL.STATS), dashboardRouter);
-app.use('/geizhals', authenticateToken, cacheMiddleware(CacheTTL.STATS), geizhalsRouter);
 
 // Dashboard direct management API routes
 app.use('/api/tickets', authenticateToken, invalidateCache(() => `*tickets*`), ticketsApiRouter);
