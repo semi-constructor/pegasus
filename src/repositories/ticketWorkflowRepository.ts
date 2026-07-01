@@ -44,7 +44,12 @@ export class TicketWorkflowRepository extends BaseRepository {
       const [record] = await this.db
         .select()
         .from(ticketDepartments)
-        .where(and(eq(ticketDepartments.guildId, guildId), eq(ticketDepartments.departmentId, departmentId)))
+        .where(
+          and(
+            eq(ticketDepartments.guildId, guildId),
+            eq(ticketDepartments.departmentId, departmentId)
+          )
+        )
         .limit(1);
       return (record as unknown as TicketDepartment) || null;
     });
@@ -55,7 +60,9 @@ export class TicketWorkflowRepository extends BaseRepository {
       const records = await this.db
         .select()
         .from(ticketDepartments)
-        .where(and(eq(ticketDepartments.guildId, guildId), eq(ticketDepartments.panelId, panelDbId)));
+        .where(
+          and(eq(ticketDepartments.guildId, guildId), eq(ticketDepartments.panelId, panelDbId))
+        );
       return records as unknown as TicketDepartment[];
     });
   }

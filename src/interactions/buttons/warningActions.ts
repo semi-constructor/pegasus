@@ -75,14 +75,20 @@ async function handleWarningAction(
       case 'ban':
         await member.ban({ reason: 'Warning threshold reached' });
         await interaction.editReply({
-          content: t('commands.moderation.subcommands.ban.success.description', { user: member.user.tag, moderator: interaction.user.tag }),
+          content: t('commands.moderation.subcommands.ban.success.description', {
+            user: member.user.tag,
+            moderator: interaction.user.tag,
+          }),
         });
         break;
 
       case 'kick':
         await member.kick('Warning threshold reached');
         await interaction.editReply({
-          content: t('commands.moderation.subcommands.kick.success.description', { user: member.user.tag, moderator: interaction.user.tag }),
+          content: t('commands.moderation.subcommands.kick.success.description', {
+            user: member.user.tag,
+            moderator: interaction.user.tag,
+          }),
         });
         break;
 
@@ -100,7 +106,11 @@ async function handleWarningAction(
         await member.timeout(durationMs, 'Warning threshold reached');
 
         await interaction.editReply({
-          content: t('commands.moderation.subcommands.timeout.success.description', { user: member.user.tag, duration: formatActionDuration(durationMinutes), moderator: interaction.user.tag }),
+          content: t('commands.moderation.subcommands.timeout.success.description', {
+            user: member.user.tag,
+            duration: formatActionDuration(durationMinutes),
+            moderator: interaction.user.tag,
+          }),
         });
         break;
       }
@@ -131,7 +141,11 @@ async function handleWarningAction(
         );
 
         await interaction.editReply({
-          content: t('commands.moderation.subcommands.mute.success.description', { user: member.user.tag, moderator: interaction.user.tag }) + ` (${duration}m)`,
+          content:
+            t('commands.moderation.subcommands.mute.success.description', {
+              user: member.user.tag,
+              moderator: interaction.user.tag,
+            }) + ` (${duration}m)`,
         });
         break;
 
@@ -222,7 +236,10 @@ async function handleWarningView(interaction: ButtonInteraction, userId: string)
 
   if (warnings.length > 10) {
     embed.setFooter({
-      text: t('commands.warn.subcommands.view.stats', { count: warnings.length, level: stats.totalLevel }),
+      text: t('commands.warn.subcommands.view.stats', {
+        count: warnings.length,
+        level: stats.totalLevel,
+      }),
     });
   }
 

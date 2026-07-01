@@ -63,10 +63,26 @@ export const data = new SlashCommandBuilder()
           .setDescription(t('commands.config.subcommands.lang.options.language'))
           .setRequired(true)
           .addChoices(
-            { name: 'English', value: 'en', name_localizations: { de: 'Englisch', 'es-ES': 'Inglés', fr: 'Anglais' } },
-            { name: 'Deutsch', value: 'de', name_localizations: { 'en-US': 'German', 'es-ES': 'Alemán', fr: 'Allemand' } },
-            { name: 'Español', value: 'es', name_localizations: { 'en-US': 'Spanish', de: 'Spanisch', fr: 'Espagnol' } },
-            { name: 'Français', value: 'fr', name_localizations: { 'en-US': 'French', de: 'Französisch', 'es-ES': 'Francés' } }
+            {
+              name: 'English',
+              value: 'en',
+              name_localizations: { de: 'Englisch', 'es-ES': 'Inglés', fr: 'Anglais' },
+            },
+            {
+              name: 'Deutsch',
+              value: 'de',
+              name_localizations: { 'en-US': 'German', 'es-ES': 'Alemán', fr: 'Allemand' },
+            },
+            {
+              name: 'Español',
+              value: 'es',
+              name_localizations: { 'en-US': 'Spanish', de: 'Spanisch', fr: 'Espagnol' },
+            },
+            {
+              name: 'Français',
+              value: 'fr',
+              name_localizations: { 'en-US': 'French', de: 'Französisch', 'es-ES': 'Francés' },
+            }
           )
       )
   )
@@ -259,7 +275,12 @@ async function handleXPConfig(interaction: ChatInputCommandInteraction) {
           name: t('commands.config.subcommands.xp.embed.fields.roleRewards'),
           value:
             roleRewards.length > 0
-              ? roleRewards.map(r => `${t('common.level', { defaultValue: 'Level' })} ${r.level}: <@&${r.roleId}>`).join('\n')
+              ? roleRewards
+                  .map(
+                    r =>
+                      `${t('common.level', { defaultValue: 'Level' })} ${r.level}: <@&${r.roleId}>`
+                  )
+                  .join('\n')
               : t('common.none'),
           inline: false,
         }

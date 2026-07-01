@@ -123,10 +123,7 @@ async function handleCommand(interaction: ChatInputCommandInteraction) {
   }
 }
 
-async function preDeferInteraction(
-  interaction: ChatInputCommandInteraction,
-  ephemeral: boolean
-) {
+async function preDeferInteraction(interaction: ChatInputCommandInteraction, ephemeral: boolean) {
   if (interaction.deferred || interaction.replied) {
     return;
   }
@@ -286,7 +283,12 @@ async function handleModal(interaction: ModalSubmitInteraction) {
       const panelDbId = parts[1];
       const departmentId = parts[2];
       const reason = interaction.fields.getTextInputValue('reason');
-      await ticketWorkflowService.createDepartmentTicket(interaction, panelDbId, departmentId, reason);
+      await ticketWorkflowService.createDepartmentTicket(
+        interaction,
+        panelDbId,
+        departmentId,
+        reason
+      );
       return;
     }
 
@@ -374,4 +376,3 @@ async function handleSelectMenu(
     }
   }
 }
-

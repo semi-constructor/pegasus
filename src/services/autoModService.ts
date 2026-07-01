@@ -19,7 +19,11 @@ export class AutoModService {
         if (rule.exemptChannels && rule.exemptChannels.includes(channelId)) continue;
 
         // Check exempt roles
-        if (member && rule.exemptRoles && rule.exemptRoles.some(roleId => member.roles.cache.has(roleId))) {
+        if (
+          member &&
+          rule.exemptRoles &&
+          rule.exemptRoles.some(roleId => member.roles.cache.has(roleId))
+        ) {
           continue;
         }
 
@@ -130,7 +134,13 @@ export class AutoModService {
             const quarantineThreshold = action.metadata?.quarantineThreshold || 10;
 
             if (totalPoints >= quarantineThreshold) {
-              await this.quarantineUser(guildId, userId, message.member, `Exceeded infraction threshold (${totalPoints}/${quarantineThreshold})`, 'AutoMod');
+              await this.quarantineUser(
+                guildId,
+                userId,
+                message.member,
+                `Exceeded infraction threshold (${totalPoints}/${quarantineThreshold})`,
+                'AutoMod'
+              );
             }
           } catch (error) {
             logger.error(`AutoMod failed to add infraction for user ${userId}:`, error);
@@ -160,9 +170,12 @@ export class AutoModService {
         try {
           // Attempt to strip roles
           await member.roles.remove(originalRoles, `Quarantined: ${reason}`);
-          
+
           // Look for a quarantine role to add if exists
-          const quarantineRole = member.guild.roles.cache.find(r => r.name.toLowerCase().includes('quarantine') || r.name.toLowerCase().includes('jailed'));
+          const quarantineRole = member.guild.roles.cache.find(
+            r =>
+              r.name.toLowerCase().includes('quarantine') || r.name.toLowerCase().includes('jailed')
+          );
           if (quarantineRole) {
             await member.roles.add(quarantineRole, `Quarantined: ${reason}`);
           }
@@ -197,14 +210,20 @@ export class AutoModService {
       if (member) {
         try {
           // Remove quarantine role if present
-          const quarantineRole = member.guild.roles.cache.find(r => r.name.toLowerCase().includes('quarantine') || r.name.toLowerCase().includes('jailed'));
+          const quarantineRole = member.guild.roles.cache.find(
+            r =>
+              r.name.toLowerCase().includes('quarantine') || r.name.toLowerCase().includes('jailed')
+          );
           if (quarantineRole) {
             await member.roles.remove(quarantineRole, `Released from quarantine by ${releasedBy}`);
           }
 
           // Restore original roles
           if (record.originalRoles && record.originalRoles.length > 0) {
-            await member.roles.add(record.originalRoles, `Released from quarantine by ${releasedBy}`);
+            await member.roles.add(
+              record.originalRoles,
+              `Released from quarantine by ${releasedBy}`
+            );
           }
         } catch (error) {
           logger.warn(`Failed to restore roles for released member ${userId}:`, error);

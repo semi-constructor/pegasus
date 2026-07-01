@@ -1,7 +1,11 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import axios from 'axios';
 import { CommandCategory } from '../../types/command';
-import { createLocalizationMap, commandDescriptions, subcommandDescriptions } from '../../utils/localization';
+import {
+  createLocalizationMap,
+  commandDescriptions,
+  subcommandDescriptions,
+} from '../../utils/localization';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
 import { t, getGuildLocale } from '../../i18n';
@@ -13,31 +17,41 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('meme')
-      .setDescription(t('commands.fun.subcommands.meme.description', { defaultValue: 'Get a random meme' }))
+      .setDescription(
+        t('commands.fun.subcommands.meme.description', { defaultValue: 'Get a random meme' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.meme))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('fact')
-      .setDescription(t('commands.fun.subcommands.fact.description', { defaultValue: 'Get a random fact' }))
+      .setDescription(
+        t('commands.fun.subcommands.fact.description', { defaultValue: 'Get a random fact' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.fact))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('quote')
-      .setDescription(t('commands.fun.subcommands.quote.description', { defaultValue: 'Get a random quote' }))
+      .setDescription(
+        t('commands.fun.subcommands.quote.description', { defaultValue: 'Get a random quote' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.quote))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('joke')
-      .setDescription(t('commands.fun.subcommands.joke.description', { defaultValue: 'Get a random joke' }))
+      .setDescription(
+        t('commands.fun.subcommands.joke.description', { defaultValue: 'Get a random joke' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.joke))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('dadjoke')
-      .setDescription(t('commands.fun.subcommands.dadjoke.description', { defaultValue: 'Get a random dad joke' }))
+      .setDescription(
+        t('commands.fun.subcommands.dadjoke.description', { defaultValue: 'Get a random dad joke' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.fun.dadjoke))
   );
 
@@ -100,9 +114,18 @@ async function handleMeme(interaction: ChatInputCommandInteraction, locale: stri
 
     const embed = new EmbedBuilder()
       .setColor(0xff4500)
-      .setTitle(meme.title || t('commands.fun.meme.fallbackTitle', { defaultValue: 'Random Meme', lng: locale }))
+      .setTitle(
+        meme.title ||
+          t('commands.fun.meme.fallbackTitle', { defaultValue: 'Random Meme', lng: locale })
+      )
       .setImage(meme.url)
-      .setFooter({ text: t('commands.fun.meme.footer', { defaultValue: 'From r/{{subreddit}}', subreddit: meme.subreddit || 'memes', lng: locale }) })
+      .setFooter({
+        text: t('commands.fun.meme.footer', {
+          defaultValue: 'From r/{{subreddit}}',
+          subreddit: meme.subreddit || 'memes',
+          lng: locale,
+        }),
+      })
       .setTimestamp();
 
     if (meme.author) {
@@ -124,7 +147,12 @@ async function handleMeme(interaction: ChatInputCommandInteraction, locale: stri
         .setColor(0xff4500)
         .setTitle(randomMeme.name)
         .setImage(randomMeme.url)
-        .setFooter({ text: t('commands.fun.meme.poweredBy', { defaultValue: 'Powered by Imgflip', lng: locale }) })
+        .setFooter({
+          text: t('commands.fun.meme.poweredBy', {
+            defaultValue: 'Powered by Imgflip',
+            lng: locale,
+          }),
+        })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -149,7 +177,11 @@ async function handleFact(interaction: ChatInputCommandInteraction, locale: stri
       .setColor(0x00ae86)
       .setTitle(t('commands.fun.fact.title', { defaultValue: 'Random Fact', lng: locale }))
       .setDescription(fact.text)
-      .setFooter({ text: fact.source || t('commands.fun.fact.unknownSource', { defaultValue: 'Unknown Source', lng: locale }) })
+      .setFooter({
+        text:
+          fact.source ||
+          t('commands.fun.fact.unknownSource', { defaultValue: 'Unknown Source', lng: locale }),
+      })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -169,7 +201,12 @@ async function handleFact(interaction: ChatInputCommandInteraction, locale: stri
         .setColor(0x00ae86)
         .setTitle(t('commands.fun.fact.title', { defaultValue: 'Random Fact', lng: locale }))
         .setDescription(fact.fact)
-        .setFooter({ text: t('commands.fun.fact.poweredBy', { defaultValue: 'Powered by API Ninjas', lng: locale }) })
+        .setFooter({
+          text: t('commands.fun.fact.poweredBy', {
+            defaultValue: 'Powered by API Ninjas',
+            lng: locale,
+          }),
+        })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -285,7 +322,13 @@ async function handleJoke(interaction: ChatInputCommandInteraction, locale: stri
       .setColor(0xffd700)
       .setTitle(t('commands.fun.joke.title', { defaultValue: 'Random Joke', lng: locale }))
       .setDescription(`**${joke.setup}**\n\n||${joke.punchline}||`)
-      .setFooter({ text: t('commands.fun.joke.type', { defaultValue: 'Type: {{type}}', type: joke.type || 'General', lng: locale }) })
+      .setFooter({
+        text: t('commands.fun.joke.type', {
+          defaultValue: 'Type: {{type}}',
+          type: joke.type || 'General',
+          lng: locale,
+        }),
+      })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -302,7 +345,13 @@ async function handleJoke(interaction: ChatInputCommandInteraction, locale: stri
         .setColor(0xffd700)
         .setTitle(t('commands.fun.joke.title', { defaultValue: 'Random Joke', lng: locale }))
         .setDescription(`**${joke.setup}**\n\n||${joke.delivery}||`)
-        .setFooter({ text: t('commands.fun.joke.category', { defaultValue: 'Category: {{category}}', category: joke.category, lng: locale }) })
+        .setFooter({
+          text: t('commands.fun.joke.category', {
+            defaultValue: 'Category: {{category}}',
+            category: joke.category,
+            lng: locale,
+          }),
+        })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -351,7 +400,12 @@ async function handleDadJoke(interaction: ChatInputCommandInteraction, locale: s
       .setColor(0x1e90ff)
       .setTitle(t('commands.fun.dadjoke.title', { defaultValue: 'Dad Joke', lng: locale }))
       .setDescription(joke.joke)
-      .setFooter({ text: t('commands.fun.dadjoke.poweredBy', { defaultValue: 'Powered by icanhazdadjoke.com', lng: locale }) })
+      .setFooter({
+        text: t('commands.fun.dadjoke.poweredBy', {
+          defaultValue: 'Powered by icanhazdadjoke.com',
+          lng: locale,
+        }),
+      })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });

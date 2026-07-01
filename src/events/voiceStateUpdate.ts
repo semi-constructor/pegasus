@@ -70,13 +70,17 @@ async function handleVoiceLeave(state: VoiceState) {
     if (startTime) {
       const minutes = Math.floor((Date.now() - startTime) / 60000);
       if (minutes > 0) {
-        await engagementService.trackVoiceActivity(state.member.id, state.guild.id, state.member, minutes);
+        await engagementService.trackVoiceActivity(
+          state.member.id,
+          state.guild.id,
+          state.member,
+          minutes
+        );
       }
     }
 
     // Stop tracking and award XP
     const result = await xpService.stopVoiceTracking(state.member.id, state.guild.id, state.member);
-
 
     // Handle level up if needed (similar to messageCreate)
     if (result && result.leveledUp) {

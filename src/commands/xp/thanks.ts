@@ -14,9 +14,7 @@ export const data = new SlashCommandBuilder()
   .addUserOption(option =>
     option.setName('user').setDescription('The user to thank').setRequired(true)
   )
-  .addStringOption(option =>
-    option.setName('reason').setDescription('Reason for thanking them')
-  );
+  .addStringOption(option => option.setName('reason').setDescription('Reason for thanking them'));
 
 export const category = CommandCategory.XP;
 export const cooldown = 10;

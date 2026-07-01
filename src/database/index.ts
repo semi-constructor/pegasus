@@ -17,7 +17,12 @@ const queryClient = postgres(connectionString, {
   fetch_types: false, // Prevents custom type fetching on connection initialization, saving extra round-trips to Neon pooler
   // Connection pool settings optimized for Discord bot workloads
   prepare: true, // Prepared statements for better performance
-  ssl: connectionString.includes('sslmode=require') || connectionString.includes('.neon.tech') ? 'require' : (process.env.DB_SSL === 'false' ? false : 'require'),
+  ssl:
+    connectionString.includes('sslmode=require') || connectionString.includes('.neon.tech')
+      ? 'require'
+      : process.env.DB_SSL === 'false'
+        ? false
+        : 'require',
 
   // Error handling
   onnotice: notice => {

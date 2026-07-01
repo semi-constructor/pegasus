@@ -47,6 +47,7 @@ export interface GuildSettings {
   xpRate: number;
   levelUpMessage?: string;
   levelUpChannel?: string;
+  customCommands: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -340,4 +341,3 @@ export interface TicketMessage {
   attachments: Record<string, any>[];
   createdAt: Date;
 }
-

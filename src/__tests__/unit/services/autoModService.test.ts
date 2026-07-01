@@ -93,7 +93,13 @@ describe('AutoModService', () => {
       (autoModRepository.getQuarantineStatus as jest.Mock).mockResolvedValue(null);
       (autoModRepository.quarantineUser as jest.Mock).mockResolvedValue(mockVaultRecord);
 
-      const result = await autoModService.quarantineUser('guild123', 'user123', null, 'Spam', 'admin123');
+      const result = await autoModService.quarantineUser(
+        'guild123',
+        'user123',
+        null,
+        'Spam',
+        'admin123'
+      );
       expect(result).toEqual(mockVaultRecord);
       expect(autoModRepository.quarantineUser).toHaveBeenCalledWith({
         guildId: 'guild123',

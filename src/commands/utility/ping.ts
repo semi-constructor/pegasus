@@ -18,5 +18,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const apiLatency = Math.round(interaction.client.ws.ping);
   const locale = getGuildLocale(interaction.guildId ?? '');
 
-  await interaction.editReply(t('commands.ping.response', { lng: locale, latency, apiLatency, defaultValue: `Pong! Latency: ${latency}ms. API Latency: ${apiLatency}ms.` }));
+  await interaction.editReply(
+    t('commands.ping.response', {
+      lng: locale,
+      latency,
+      apiLatency,
+      defaultValue: `Pong! Latency: ${latency}ms. API Latency: ${apiLatency}ms.`,
+    })
+  );
 }

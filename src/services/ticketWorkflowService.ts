@@ -23,7 +23,11 @@ import { ticketRepository } from '../repositories/ticketRepository';
 import { t } from '../i18n';
 
 export class TicketWorkflowService {
-  async sendPanelWithDepartments(guild: Guild, channel: TextChannel, panelCustomId: string): Promise<void> {
+  async sendPanelWithDepartments(
+    guild: Guild,
+    channel: TextChannel,
+    panelCustomId: string
+  ): Promise<void> {
     const panel = await ticketWorkflowRepository.getPanelByCustomId(guild.id, panelCustomId);
     if (!panel || !panel.isActive) {
       throw new Error(t('tickets.panelNotFound'));
@@ -72,7 +76,11 @@ export class TicketWorkflowService {
     await ticketRepository.setPanelMessage(panel.panelId, guild.id, message.id, channel.id);
   }
 
-  async handleDepartmentSelect(interaction: StringSelectMenuInteraction, panelDbId: string, departmentId: string): Promise<void> {
+  async handleDepartmentSelect(
+    interaction: StringSelectMenuInteraction,
+    panelDbId: string,
+    departmentId: string
+  ): Promise<void> {
     const guild = interaction.guild!;
     const department = await ticketWorkflowRepository.getDepartment(guild.id, departmentId);
     if (!department) {
@@ -84,17 +92,20 @@ export class TicketWorkflowService {
       .setCustomId(`ticket_modal_dept:${panelDbId}:${department.departmentId}`)
       .setTitle(t('tickets.createTicketDept', { dept: department.name }));
 
-    const modalFields: any[] = department.modalFields && department.modalFields.length > 0 ? department.modalFields : [
-      {
-        customId: 'reason',
-        label: t('tickets.reasonLabel'),
-        style: TextInputStyle.Paragraph,
-        placeholder: t('tickets.reasonPlaceholder'),
-        required: true,
-        minLength: 10,
-        maxLength: 1000,
-      }
-    ];
+    const modalFields: any[] =
+      department.modalFields && department.modalFields.length > 0
+        ? department.modalFields
+        : [
+            {
+              customId: 'reason',
+              label: t('tickets.reasonLabel'),
+              style: TextInputStyle.Paragraph,
+              placeholder: t('tickets.reasonPlaceholder'),
+              required: true,
+              minLength: 10,
+              maxLength: 1000,
+            },
+          ];
 
     for (const field of modalFields) {
       const input = new TextInputBuilder()
@@ -134,7 +145,10 @@ export class TicketWorkflowService {
     }
 
     const ticketNumber = await ticketRepository.getNextTicketNumber(guild.id);
-    const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace('{number}', ticketNumber.toString());
+    const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace(
+      '{number}',
+      ticketNumber.toString()
+    );
 
     let category: CategoryChannel | null = null;
     const categoryId = department.categoryId || panel.categoryId;
@@ -144,7 +158,10 @@ export class TicketWorkflowService {
       } catch (error) {}
     }
 
-    const supportRoles = [...(department.supportRoles ?? []), ...((panel.supportRoles as string[]) ?? [])];
+    const supportRoles = [
+      ...(department.supportRoles ?? []),
+      ...((panel.supportRoles as string[]) ?? []),
+    ];
 
     const ticketChannel = await guild.channels.create({
       name: ticketName,
@@ -196,7 +213,9 @@ export class TicketWorkflowService {
 
     const ticketEmbed = new EmbedBuilder()
       .setTitle(t('tickets.ticketCreatedDept', { number: ticketNumber, dept: department.name }))
-      .setDescription(department.welcomeMessage || panel.welcomeMessage || t('tickets.welcomeMessage'))
+      .setDescription(
+        department.welcomeMessage || panel.welcomeMessage || t('tickets.welcomeMessage')
+      )
       .addFields([
         { name: t('tickets.createdBy'), value: `<@${member.id}>`, inline: true },
         { name: t('tickets.department'), value: department.name, inline: true },
@@ -206,19 +225,54 @@ export class TicketWorkflowService {
       .setTimestamp();
 
     const controlButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId(`ticket_close:${ticket.id}`).setLabel(t('tickets.close')).setStyle(ButtonStyle.Danger).setEmoji('🔒'),
-      new ButtonBuilder().setCustomId(`ticket_close_reason:${ticket.id}`).setLabel(t('tickets.closeWithReason')).setStyle(ButtonStyle.Danger).setEmoji('📝'),
-      new ButtonBuilder().setCustomId(`ticket_lock:${ticket.id}`).setLabel(t('tickets.lock')).setStyle(ButtonStyle.Secondary).setEmoji('🔐'),
-      new ButtonBuilder().setCustomId(`ticket_freeze:${ticket.id}`).setLabel(t('tickets.freeze')).setStyle(ButtonStyle.Secondary).setEmoji('❄️'),
-      new ButtonBuilder().setCustomId(`ticket_claim:${ticket.id}`).setLabel(t('tickets.claim')).setStyle(ButtonStyle.Primary).setEmoji('🙋')
+      new ButtonBuilder()
+        .setCustomId(`ticket_close:${ticket.id}`)
+        .setLabel(t('tickets.close'))
+        .setStyle(ButtonStyle.Danger)
+        .setEmoji('🔒'),
+      new ButtonBuilder()
+        .setCustomId(`ticket_close_reason:${ticket.id}`)
+        .setLabel(t('tickets.closeWithReason'))
+        .setStyle(ButtonStyle.Danger)
+        .setEmoji('📝'),
+      new ButtonBuilder()
+        .setCustomId(`ticket_lock:${ticket.id}`)
+        .setLabel(t('tickets.lock'))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji('🔐'),
+      new ButtonBuilder()
+        .setCustomId(`ticket_freeze:${ticket.id}`)
+        .setLabel(t('tickets.freeze'))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji('❄️'),
+      new ButtonBuilder()
+        .setCustomId(`ticket_claim:${ticket.id}`)
+        .setLabel(t('tickets.claim'))
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('🙋')
     );
 
     const ratingButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId(`ticket_rate:${ticket.id}:5`).setLabel('⭐⭐⭐⭐⭐').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(`ticket_rate:${ticket.id}:4`).setLabel('⭐⭐⭐⭐').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(`ticket_rate:${ticket.id}:3`).setLabel('⭐⭐⭐').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId(`ticket_rate:${ticket.id}:2`).setLabel('⭐⭐').setStyle(ButtonStyle.Danger),
-      new ButtonBuilder().setCustomId(`ticket_rate:${ticket.id}:1`).setLabel('⭐').setStyle(ButtonStyle.Danger)
+      new ButtonBuilder()
+        .setCustomId(`ticket_rate:${ticket.id}:5`)
+        .setLabel('⭐⭐⭐⭐⭐')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(`ticket_rate:${ticket.id}:4`)
+        .setLabel('⭐⭐⭐⭐')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(`ticket_rate:${ticket.id}:3`)
+        .setLabel('⭐⭐⭐')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(`ticket_rate:${ticket.id}:2`)
+        .setLabel('⭐⭐')
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId(`ticket_rate:${ticket.id}:1`)
+        .setLabel('⭐')
+        .setStyle(ButtonStyle.Danger)
     );
 
     const supportPings = supportRoles.map((roleId: string) => `<@&${roleId}>`).join(' ');
@@ -228,12 +282,20 @@ export class TicketWorkflowService {
       components: [controlButtons, ratingButtons],
     });
 
-    await ticketRepository.addTicketMessage(ticket.id, member.id, t('tickets.ticketCreatedLog', { user: member.user.tag, reason }));
+    await ticketRepository.addTicketMessage(
+      ticket.id,
+      member.id,
+      t('tickets.ticketCreatedLog', { user: member.user.tag, reason })
+    );
 
     return { ticket, channel: ticketChannel };
   }
 
-  async handleTicketRating(interaction: ButtonInteraction, ticketId: string, rating: number): Promise<void> {
+  async handleTicketRating(
+    interaction: ButtonInteraction,
+    ticketId: string,
+    rating: number
+  ): Promise<void> {
     const ticket = await ticketWorkflowRepository.getTicket(ticketId);
     if (!ticket) {
       await interaction.reply({ content: t('tickets.ticketNotFound'), ephemeral: true });

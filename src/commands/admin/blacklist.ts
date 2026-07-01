@@ -99,11 +99,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 }
 
-async function handleBlacklistUser(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
+async function handleBlacklistUser(
+  interaction: ChatInputCommandInteraction,
+  locale: string
+): Promise<void> {
   await interaction.deferReply();
 
   const user = interaction.options.getUser('user', true);
-  const reason = interaction.options.getString('reason') || t('common.noReasonProvided', { lng: locale });
+  const reason =
+    interaction.options.getString('reason') || t('common.noReasonProvided', { lng: locale });
 
   // Check if user is already blacklisted
   const db = getDatabase();
@@ -186,7 +190,10 @@ async function handleBlacklistUser(interaction: ChatInputCommandInteraction, loc
   return;
 }
 
-async function handleBlacklistView(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
+async function handleBlacklistView(
+  interaction: ChatInputCommandInteraction,
+  locale: string
+): Promise<void> {
   await interaction.deferReply();
 
   const page = interaction.options.getInteger('page') || 1;
@@ -250,7 +257,10 @@ async function handleBlacklistView(interaction: ChatInputCommandInteraction, loc
   return;
 }
 
-async function handleBlacklistRemove(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
+async function handleBlacklistRemove(
+  interaction: ChatInputCommandInteraction,
+  locale: string
+): Promise<void> {
   await interaction.deferReply();
 
   const user = interaction.options.getUser('user', true);

@@ -1,8 +1,21 @@
 import { and, eq, desc, sql } from 'drizzle-orm';
 import { BaseRepository } from './baseRepository';
-import { achievements, userAchievements, engagementQuests, userQuestProgress, userReputation } from '../database/schema/engagement';
+import {
+  achievements,
+  userAchievements,
+  engagementQuests,
+  userQuestProgress,
+  userReputation,
+} from '../database/schema/engagement';
 import { userXp } from '../database/schema/xp';
-import type { Achievement, UserAchievement, EngagementQuest, UserQuestProgress, UserReputation, UserXp } from '../types';
+import type {
+  Achievement,
+  UserAchievement,
+  EngagementQuest,
+  UserQuestProgress,
+  UserReputation,
+  UserXp,
+} from '../types';
 
 export class EngagementRepository extends BaseRepository {
   async getAchievement(guildId: string, achievementId: string): Promise<Achievement | null> {
@@ -10,7 +23,9 @@ export class EngagementRepository extends BaseRepository {
       const [record] = await this.db
         .select()
         .from(achievements)
-        .where(and(eq(achievements.guildId, guildId), eq(achievements.achievementId, achievementId)))
+        .where(
+          and(eq(achievements.guildId, guildId), eq(achievements.achievementId, achievementId))
+        )
         .limit(1);
       return (record as unknown as Achievement) || null;
     });

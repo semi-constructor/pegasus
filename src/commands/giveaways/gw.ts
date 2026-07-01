@@ -190,7 +190,11 @@ async function handleStart(interaction: ChatInputCommandInteraction): Promise<an
     .setLabel(t('commands.giveaway.subcommands.start.modal.requirements'))
     .setStyle(TextInputStyle.Paragraph)
     .setRequired(false)
-    .setPlaceholder(t('commands.giveaway.subcommands.start.modal.placeholders.requirements', { defaultValue: 'role:123456789\nlevel:10\ntime:7d' }))
+    .setPlaceholder(
+      t('commands.giveaway.subcommands.start.modal.placeholders.requirements', {
+        defaultValue: 'role:123456789\nlevel:10\ntime:7d',
+      })
+    )
     .setMaxLength(500);
 
   const bonusEntriesInput = new TextInputBuilder()
@@ -198,7 +202,11 @@ async function handleStart(interaction: ChatInputCommandInteraction): Promise<an
     .setLabel(t('commands.giveaway.subcommands.start.modal.bonusEntries'))
     .setStyle(TextInputStyle.Paragraph)
     .setRequired(false)
-    .setPlaceholder(t('commands.giveaway.subcommands.start.modal.placeholders.bonusEntries', { defaultValue: 'role:123456789:2\nbooster:3' }))
+    .setPlaceholder(
+      t('commands.giveaway.subcommands.start.modal.placeholders.bonusEntries', {
+        defaultValue: 'role:123456789:2\nbooster:3',
+      })
+    )
     .setMaxLength(500);
 
   const embedColorInput = new TextInputBuilder()
@@ -206,7 +214,11 @@ async function handleStart(interaction: ChatInputCommandInteraction): Promise<an
     .setLabel(t('commands.giveaway.subcommands.start.modal.embedColor'))
     .setStyle(TextInputStyle.Short)
     .setRequired(false)
-    .setPlaceholder(t('commands.giveaway.subcommands.start.modal.placeholders.embedColor', { defaultValue: '#0099FF' }))
+    .setPlaceholder(
+      t('commands.giveaway.subcommands.start.modal.placeholders.embedColor', {
+        defaultValue: '#0099FF',
+      })
+    )
     .setMaxLength(7);
 
   const hostInput = new TextInputBuilder()
@@ -214,7 +226,11 @@ async function handleStart(interaction: ChatInputCommandInteraction): Promise<an
     .setLabel(t('commands.giveaway.subcommands.start.modal.host'))
     .setStyle(TextInputStyle.Short)
     .setRequired(false)
-    .setPlaceholder(t('commands.giveaway.subcommands.start.modal.placeholders.host', { defaultValue: '@username or Custom Name' }))
+    .setPlaceholder(
+      t('commands.giveaway.subcommands.start.modal.placeholders.host', {
+        defaultValue: '@username or Custom Name',
+      })
+    )
     .setMaxLength(100);
 
   const rows = [
@@ -326,7 +342,9 @@ async function handleEnd(interaction: ChatInputCommandInteraction): Promise<any>
 
     if (!result.success) {
       return interaction.editReply({
-        content: result.error ? t(result.error, { defaultValue: result.error }) : t('commands.giveaway.error'),
+        content: result.error
+          ? t(result.error, { defaultValue: result.error })
+          : t('commands.giveaway.error'),
       });
     }
 
@@ -359,7 +377,9 @@ async function handleReroll(interaction: ChatInputCommandInteraction): Promise<a
 
     if (!result.success) {
       return interaction.editReply({
-        content: result.error ? t(result.error, { defaultValue: result.error }) : t('commands.giveaway.error'),
+        content: result.error
+          ? t(result.error, { defaultValue: result.error })
+          : t('commands.giveaway.error'),
       });
     }
 

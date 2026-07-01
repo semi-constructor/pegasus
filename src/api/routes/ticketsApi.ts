@@ -13,7 +13,13 @@ function getTicketParams(req: Request) {
   const ticketId = req.body.ticketId || req.query.ticketId;
   const guildId = req.body.guildId || req.query.guildId;
   const reason = req.body.reason || req.query.reason;
-  const userId = req.body.userId || req.body.closedBy || req.body.lockedBy || req.body.frozenBy || req.body.claimedBy || req.query.userId;
+  const userId =
+    req.body.userId ||
+    req.body.closedBy ||
+    req.body.lockedBy ||
+    req.body.frozenBy ||
+    req.body.claimedBy ||
+    req.query.userId;
   return { ticketId, guildId, reason, userId };
 }
 
@@ -30,7 +36,9 @@ const handleClose = async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const whereClause = guildId ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId)) : eq(tickets.id, ticketId);
+    const whereClause = guildId
+      ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId))
+      : eq(tickets.id, ticketId);
 
     const [ticket] = await db.select().from(tickets).where(whereClause).limit(1);
 
@@ -63,7 +71,9 @@ const handleClose = async (req: Request, res: Response) => {
           if (channel.isTextBased()) {
             const embed = new EmbedBuilder()
               .setTitle('🔒 Ticket Closed')
-              .setDescription(reason ? `Reason: ${reason}` : 'This ticket has been closed via the dashboard.')
+              .setDescription(
+                reason ? `Reason: ${reason}` : 'This ticket has been closed via the dashboard.'
+              )
               .setColor(0xff0000)
               .setTimestamp();
 
@@ -105,7 +115,9 @@ const handleClose = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error closing ticket via dashboard:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to close ticket' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to close ticket' });
   }
 };
 
@@ -125,7 +137,9 @@ const handleLock = async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const whereClause = guildId ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId)) : eq(tickets.id, ticketId);
+    const whereClause = guildId
+      ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId))
+      : eq(tickets.id, ticketId);
 
     const [ticket] = await db.select().from(tickets).where(whereClause).limit(1);
 
@@ -159,7 +173,11 @@ const handleLock = async (req: Request, res: Response) => {
 
           const embed = new EmbedBuilder()
             .setTitle('🔒 Ticket Locked')
-            .setDescription(reason ? `This ticket has been locked. Reason: ${reason}` : 'This ticket has been locked by a moderator.')
+            .setDescription(
+              reason
+                ? `This ticket has been locked. Reason: ${reason}`
+                : 'This ticket has been locked by a moderator.'
+            )
             .setColor(0xffa500)
             .setTimestamp();
 
@@ -179,7 +197,9 @@ const handleLock = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error locking ticket via dashboard:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to lock ticket' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to lock ticket' });
   }
 };
 
@@ -199,7 +219,9 @@ const handleFreeze = async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const whereClause = guildId ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId)) : eq(tickets.id, ticketId);
+    const whereClause = guildId
+      ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId))
+      : eq(tickets.id, ticketId);
 
     const [ticket] = await db.select().from(tickets).where(whereClause).limit(1);
 
@@ -208,7 +230,9 @@ const handleFreeze = async (req: Request, res: Response) => {
     }
 
     if (ticket.status === 'closed') {
-      return res.status(400).json({ error: 'Bad Request', message: 'Cannot freeze a closed ticket' });
+      return res
+        .status(400)
+        .json({ error: 'Bad Request', message: 'Cannot freeze a closed ticket' });
     }
 
     // Update ticket status in DB
@@ -229,11 +253,18 @@ const handleFreeze = async (req: Request, res: Response) => {
       if (channel && channel.isTextBased()) {
         try {
           // Update channel permissions to freeze user interactions
-          await channel.permissionOverwrites.edit(ticket.userId, { SendMessages: false, AddReactions: false });
+          await channel.permissionOverwrites.edit(ticket.userId, {
+            SendMessages: false,
+            AddReactions: false,
+          });
 
           const embed = new EmbedBuilder()
             .setTitle('❄️ Ticket Frozen')
-            .setDescription(reason ? `This ticket has been frozen. Reason: ${reason}` : 'This ticket has been frozen pending further administrative review.')
+            .setDescription(
+              reason
+                ? `This ticket has been frozen. Reason: ${reason}`
+                : 'This ticket has been frozen pending further administrative review.'
+            )
             .setColor(0x00ffff)
             .setTimestamp();
 
@@ -253,7 +284,9 @@ const handleFreeze = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error freezing ticket via dashboard:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to freeze ticket' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to freeze ticket' });
   }
 };
 
@@ -272,12 +305,16 @@ const handleClaim = async (req: Request, res: Response) => {
   }
 
   if (!userId) {
-    return res.status(400).json({ error: 'Bad Request', message: 'userId / claimedBy is required to claim a ticket' });
+    return res
+      .status(400)
+      .json({ error: 'Bad Request', message: 'userId / claimedBy is required to claim a ticket' });
   }
 
   try {
     const db = getDatabase();
-    const whereClause = guildId ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId)) : eq(tickets.id, ticketId);
+    const whereClause = guildId
+      ? and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId))
+      : eq(tickets.id, ticketId);
 
     const [ticket] = await db.select().from(tickets).where(whereClause).limit(1);
 
@@ -286,7 +323,9 @@ const handleClaim = async (req: Request, res: Response) => {
     }
 
     if (ticket.status === 'closed') {
-      return res.status(400).json({ error: 'Bad Request', message: 'Cannot claim a closed ticket' });
+      return res
+        .status(400)
+        .json({ error: 'Bad Request', message: 'Cannot claim a closed ticket' });
     }
 
     // Update ticket status in DB
@@ -307,7 +346,9 @@ const handleClaim = async (req: Request, res: Response) => {
         try {
           const embed = new EmbedBuilder()
             .setTitle('👋 Ticket Claimed')
-            .setDescription(`This ticket has been claimed by <@${userId}>. They will be assisting you shortly.`)
+            .setDescription(
+              `This ticket has been claimed by <@${userId}>. They will be assisting you shortly.`
+            )
             .setColor(0x5865f2)
             .setTimestamp();
 
@@ -327,7 +368,9 @@ const handleClaim = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error claiming ticket via dashboard:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to claim ticket' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to claim ticket' });
   }
 };
 
@@ -335,4 +378,3 @@ router.post('/claim', handleClaim);
 router.patch('/claim', handleClaim);
 
 export const ticketsApiRouter = router;
-

@@ -716,7 +716,9 @@ async function handleAutoroleConfigButton(
       }
 
       const options = config.roles.map(roleId => ({
-        label: interaction.guild!.roles.cache.get(roleId)?.name || t('commands.config.subcommands.xp.buttons.roles'),
+        label:
+          interaction.guild!.roles.cache.get(roleId)?.name ||
+          t('commands.config.subcommands.xp.buttons.roles'),
         value: roleId,
       }));
 
@@ -917,7 +919,12 @@ export async function refreshXPConfigEmbed(
           name: t('commands.config.subcommands.xp.embed.fields.roleRewards'),
           value:
             roleRewards.length > 0
-              ? roleRewards.map(r => `${t('commands.warn.subcommands.issue.success.level')} ${r.level}: <@&${r.roleId}>`).join('\n')
+              ? roleRewards
+                  .map(
+                    r =>
+                      `${t('commands.warn.subcommands.issue.success.level')} ${r.level}: <@&${r.roleId}>`
+                  )
+                  .join('\n')
               : t('common.none'),
           inline: false,
         }

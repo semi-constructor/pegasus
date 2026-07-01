@@ -57,7 +57,8 @@ export async function execute(message: Message) {
 
   try {
     // Ensure guild exists in database
-    await guildService.ensureGuild(message.guild);
+    const guildData = await guildService.ensureGuild(message.guild);
+    const guildSettings = await guildService.getGuildSettings(message.guild.id);
 
     // Evaluate AutoMod V2
     const autoModTriggered = await autoModService.evaluateMessage(message);
@@ -66,6 +67,28 @@ export async function execute(message: Message) {
     // Handle prefix list commands before processing XP
     const handled = await listCommandService.handle(message);
     if (handled) return;
+
+    // Handle custom commands
+    try {
+      const customCommands = JSON.parse(guildSettings.customCommands);
+      if (Array.isArray(customCommands)) {
+        for (const cmd of customCommands) {
+          const prefix = cmd.prefix || guildData.prefix;
+          if (prefix && message.content.startsWith(prefix)) {
+            const args = message.content.slice(prefix.length).trim().split(/ +/);
+            const commandName = args.shift()?.toLowerCase();
+            if (commandName && commandName === cmd.name?.toLowerCase()) {
+              if (cmd.reply) {
+                await message.reply(cmd.reply);
+                return;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      logger.error(`Failed to parse custom commands for guild ${message.guild.id}:`, e);
+    }
 
     const filtered = await handleWordFilter(message);
     if (filtered) return;
@@ -79,7 +102,6 @@ export async function execute(message: Message) {
     logger.error('Error in messageCreate event:', error);
   }
 }
-
 
 interface WordFilterDeletionResult {
   attempted: boolean;

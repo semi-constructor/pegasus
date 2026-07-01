@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  ChatInputCommandInteraction,
-  GuildMember,
-} from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { engagementService } from '../../services/engagementService';

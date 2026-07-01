@@ -22,7 +22,10 @@ export const data = new SlashCommandBuilder()
         option.setName('name').setDescription('Rule name').setRequired(true)
       )
       .addStringOption(option =>
-        option.setName('trigger_type').setDescription('Type of trigger').setRequired(true)
+        option
+          .setName('trigger_type')
+          .setDescription('Type of trigger')
+          .setRequired(true)
           .addChoices(
             { name: 'Keyword Match', value: 'KEYWORD' },
             { name: 'Regex Match', value: 'REGEX' },
@@ -31,7 +34,10 @@ export const data = new SlashCommandBuilder()
           )
       )
       .addStringOption(option =>
-        option.setName('action_type').setDescription('Action to take').setRequired(true)
+        option
+          .setName('action_type')
+          .setDescription('Action to take')
+          .setRequired(true)
           .addChoices(
             { name: 'Delete Message', value: 'DELETE_MESSAGE' },
             { name: 'Warn User', value: 'WARN_USER' },
@@ -46,16 +52,16 @@ export const data = new SlashCommandBuilder()
         option.setName('regex_pattern').setDescription('Regex pattern (for REGEX trigger)')
       )
       .addIntegerOption(option =>
-        option.setName('limit').setDescription('Limit threshold (for MENTION_SPAM or ATTACHMENT_SPAM)')
+        option
+          .setName('limit')
+          .setDescription('Limit threshold (for MENTION_SPAM or ATTACHMENT_SPAM)')
       )
       .addIntegerOption(option =>
         option.setName('points').setDescription('Infraction points to add (for ADD_INFRACTION)')
       )
   )
   .addSubcommand(subcommand =>
-    subcommand
-      .setName('list_rules')
-      .setDescription('List all AutoMod V2 rules')
+    subcommand.setName('list_rules').setDescription('List all AutoMod V2 rules')
   )
   .addSubcommand(subcommand =>
     subcommand
@@ -126,7 +132,11 @@ async function handleAddRule(interaction: ChatInputCommandInteraction) {
   const name = interaction.options.getString('name', true);
   const triggerType = interaction.options.getString('trigger_type', true) as any;
   const actionType = interaction.options.getString('action_type', true) as any;
-  const keywords = interaction.options.getString('keywords')?.split(',').map(k => k.trim()) || [];
+  const keywords =
+    interaction.options
+      .getString('keywords')
+      ?.split(',')
+      .map(k => k.trim()) || [];
   const regexPattern = interaction.options.getString('regex_pattern');
   const limit = interaction.options.getInteger('limit') || 5;
   const points = interaction.options.getInteger('points') || 1;
@@ -170,7 +180,12 @@ async function handleListRules(interaction: ChatInputCommandInteraction) {
     .setColor(0x5865f2)
     .setTitle(`AutoMod V2 Rules (${rules.length})`)
     .setDescription(
-      rules.map(r => `• **${r.name}** (\`${r.id}\`)\n  Trigger: ${r.triggerType} | Action: ${r.actions.map(a => a.type).join(', ')}`).join('\n\n')
+      rules
+        .map(
+          r =>
+            `• **${r.name}** (\`${r.id}\`)\n  Trigger: ${r.triggerType} | Action: ${r.actions.map(a => a.type).join(', ')}`
+        )
+        .join('\n\n')
     )
     .setTimestamp();
 
@@ -203,7 +218,12 @@ async function handleQuarantineList(interaction: ChatInputCommandInteraction) {
     .setColor(0xed4245)
     .setTitle(`Quarantine Vault (${list.length})`)
     .setDescription(
-      list.map((q: any) => `• <@${q.userId}> (\`${q.userId}\`)\n  Reason: ${q.reason}\n  Quarantined At: ${q.quarantinedAt}`).join('\n\n')
+      list
+        .map(
+          (q: any) =>
+            `• <@${q.userId}> (\`${q.userId}\`)\n  Reason: ${q.reason}\n  Quarantined At: ${q.quarantinedAt}`
+        )
+        .join('\n\n')
     )
     .setTimestamp();
 
@@ -227,5 +247,7 @@ async function handleQuarantineRelease(interaction: ChatInputCommandInteraction)
     return;
   }
 
-  await interaction.editReply({ content: `✅ User <@${user.id}> has been released from the Quarantine Vault and original roles have been restored.` });
+  await interaction.editReply({
+    content: `✅ User <@${user.id}> has been released from the Quarantine Vault and original roles have been restored.`,
+  });
 }

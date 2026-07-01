@@ -46,6 +46,8 @@ export const guildSettings = pgTable('guild_settings', {
   xpBoosterMultiplier: integer('xp_booster_multiplier').default(200).notNull(),
   levelUpMessage: text('level_up_message'),
   levelUpChannel: varchar('level_up_channel', { length: 20 }),
+  // Custom commands
+  customCommands: text('custom_commands').default('[]').notNull(),
   // Autorole configuration
   autoroleEnabled: boolean('autorole_enabled').default(false).notNull(),
   autoroleRoles: text('autorole_roles').default('[]').notNull(), // JSON array of role IDs

@@ -18,21 +18,40 @@ export class EngagementService {
       const activeQuests = await engagementRepository.getActiveQuests(guildId);
       for (const quest of activeQuests) {
         if (quest.targetType === 'messages') {
-          await this.progressQuest(guildId, userId, member, quest, 1, message.channel as TextChannel);
+          await this.progressQuest(
+            guildId,
+            userId,
+            member,
+            quest,
+            1,
+            message.channel as TextChannel
+          );
         }
       }
 
       // 2. Check achievements (e.g., messages sent count)
       // For simplicity and decoupling from message count queries every message, we can evaluate specific milestone checks or triggers
       if (member) {
-        await this.checkAchievements(guildId, userId, member, 'messages', 1, message.channel as TextChannel);
+        await this.checkAchievements(
+          guildId,
+          userId,
+          member,
+          'messages',
+          1,
+          message.channel as TextChannel
+        );
       }
     } catch (error) {
       logger.error(`Error tracking message activity for user ${userId}:`, error);
     }
   }
 
-  async trackVoiceActivity(userId: string, guildId: string, member: GuildMember | null, minutes: number): Promise<void> {
+  async trackVoiceActivity(
+    userId: string,
+    guildId: string,
+    member: GuildMember | null,
+    minutes: number
+  ): Promise<void> {
     if (!member || member.user.bot || minutes <= 0) return;
 
     try {
@@ -66,7 +85,13 @@ export class EngagementService {
       const newProgress = (progressObj?.progress || 0) + amount;
       const completed = newProgress >= quest.targetValue;
 
-      await engagementRepository.updateUserQuestProgress(guildId, userId, quest.id, newProgress, completed);
+      await engagementRepository.updateUserQuestProgress(
+        guildId,
+        userId,
+        quest.id,
+        newProgress,
+        completed
+      );
 
       if (completed && member) {
         // Grant quest rewards
@@ -78,7 +103,9 @@ export class EngagementService {
         }
 
         if (channel) {
-          await channel.send(`🎉 <@${userId}> has completed the quest **${quest.title}**! Earned ${quest.rewardXp} XP and ${quest.rewardCoins} coins.`);
+          await channel.send(
+            `🎉 <@${userId}> has completed the quest **${quest.title}**! Earned ${quest.rewardXp} XP and ${quest.rewardCoins} coins.`
+          );
         }
       }
     } catch (error) {
@@ -123,7 +150,9 @@ export class EngagementService {
             }
 
             if (channel) {
-              await channel.send(`🏆 <@${userId}> unlocked the achievement **${achievement.title}**! (${achievement.description})`);
+              await channel.send(
+                `🏆 <@${userId}> unlocked the achievement **${achievement.title}**! (${achievement.description})`
+              );
             }
           }
         }
@@ -146,7 +175,11 @@ export class EngagementService {
     return rep;
   }
 
-  async prestigeUser(userId: string, guildId: string, _member: GuildMember): Promise<{ success: boolean; newPrestige: number; message: string }> {
+  async prestigeUser(
+    userId: string,
+    guildId: string,
+    _member: GuildMember
+  ): Promise<{ success: boolean; newPrestige: number; message: string }> {
     const userXpData = await engagementRepository.getUserPrestige(userId, guildId);
     if (!userXpData) {
       return { success: false, newPrestige: 0, message: 'You do not have any XP yet.' };
@@ -154,13 +187,21 @@ export class EngagementService {
 
     const requiredLevel = 50; // Configurable prestige level threshold
     if (userXpData.level < requiredLevel) {
-      return { success: false, newPrestige: userXpData.prestigeLevel, message: `You must reach level ${requiredLevel} to prestige. Current level: ${userXpData.level}.` };
+      return {
+        success: false,
+        newPrestige: userXpData.prestigeLevel,
+        message: `You must reach level ${requiredLevel} to prestige. Current level: ${userXpData.level}.`,
+      };
     }
 
     const newPrestige = userXpData.prestigeLevel + 1;
     await engagementRepository.updateUserPrestige(userId, guildId, newPrestige, 0, 0);
 
-    return { success: true, newPrestige, message: `🎉 Congratulations! You have reached Prestige Level ${newPrestige}! Your XP has been reset to 0.` };
+    return {
+      success: true,
+      newPrestige,
+      message: `🎉 Congratulations! You have reached Prestige Level ${newPrestige}! Your XP has been reset to 0.`,
+    };
   }
 }
 

@@ -15,7 +15,13 @@ import { rankCardService } from '../../services/rankCardService';
 import { configurationService } from '../../services/configurationService';
 import { logger } from '../../utils/logger';
 import { getTranslation, type LocaleObject } from '../../i18n';
-import { createLocalizationMap, commandNames, commandDescriptions, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
+import {
+  createLocalizationMap,
+  commandNames,
+  commandDescriptions,
+  subcommandDescriptions,
+  optionDescriptions,
+} from '../../utils/localization';
 
 const xpCommand: Command = {
   data: new SlashCommandBuilder()

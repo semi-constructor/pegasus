@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-} from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { engagementRepository } from '../../repositories/engagementRepository';
@@ -42,7 +38,9 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       const isCompleted = progressObj?.completed || false;
       const status = isCompleted ? '✅ Completed' : `⏳ Progress: ${current} / ${q.targetValue}`;
 
-      list.push(`**${q.title}** (${status})\n  ${q.description}\n  Rewards: ${q.rewardXp} XP | ${q.rewardCoins} Coins`);
+      list.push(
+        `**${q.title}** (${status})\n  ${q.description}\n  Rewards: ${q.rewardXp} XP | ${q.rewardCoins} Coins`
+      );
     }
 
     embed.setDescription(list.join('\n\n'));

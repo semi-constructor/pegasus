@@ -45,7 +45,9 @@ export const tickets = pgTable('tickets', {
     .references(() => guilds.id, { onDelete: 'cascade' })
     .notNull(),
   panelId: uuid('panel_id').references(() => ticketPanels.id, { onDelete: 'set null' }),
-  departmentId: uuid('department_id').references(() => ticketDepartments.id, { onDelete: 'set null' }),
+  departmentId: uuid('department_id').references(() => ticketDepartments.id, {
+    onDelete: 'set null',
+  }),
   ticketNumber: integer('ticket_number').notNull(),
   channelId: varchar('channel_id', { length: 20 }).notNull(),
   userId: varchar('user_id', { length: 20 })
@@ -70,7 +72,9 @@ export const tickets = pgTable('tickets', {
   }),
   frozenAt: timestamp('frozen_at'),
   slaBreached: boolean('sla_breached').default(false).notNull(),
-  ratingId: uuid('rating_id').references((): AnyPgColumn => ticketRatings.id, { onDelete: 'set null' }),
+  ratingId: uuid('rating_id').references((): AnyPgColumn => ticketRatings.id, {
+    onDelete: 'set null',
+  }),
   transcript: text('transcript'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

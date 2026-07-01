@@ -333,7 +333,7 @@ export const subcommandDescriptions = {
         en: 'Remove a department from a ticket panel',
         de: 'Eine Abteilung aus einem Ticket-Panel entfernen',
         es: 'Eliminar un departamento de un panel de tickets',
-        fr: 'Supprimer un département d\'un panneau de tickets',
+        fr: "Supprimer un département d'un panneau de tickets",
       },
     },
     claim: {
@@ -736,7 +736,12 @@ export const choiceLocalizations = {
     odd: { en: 'Odd', es: 'Impar', fr: 'Impair', de: 'Ungerade' },
     low: { en: 'Low (1-18)', es: 'Bajo (1-18)', fr: 'Manque (1-18)', de: 'Niedrig (1-18)' },
     high: { en: 'High (19-36)', es: 'Alto (19-36)', fr: 'Passe (19-36)', de: 'Hoch (19-36)' },
-    number: { en: 'Specific Number', es: 'Número específico', fr: 'Numéro spécifique', de: 'Spezifische Zahl' },
+    number: {
+      en: 'Specific Number',
+      es: 'Número específico',
+      fr: 'Numéro spécifique',
+      de: 'Spezifische Zahl',
+    },
     dozen1: { en: '1st Dozen', es: '1ra Docena', fr: '1er Douzaine', de: '1. Dutzend' },
     dozen2: { en: '2nd Dozen', es: '2da Docena', fr: '2ème Douzaine', de: '2. Dutzend' },
     dozen3: { en: '3rd Dozen', es: '3ra Docena', fr: '3ème Douzaine', de: '3. Dutzend' },

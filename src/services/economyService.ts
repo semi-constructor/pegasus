@@ -296,7 +296,11 @@ export class EconomyService {
           nextAvailable,
         });
 
-        return { success: false, protected: true, error: t('commands.economy.rob.protectedText', { user: '' }) };
+        return {
+          success: false,
+          protected: true,
+          error: t('commands.economy.rob.protectedText', { user: '' }),
+        };
       }
 
       const victimBalance = await this.getOrCreateBalance(victimId, guildId);
@@ -366,7 +370,9 @@ export class EconomyService {
             success: false,
             amount: -fine,
             robberBalance: result.balance ?? ({} as EconomyBalance),
-            error: t('commands.economy.rob.failedText', { user: '' }) + ` (${fine} ${settings.currencyName})`,
+            error:
+              t('commands.economy.rob.failedText', { user: '' }) +
+              ` (${fine} ${settings.currencyName})`,
           };
         }
 

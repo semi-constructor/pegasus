@@ -144,10 +144,14 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
         );
       }
       if (requirements.minLevel) {
-        reqLines.push(`• ${t('commands.warn.subcommands.issue.success.level')}: ${requirements.minLevel}`);
+        reqLines.push(
+          `• ${t('commands.warn.subcommands.issue.success.level')}: ${requirements.minLevel}`
+        );
       }
       if (requirements.minTimeInServer) {
-        reqLines.push(`• ${t('commands.moderation.subcommands.mute.success.duration')}: ${requirements.minTimeInServer}`);
+        reqLines.push(
+          `• ${t('commands.moderation.subcommands.mute.success.duration')}: ${requirements.minTimeInServer}`
+        );
       }
       embed.addFields({
         name: t('commands.giveaway.embed.requirements'),
@@ -165,7 +169,9 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
         }
       }
       if (bonusEntries.booster) {
-        bonusLines.push(`• ${t('commands.config.subcommands.xp.embed.fields.boosterRole')}: ${bonusEntries.booster}x ${t('commands.giveaway.info.entries')}`);
+        bonusLines.push(
+          `• ${t('commands.config.subcommands.xp.embed.fields.boosterRole')}: ${bonusEntries.booster}x ${t('commands.giveaway.info.entries')}`
+        );
       }
       embed.addFields({
         name: t('commands.giveaway.embed.bonusEntries'),

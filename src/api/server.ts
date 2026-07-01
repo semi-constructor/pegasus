@@ -154,9 +154,24 @@ app.use(
 app.use('/dashboard', authenticateToken, cacheMiddleware(CacheTTL.STATS), dashboardRouter);
 
 // Dashboard direct management API routes
-app.use('/api/tickets', authenticateToken, invalidateCache(() => `*tickets*`), ticketsApiRouter);
-app.use('/api/jtc', authenticateToken, invalidateCache(() => `*jtc*`), jtcApiRouter);
-app.use('/api/j2c', authenticateToken, invalidateCache(() => `*jtc*`), jtcApiRouter);
+app.use(
+  '/api/tickets',
+  authenticateToken,
+  invalidateCache(() => `*tickets*`),
+  ticketsApiRouter
+);
+app.use(
+  '/api/jtc',
+  authenticateToken,
+  invalidateCache(() => `*jtc*`),
+  jtcApiRouter
+);
+app.use(
+  '/api/j2c',
+  authenticateToken,
+  invalidateCache(() => `*jtc*`),
+  jtcApiRouter
+);
 
 // Batch API for optimized multi-guild fetching
 app.use(

@@ -42,7 +42,12 @@ export class HelpService {
             const filePath = join(categoryPath, file);
             const commandModule = (await import(filePath)) as CommandModule;
 
-            if (commandModule.isSubcommand || (commandModule.default && 'isSubcommand' in commandModule.default && (commandModule.default as any).isSubcommand)) {
+            if (
+              commandModule.isSubcommand ||
+              (commandModule.default &&
+                'isSubcommand' in commandModule.default &&
+                (commandModule.default as any).isSubcommand)
+            ) {
               continue;
             }
 
@@ -319,7 +324,9 @@ export class HelpService {
       for (const option of options) {
         if (option.type === 1) {
           // Subcommand
-          subcommands.push(`• \`${option.name}\` - ${option.description || t('common.noDescription', { defaultValue: 'No description' })}`);
+          subcommands.push(
+            `• \`${option.name}\` - ${option.description || t('common.noDescription', { defaultValue: 'No description' })}`
+          );
         } else if (option.type === 2) {
           // Subcommand group
           for (const subOption of option.options || []) {

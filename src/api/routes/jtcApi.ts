@@ -35,16 +35,24 @@ const handleGetConfig = async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const [config] = await db.select().from(jtcConfigs).where(eq(jtcConfigs.guildId, guildId)).limit(1);
+    const [config] = await db
+      .select()
+      .from(jtcConfigs)
+      .where(eq(jtcConfigs.guildId, guildId))
+      .limit(1);
 
     if (!config) {
-      return res.status(404).json({ error: 'Not Found', message: 'JTC configuration not found for this guild' });
+      return res
+        .status(404)
+        .json({ error: 'Not Found', message: 'JTC configuration not found for this guild' });
     }
 
     return res.json({ success: true, config });
   } catch (error) {
     logger.error('Error fetching JTC config:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch JTC configuration' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to fetch JTC configuration' });
   }
 };
 
@@ -64,7 +72,14 @@ router.get('/config/:guildId', async (req: Request, res: Response) => {
  */
 const handlePostConfig = async (req: Request, res: Response) => {
   const { guildId } = getParams(req);
-  const { baseVoiceChannelId, categoryId, panelChannelId, channelNameFormat, panelTitle, panelDescription } = req.body;
+  const {
+    baseVoiceChannelId,
+    categoryId,
+    panelChannelId,
+    channelNameFormat,
+    panelTitle,
+    panelDescription,
+  } = req.body;
 
   if (!guildId || !baseVoiceChannelId || !categoryId || !panelChannelId) {
     return res.status(400).json({
@@ -83,11 +98,18 @@ const handlePostConfig = async (req: Request, res: Response) => {
 
     const panelChannel = guild.channels.cache.get(panelChannelId) as TextChannel;
     if (!panelChannel || !panelChannel.isTextBased()) {
-      return res.status(400).json({ error: 'Bad Request', message: 'Invalid panelChannelId or channel is not text-based' });
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Invalid panelChannelId or channel is not text-based',
+      });
     }
 
     // Check existing config
-    const [existingConfig] = await db.select().from(jtcConfigs).where(eq(jtcConfigs.guildId, guildId)).limit(1);
+    const [existingConfig] = await db
+      .select()
+      .from(jtcConfigs)
+      .where(eq(jtcConfigs.guildId, guildId))
+      .limit(1);
 
     let messageId = existingConfig?.panelMessageId;
 
@@ -102,9 +124,21 @@ const handlePostConfig = async (req: Request, res: Response) => {
       .setFooter({ text: 'JTC Voice Management' })
       .setTimestamp();
 
-    const lockBtn = new ButtonBuilder().setCustomId('jtc_lock').setLabel('Lock Channel').setStyle(ButtonStyle.Danger).setEmoji('🔒');
-    const unlockBtn = new ButtonBuilder().setCustomId('jtc_unlock').setLabel('Unlock Channel').setStyle(ButtonStyle.Success).setEmoji('🔓');
-    const limitBtn = new ButtonBuilder().setCustomId('jtc_limit').setLabel('Set User Limit').setStyle(ButtonStyle.Primary).setEmoji('👥');
+    const lockBtn = new ButtonBuilder()
+      .setCustomId('jtc_lock')
+      .setLabel('Lock Channel')
+      .setStyle(ButtonStyle.Danger)
+      .setEmoji('🔒');
+    const unlockBtn = new ButtonBuilder()
+      .setCustomId('jtc_unlock')
+      .setLabel('Unlock Channel')
+      .setStyle(ButtonStyle.Success)
+      .setEmoji('🔓');
+    const limitBtn = new ButtonBuilder()
+      .setCustomId('jtc_limit')
+      .setLabel('Set User Limit')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('👥');
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(lockBtn, unlockBtn, limitBtn);
 
@@ -162,7 +196,9 @@ const handlePostConfig = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error saving JTC config:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to save JTC configuration' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to save JTC configuration' });
   }
 };
 
@@ -183,10 +219,16 @@ const handlePanelUpdate = async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const [config] = await db.select().from(jtcConfigs).where(eq(jtcConfigs.guildId, guildId)).limit(1);
+    const [config] = await db
+      .select()
+      .from(jtcConfigs)
+      .where(eq(jtcConfigs.guildId, guildId))
+      .limit(1);
 
     if (!config || !config.panelChannelId || !config.panelMessageId) {
-      return res.status(404).json({ error: 'Not Found', message: 'JTC panel configuration not found for this guild' });
+      return res
+        .status(404)
+        .json({ error: 'Not Found', message: 'JTC panel configuration not found for this guild' });
     }
 
     const guild = client.guilds.cache.get(guildId);
@@ -214,10 +256,14 @@ const handlePanelUpdate = async (req: Request, res: Response) => {
       return res.json({ success: true, message: 'JTC panel message updated successfully' });
     }
 
-    return res.status(400).json({ error: 'Bad Request', message: 'Could not fetch panel channel or message' });
+    return res
+      .status(400)
+      .json({ error: 'Bad Request', message: 'Could not fetch panel channel or message' });
   } catch (error) {
     logger.error('Error updating JTC panel:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to update JTC panel message' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to update JTC panel message' });
   }
 };
 
@@ -232,7 +278,9 @@ const handleChannelsLock = async (req: Request, res: Response) => {
   const { guildId, channelId } = getParams(req);
 
   if (!guildId || !channelId) {
-    return res.status(400).json({ error: 'Bad Request', message: 'guildId and channelId are required' });
+    return res
+      .status(400)
+      .json({ error: 'Bad Request', message: 'guildId and channelId are required' });
   }
 
   try {
@@ -244,7 +292,9 @@ const handleChannelsLock = async (req: Request, res: Response) => {
       .limit(1);
 
     if (!jtcChannel) {
-      return res.status(404).json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
+      return res
+        .status(404)
+        .json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
     }
 
     const guild = client.guilds.cache.get(guildId);
@@ -264,7 +314,9 @@ const handleChannelsLock = async (req: Request, res: Response) => {
     return res.json({ success: true, message: 'JTC channel locked successfully' });
   } catch (error) {
     logger.error('Error locking JTC channel:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to lock JTC channel' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to lock JTC channel' });
   }
 };
 
@@ -279,7 +331,9 @@ const handleChannelsUnlock = async (req: Request, res: Response) => {
   const { guildId, channelId } = getParams(req);
 
   if (!guildId || !channelId) {
-    return res.status(400).json({ error: 'Bad Request', message: 'guildId and channelId are required' });
+    return res
+      .status(400)
+      .json({ error: 'Bad Request', message: 'guildId and channelId are required' });
   }
 
   try {
@@ -291,7 +345,9 @@ const handleChannelsUnlock = async (req: Request, res: Response) => {
       .limit(1);
 
     if (!jtcChannel) {
-      return res.status(404).json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
+      return res
+        .status(404)
+        .json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
     }
 
     const guild = client.guilds.cache.get(guildId);
@@ -311,7 +367,9 @@ const handleChannelsUnlock = async (req: Request, res: Response) => {
     return res.json({ success: true, message: 'JTC channel unlocked successfully' });
   } catch (error) {
     logger.error('Error unlocking JTC channel:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to unlock JTC channel' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to unlock JTC channel' });
   }
 };
 
@@ -327,12 +385,16 @@ const handleChannelsLimit = async (req: Request, res: Response) => {
   const { userLimit } = req.body;
 
   if (!guildId || !channelId || userLimit === undefined) {
-    return res.status(400).json({ error: 'Bad Request', message: 'guildId, channelId, and userLimit are required' });
+    return res
+      .status(400)
+      .json({ error: 'Bad Request', message: 'guildId, channelId, and userLimit are required' });
   }
 
   const limit = parseInt(userLimit, 10);
   if (isNaN(limit) || limit < 0 || limit > 99) {
-    return res.status(400).json({ error: 'Bad Request', message: 'userLimit must be a number between 0 and 99' });
+    return res
+      .status(400)
+      .json({ error: 'Bad Request', message: 'userLimit must be a number between 0 and 99' });
   }
 
   try {
@@ -344,7 +406,9 @@ const handleChannelsLimit = async (req: Request, res: Response) => {
       .limit(1);
 
     if (!jtcChannel) {
-      return res.status(404).json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
+      return res
+        .status(404)
+        .json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
     }
 
     const guild = client.guilds.cache.get(guildId);
@@ -364,7 +428,9 @@ const handleChannelsLimit = async (req: Request, res: Response) => {
     return res.json({ success: true, message: `JTC channel user limit set to ${limit}` });
   } catch (error) {
     logger.error('Error setting JTC channel limit:', error);
-    return res.status(500).json({ error: 'Internal Server Error', message: 'Failed to set JTC channel user limit' });
+    return res
+      .status(500)
+      .json({ error: 'Internal Server Error', message: 'Failed to set JTC channel user limit' });
   }
 };
 
@@ -372,4 +438,3 @@ router.post('/channels/limit', handleChannelsLimit);
 router.patch('/channels/limit', handleChannelsLimit);
 
 export const jtcApiRouter = router;
-

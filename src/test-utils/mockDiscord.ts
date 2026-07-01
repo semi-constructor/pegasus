@@ -145,9 +145,7 @@ export const createMockGuildMember = (overrides: Record<string, unknown> = {}): 
   return mockMember as unknown as GuildMember;
 };
 
-export const createMockTextChannel = (
-  overrides: Record<string, unknown> = {}
-): TextChannel => {
+export const createMockTextChannel = (overrides: Record<string, unknown> = {}): TextChannel => {
   const mockChannel = {
     id: '333333333333333333',
     name: 'test-channel',

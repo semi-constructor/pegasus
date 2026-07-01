@@ -125,7 +125,9 @@ export class JTCService {
           return;
         }
       } catch (error) {
-        logger.warn(`Could not fetch existing JTC panel message in guild ${guild.id}, sending new one.`);
+        logger.warn(
+          `Could not fetch existing JTC panel message in guild ${guild.id}, sending new one.`
+        );
       }
     }
 
@@ -217,13 +219,19 @@ export class JTCService {
     const voiceChannelId = member?.voice?.channelId;
 
     if (!voiceChannelId) {
-      await interaction.reply({ content: t('jtc.error.notInVoice'), flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        content: t('jtc.error.notInVoice'),
+        flags: MessageFlags.Ephemeral,
+      });
       return null;
     }
 
     const tempChannelData = await jtcRepository.getTempChannel(voiceChannelId);
     if (!tempChannelData) {
-      await interaction.reply({ content: t('jtc.error.notInTempChannel'), flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        content: t('jtc.error.notInTempChannel'),
+        flags: MessageFlags.Ephemeral,
+      });
       return null;
     }
 
@@ -270,7 +278,10 @@ export class JTCService {
       });
 
       await jtcRepository.updateTempChannel(tempChannelData.channelId, { isLocked: false });
-      await interaction.reply({ content: t('jtc.success.unlocked'), flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        content: t('jtc.success.unlocked'),
+        flags: MessageFlags.Ephemeral,
+      });
     } catch (error) {
       logger.error(`Error in handleUnlock for channel ${data.tempChannelData.channelId}:`, error);
       await interaction.reply({ content: t('common.error'), flags: MessageFlags.Ephemeral });
@@ -300,7 +311,10 @@ export class JTCService {
 
       await interaction.showModal(modal);
     } catch (error) {
-      logger.error(`Error in handleRenameModal for channel ${data.tempChannelData.channelId}:`, error);
+      logger.error(
+        `Error in handleRenameModal for channel ${data.tempChannelData.channelId}:`,
+        error
+      );
       await interaction.reply({ content: t('common.error'), flags: MessageFlags.Ephemeral });
     }
   }
@@ -314,7 +328,10 @@ export class JTCService {
       await data.voiceChannel.setName(newName);
       await interaction.reply({ content: t('jtc.success.renamed'), flags: MessageFlags.Ephemeral });
     } catch (error) {
-      logger.error(`Error in handleRenameSubmit for channel ${data.tempChannelData.channelId}:`, error);
+      logger.error(
+        `Error in handleRenameSubmit for channel ${data.tempChannelData.channelId}:`,
+        error
+      );
       await interaction.reply({ content: t('common.error'), flags: MessageFlags.Ephemeral });
     }
   }
@@ -327,9 +344,15 @@ export class JTCService {
       const limit = parseInt(interaction.values[0], 10);
       await data.voiceChannel.setUserLimit(limit);
       await jtcRepository.updateTempChannel(data.tempChannelData.channelId, { userLimit: limit });
-      await interaction.reply({ content: t('jtc.success.limitSet', { limit }), flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        content: t('jtc.success.limitSet', { limit }),
+        flags: MessageFlags.Ephemeral,
+      });
     } catch (error) {
-      logger.error(`Error in handleUserLimit for channel ${data.tempChannelData.channelId}:`, error);
+      logger.error(
+        `Error in handleUserLimit for channel ${data.tempChannelData.channelId}:`,
+        error
+      );
       await interaction.reply({ content: t('common.error'), flags: MessageFlags.Ephemeral });
     }
   }
@@ -341,7 +364,10 @@ export class JTCService {
     try {
       const { voiceChannel, tempChannelData } = data;
       if (voiceChannel.members.has(tempChannelData.ownerId)) {
-        await interaction.reply({ content: t('jtc.error.ownerStillPresent'), flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          content: t('jtc.error.ownerStillPresent'),
+          flags: MessageFlags.Ephemeral,
+        });
         return;
       }
 
@@ -352,7 +378,9 @@ export class JTCService {
         ManageChannels: true,
       });
 
-      await jtcRepository.updateTempChannel(tempChannelData.channelId, { ownerId: interaction.user.id });
+      await jtcRepository.updateTempChannel(tempChannelData.channelId, {
+        ownerId: interaction.user.id,
+      });
       await interaction.reply({ content: t('jtc.success.claimed'), flags: MessageFlags.Ephemeral });
     } catch (error) {
       logger.error(`Error in handleClaim for channel ${data.tempChannelData.channelId}:`, error);

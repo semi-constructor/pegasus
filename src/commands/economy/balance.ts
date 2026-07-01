@@ -5,13 +5,21 @@ import { economyRepository } from '../../repositories/economyRepository';
 import { embedBuilder } from '../../handlers/embedBuilder';
 import { t, getGuildLocale } from '../../i18n';
 import { logger } from '../../utils/logger';
-import { createLocalizationMap, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
+import {
+  createLocalizationMap,
+  subcommandDescriptions,
+  optionDescriptions,
+} from '../../utils/localization';
 
 export const isSubcommand = true;
 
 export const data = new SlashCommandBuilder()
   .setName('balance')
-  .setDescription(t('commands.economy.subcommands.balance.description', { defaultValue: "Check your or another user's balance" }))
+  .setDescription(
+    t('commands.economy.subcommands.balance.description', {
+      defaultValue: "Check your or another user's balance",
+    })
+  )
   .setNameLocalizations({
     'es-ES': 'saldo',
     fr: 'solde',
@@ -21,7 +29,11 @@ export const data = new SlashCommandBuilder()
   .addUserOption(option =>
     option
       .setName('user')
-      .setDescription(t('commands.economy.subcommands.balance.options.user', { defaultValue: 'The user to check balance for' }))
+      .setDescription(
+        t('commands.economy.subcommands.balance.options.user', {
+          defaultValue: 'The user to check balance for',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.balanceUser))
       .setRequired(false)
   );
@@ -44,28 +56,44 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const transactions = await economyRepository.getTransactions(targetUser.id, guildId, 5);
 
     const embed = new EmbedBuilder()
-      .setTitle(`${settings.currencySymbol} ${t('commands.economy.subcommands.balance.embed.title', { defaultValue: 'Balance', lng: locale })}`)
-      .setDescription(`**${targetUser.username} - ${t('commands.economy.subcommands.balance.embed.description', { defaultValue: 'Balance', lng: locale })}**`)
+      .setTitle(
+        `${settings.currencySymbol} ${t('commands.economy.subcommands.balance.embed.title', { defaultValue: 'Balance', lng: locale })}`
+      )
+      .setDescription(
+        `**${targetUser.username} - ${t('commands.economy.subcommands.balance.embed.description', { defaultValue: 'Balance', lng: locale })}**`
+      )
       .setColor(0x2ecc71)
       .setThumbnail(targetUser.displayAvatarURL())
       .addFields(
         {
-          name: t('commands.economy.subcommands.balance.embed.wallet', { defaultValue: 'Wallet', lng: locale }),
+          name: t('commands.economy.subcommands.balance.embed.wallet', {
+            defaultValue: 'Wallet',
+            lng: locale,
+          }),
           value: `${settings.currencySymbol} ${balance.balance.toLocaleString()}`,
           inline: true,
         },
         {
-          name: t('commands.economy.subcommands.balance.embed.bank', { defaultValue: 'Bank', lng: locale }),
+          name: t('commands.economy.subcommands.balance.embed.bank', {
+            defaultValue: 'Bank',
+            lng: locale,
+          }),
           value: `${settings.currencySymbol} ${balance.bankBalance.toLocaleString()}`,
           inline: true,
         },
         {
-          name: t('commands.economy.subcommands.balance.embed.netWorth', { defaultValue: 'Net Worth', lng: locale }),
+          name: t('commands.economy.subcommands.balance.embed.netWorth', {
+            defaultValue: 'Net Worth',
+            lng: locale,
+          }),
           value: `${settings.currencySymbol} ${(balance.balance + balance.bankBalance).toLocaleString()}`,
           inline: true,
         },
         {
-          name: t('commands.economy.subcommands.balance.embed.statistics', { defaultValue: 'Statistics', lng: locale }),
+          name: t('commands.economy.subcommands.balance.embed.statistics', {
+            defaultValue: 'Statistics',
+            lng: locale,
+          }),
           value:
             `${t('commands.economy.subcommands.balance.embed.totalEarned', { defaultValue: 'Total Earned', lng: locale })}: ${settings.currencySymbol} ${balance.totalEarned.toLocaleString()}\n` +
             `${t('commands.economy.subcommands.balance.embed.totalSpent', { defaultValue: 'Total Spent', lng: locale })}: ${settings.currencySymbol} ${balance.totalSpent.toLocaleString()}\n` +
@@ -73,7 +101,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           inline: false,
         }
       )
-      .setFooter({ text: `${t('commands.economy.subcommands.balance.embed.currency', { defaultValue: 'Currency', lng: locale })}: ${settings.currencyName}` })
+      .setFooter({
+        text: `${t('commands.economy.subcommands.balance.embed.currency', { defaultValue: 'Currency', lng: locale })}: ${settings.currencyName}`,
+      })
       .setTimestamp();
 
     // Add recent transactions if any
@@ -87,7 +117,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .join('\n');
 
       embed.addFields({
-        name: t('commands.economy.subcommands.balance.embed.recentTransactions', { defaultValue: 'Recent Transactions', lng: locale }),
+        name: t('commands.economy.subcommands.balance.embed.recentTransactions', {
+          defaultValue: 'Recent Transactions',
+          lng: locale,
+        }),
         value: transactionList,
         inline: false,
       });
@@ -100,7 +133,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       embeds: [
         embedBuilder.createErrorEmbed(
           t('common.error', { defaultValue: 'Error', lng: locale }),
-          t('commands.economy.subcommands.balance.error', { defaultValue: 'Failed to fetch balance. Please try again later.', lng: locale })
+          t('commands.economy.subcommands.balance.error', {
+            defaultValue: 'Failed to fetch balance. Please try again later.',
+            lng: locale,
+          })
         ),
       ],
     });

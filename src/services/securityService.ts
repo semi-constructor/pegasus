@@ -146,16 +146,22 @@ export class SecurityService {
     const daysSinceCreation = accountAge / (1000 * 60 * 60 * 24);
 
     if (daysSinceCreation < 1) {
-      reasons.push(t('security.reasons.created24h', { defaultValue: 'Account created less than 24 hours ago' }));
+      reasons.push(
+        t('security.reasons.created24h', { defaultValue: 'Account created less than 24 hours ago' })
+      );
       score += 30;
     } else if (daysSinceCreation < 7) {
-      reasons.push(t('security.reasons.created7d', { defaultValue: 'Account created less than 7 days ago' }));
+      reasons.push(
+        t('security.reasons.created7d', { defaultValue: 'Account created less than 7 days ago' })
+      );
       score += 15;
     }
 
     // Check username patterns
     if (this.hasSupiciousUsername(user.username)) {
-      reasons.push(t('security.reasons.suspiciousUsername', { defaultValue: 'Suspicious username pattern' }));
+      reasons.push(
+        t('security.reasons.suspiciousUsername', { defaultValue: 'Suspicious username pattern' })
+      );
       score += 20;
     }
 
@@ -168,7 +174,12 @@ export class SecurityService {
     // Check recent security incidents
     const recentIncidents = await this.getUserIncidents(user.id, guild.id, 7);
     if (recentIncidents.length > 0) {
-      reasons.push(t('security.reasons.recentIncidents', { count: recentIncidents.length, defaultValue: `${recentIncidents.length} recent security incidents` }));
+      reasons.push(
+        t('security.reasons.recentIncidents', {
+          count: recentIncidents.length,
+          defaultValue: `${recentIncidents.length} recent security incidents`,
+        })
+      );
       score += recentIncidents.length * 10;
     }
 
@@ -220,7 +231,10 @@ export class SecurityService {
       type: 'RAID_DETECTED',
       severity: 'critical',
       guildId: guild.id,
-      description: t('security.raid.detected', { count: raiders.length, defaultValue: `Potential raid detected: ${raiders.length} suspicious joins` }),
+      description: t('security.raid.detected', {
+        count: raiders.length,
+        defaultValue: `Potential raid detected: ${raiders.length} suspicious joins`,
+      }),
       metadata: {
         userIds: raiders.map(r => r.userId),
         usernames: raiders.map(r => r.username),
@@ -237,7 +251,9 @@ export class SecurityService {
       for (const raider of raiders) {
         try {
           const member = await guild.members.fetch(raider.userId);
-          await member.kick(t('security.raid.kickReason', { defaultValue: 'Automated raid protection' }));
+          await member.kick(
+            t('security.raid.kickReason', { defaultValue: 'Automated raid protection' })
+          );
         } catch (error) {
           logger.error(`Failed to kick raider ${raider.userId}:`, error);
         }
@@ -264,7 +280,9 @@ export class SecurityService {
         type: 'LOCKDOWN_ENABLED',
         severity: 'high',
         guildId: guild.id,
-        description: t('security.lockdown.description', { defaultValue: 'Server lockdown enabled due to security threat' }),
+        description: t('security.lockdown.description', {
+          defaultValue: 'Server lockdown enabled due to security threat',
+        }),
       });
     } catch (error) {
       logger.error('Failed to enable lockdown:', error);
@@ -361,16 +379,33 @@ export class SecurityService {
 
     const embed = new EmbedBuilder()
       .setColor(colors[incident.severity])
-      .setTitle(t('security.embed.title', { type: incident.type, defaultValue: `Security Incident: ${incident.type}` }))
+      .setTitle(
+        t('security.embed.title', {
+          type: incident.type,
+          defaultValue: `Security Incident: ${incident.type}`,
+        })
+      )
       .setDescription(incident.description)
       .addFields(
-        { name: t('security.embed.severity', { defaultValue: 'Severity' }), value: incident.severity.toUpperCase(), inline: true },
-        { name: t('security.embed.time', { defaultValue: 'Time' }), value: new Date().toLocaleString(), inline: true }
+        {
+          name: t('security.embed.severity', { defaultValue: 'Severity' }),
+          value: incident.severity.toUpperCase(),
+          inline: true,
+        },
+        {
+          name: t('security.embed.time', { defaultValue: 'Time' }),
+          value: new Date().toLocaleString(),
+          inline: true,
+        }
       )
       .setTimestamp();
 
     if (incident.userId) {
-      embed.addFields({ name: t('security.embed.userId', { defaultValue: 'User ID' }), value: incident.userId, inline: true });
+      embed.addFields({
+        name: t('security.embed.userId', { defaultValue: 'User ID' }),
+        value: incident.userId,
+        inline: true,
+      });
     }
 
     if (incident.metadata) {
@@ -398,7 +433,9 @@ export class SecurityService {
       if (!guildSetting || !guildSetting.securityAlertRole) return;
 
       const alertEmbed = this.createIncidentEmbed(incident);
-      alertEmbed.setFooter({ text: t('security.embed.footer', { defaultValue: 'Immediate action may be required' }) });
+      alertEmbed.setFooter({
+        text: t('security.embed.footer', { defaultValue: 'Immediate action may be required' }),
+      });
 
       const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()

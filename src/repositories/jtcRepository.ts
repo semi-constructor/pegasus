@@ -32,14 +32,17 @@ export class JTCRepository extends BaseRepository {
   }
 
   async getConfigByBaseChannel(baseVoiceChannelId: string) {
-    return this.executeQuery(`JTCRepository.getConfigByBaseChannel(${baseVoiceChannelId})`, async () => {
-      const [config] = await this.db
-        .select()
-        .from(jtcConfigs)
-        .where(eq(jtcConfigs.baseVoiceChannelId, baseVoiceChannelId))
-        .limit(1);
-      return config || null;
-    });
+    return this.executeQuery(
+      `JTCRepository.getConfigByBaseChannel(${baseVoiceChannelId})`,
+      async () => {
+        const [config] = await this.db
+          .select()
+          .from(jtcConfigs)
+          .where(eq(jtcConfigs.baseVoiceChannelId, baseVoiceChannelId))
+          .limit(1);
+        return config || null;
+      }
+    );
   }
 
   async upsertConfig(guildId: string, data: JTCConfigData) {
@@ -61,7 +64,9 @@ export class JTCRepository extends BaseRepository {
             categoryId: data.categoryId,
             panelChannelId: data.panelChannelId,
             ...(data.panelMessageId !== undefined ? { panelMessageId: data.panelMessageId } : {}),
-            ...(data.channelNameFormat !== undefined ? { channelNameFormat: data.channelNameFormat } : {}),
+            ...(data.channelNameFormat !== undefined
+              ? { channelNameFormat: data.channelNameFormat }
+              : {}),
             updatedAt: new Date(),
           },
         })
@@ -120,17 +125,23 @@ export class JTCRepository extends BaseRepository {
   }
 
   async getTempChannelByOwner(guildId: string, ownerId: string) {
-    return this.executeQuery(`JTCRepository.getTempChannelByOwner(${guildId}, ${ownerId})`, async () => {
-      const [channel] = await this.db
-        .select()
-        .from(jtcChannels)
-        .where(and(eq(jtcChannels.guildId, guildId), eq(jtcChannels.ownerId, ownerId)))
-        .limit(1);
-      return channel || null;
-    });
+    return this.executeQuery(
+      `JTCRepository.getTempChannelByOwner(${guildId}, ${ownerId})`,
+      async () => {
+        const [channel] = await this.db
+          .select()
+          .from(jtcChannels)
+          .where(and(eq(jtcChannels.guildId, guildId), eq(jtcChannels.ownerId, ownerId)))
+          .limit(1);
+        return channel || null;
+      }
+    );
   }
 
-  async updateTempChannel(channelId: string, updates: Partial<{ isLocked: boolean; userLimit: number; ownerId: string }>) {
+  async updateTempChannel(
+    channelId: string,
+    updates: Partial<{ isLocked: boolean; userLimit: number; ownerId: string }>
+  ) {
     return this.executeQuery(`JTCRepository.updateTempChannel(${channelId})`, async () => {
       const [channel] = await this.db
         .update(jtcChannels)

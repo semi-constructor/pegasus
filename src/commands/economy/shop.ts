@@ -16,27 +16,47 @@ import { logger } from '../../utils/logger';
 
 export const isSubcommand = true;
 import { t, getGuildLocale } from '../../i18n';
-import { createLocalizationMap, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
+import {
+  createLocalizationMap,
+  subcommandDescriptions,
+  optionDescriptions,
+} from '../../utils/localization';
 
 export const data = new SlashCommandBuilder()
   .setName('shop')
-  .setDescription(t('commands.economy.subcommands.shop.description', { defaultValue: 'View and purchase items from the shop' }))
+  .setDescription(
+    t('commands.economy.subcommands.shop.description', {
+      defaultValue: 'View and purchase items from the shop',
+    })
+  )
   .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.group))
   .addSubcommand(subcommand =>
     subcommand
       .setName('view')
-      .setDescription(t('commands.economy.subcommands.shop.view.description', { defaultValue: 'View available shop items' }))
+      .setDescription(
+        t('commands.economy.subcommands.shop.view.description', {
+          defaultValue: 'View available shop items',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.view))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('buy')
-      .setDescription(t('commands.economy.subcommands.shop.buy.description', { defaultValue: 'Purchase an item from the shop' }))
+      .setDescription(
+        t('commands.economy.subcommands.shop.buy.description', {
+          defaultValue: 'Purchase an item from the shop',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.buy))
       .addStringOption(option =>
         option
           .setName('item')
-          .setDescription(t('commands.economy.subcommands.shop.buy.options.item', { defaultValue: 'The item to purchase' }))
+          .setDescription(
+            t('commands.economy.subcommands.shop.buy.options.item', {
+              defaultValue: 'The item to purchase',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.buyItem))
           .setRequired(true)
           .setAutocomplete(true)
@@ -44,7 +64,11 @@ export const data = new SlashCommandBuilder()
       .addIntegerOption(option =>
         option
           .setName('quantity')
-          .setDescription(t('commands.economy.subcommands.shop.buy.options.quantity', { defaultValue: 'Quantity to purchase' }))
+          .setDescription(
+            t('commands.economy.subcommands.shop.buy.options.quantity', {
+              defaultValue: 'Quantity to purchase',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.buyQuantity))
           .setMinValue(1)
           .setMaxValue(99)
@@ -53,8 +77,14 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('inventory')
-      .setDescription(t('commands.economy.subcommands.shop.inventory.description', { defaultValue: 'View your purchased items' }))
-      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.shop.inventory))
+      .setDescription(
+        t('commands.economy.subcommands.shop.inventory.description', {
+          defaultValue: 'View your purchased items',
+        })
+      )
+      .setDescriptionLocalizations(
+        createLocalizationMap(subcommandDescriptions.economy.shop.inventory)
+      )
   );
 
 export const category = CommandCategory.Economy;
@@ -96,9 +126,7 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
       if (newItems.length === 0) {
         await interaction.editReply({
           embeds: [
-            embedBuilder.createErrorEmbed(
-              t('commands.economy.shop.view.empty', { lng: locale })
-            ),
+            embedBuilder.createErrorEmbed(t('commands.economy.shop.view.empty', { lng: locale })),
           ],
         });
         return;
@@ -116,16 +144,31 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
       const pageItems = items.slice(start, start + itemsPerPage);
 
       const embed = new EmbedBuilder()
-        .setTitle(t('commands.economy.shop.view.title', { lng: locale, symbol: settings.currencySymbol }))
+        .setTitle(
+          t('commands.economy.shop.view.title', { lng: locale, symbol: settings.currencySymbol })
+        )
         .setDescription(
-          t('commands.economy.shop.view.balance', { lng: locale, symbol: settings.currencySymbol, amount: balance.balance.toLocaleString() })
+          t('commands.economy.shop.view.balance', {
+            lng: locale,
+            symbol: settings.currencySymbol,
+            amount: balance.balance.toLocaleString(),
+          })
         )
         .setColor(0x3498db)
-        .setFooter({ text: t('commands.economy.shop.view.page', { lng: locale, current: page + 1, total: totalPages }) })
+        .setFooter({
+          text: t('commands.economy.shop.view.page', {
+            lng: locale,
+            current: page + 1,
+            total: totalPages,
+          }),
+        })
         .setTimestamp();
 
       pageItems.forEach((item, index) => {
-        const stockText = item.stock === -1 ? t('commands.economy.shop.view.unlimited', { lng: locale }) : t('commands.economy.shop.view.left', { lng: locale, amount: item.stock });
+        const stockText =
+          item.stock === -1
+            ? t('commands.economy.shop.view.unlimited', { lng: locale })
+            : t('commands.economy.shop.view.left', { lng: locale, amount: item.stock });
         const affordableEmoji = balance.balance >= item.price ? '✅' : '❌';
 
         embed.addFields({
@@ -184,7 +227,10 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
 
       collector.on('collect', async (i: ButtonInteraction) => {
         if (i.user.id !== userId) {
-          await i.reply({ content: t('commands.economy.shop.view.notForYou', { lng: locale }), ephemeral: true });
+          await i.reply({
+            content: t('commands.economy.shop.view.notForYou', { lng: locale }),
+            ephemeral: true,
+          });
           return;
         }
 
@@ -221,7 +267,9 @@ async function handleViewShop(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     logger.error('Error viewing shop:', error);
     await interaction.editReply({
-      embeds: [embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale }))],
+      embeds: [
+        embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale })),
+      ],
     });
   }
 }
@@ -241,7 +289,11 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
 
     if (!item) {
       await interaction.editReply({
-        embeds: [embedBuilder.createErrorEmbed(t('commands.economy.shop.buy.itemNotFound', { lng: locale }))],
+        embeds: [
+          embedBuilder.createErrorEmbed(
+            t('commands.economy.shop.buy.itemNotFound', { lng: locale })
+          ),
+        ],
       });
       return;
     }
@@ -258,7 +310,9 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setTitle(t('commands.economy.shop.buy.success', { lng: locale }))
-      .setDescription(t('commands.economy.shop.buy.purchased', { lng: locale, quantity, item: item.name }))
+      .setDescription(
+        t('commands.economy.shop.buy.purchased', { lng: locale, quantity, item: item.name })
+      )
       .setColor(0x2ecc71)
       .setThumbnail(interaction.user.displayAvatarURL())
       .addFields(
@@ -287,7 +341,9 @@ async function handleBuyItem(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     logger.error('Error buying item:', error);
     await interaction.editReply({
-      embeds: [embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale }))],
+      embeds: [
+        embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale })),
+      ],
     });
   }
 }
@@ -305,9 +361,7 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
     if (userItems.length === 0) {
       await interaction.editReply({
         embeds: [
-          embedBuilder.createInfoEmbed(
-            t('commands.economy.shop.inventory.empty', { lng: locale })
-          ),
+          embedBuilder.createInfoEmbed(t('commands.economy.shop.inventory.empty', { lng: locale })),
         ],
       });
       return;
@@ -315,7 +369,13 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setTitle(t('commands.economy.shop.inventory.title', { lng: locale }))
-      .setDescription(t('commands.economy.shop.inventory.itemCount', { lng: locale, count: userItems.length, s: userItems.length > 1 ? 's' : '' }))
+      .setDescription(
+        t('commands.economy.shop.inventory.itemCount', {
+          lng: locale,
+          count: userItems.length,
+          s: userItems.length > 1 ? 's' : '',
+        })
+      )
       .setColor(0x3498db)
       .setThumbnail(interaction.user.displayAvatarURL())
       .setTimestamp();
@@ -340,7 +400,9 @@ async function handleViewInventory(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     logger.error('Error viewing inventory:', error);
     await interaction.editReply({
-      embeds: [embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale }))],
+      embeds: [
+        embedBuilder.createErrorEmbed(t('commands.economy.errors.general', { lng: locale })),
+      ],
     });
   }
 }
@@ -371,11 +433,18 @@ function formatEffect(effectType: string, effectValue: any, locale: string): str
   switch (effectType) {
     case 'rob_protection':
       const duration = effectValue?.duration || 86400;
-      return t('commands.economy.shop.effects.robProtection', { lng: locale, hours: duration / 3600 });
+      return t('commands.economy.shop.effects.robProtection', {
+        lng: locale,
+        hours: duration / 3600,
+      });
     case 'xp_boost':
       const multiplier = effectValue?.multiplier || 2;
       const xpDuration = effectValue?.duration || 3600;
-      return t('commands.economy.shop.effects.xpBoost', { lng: locale, multiplier, hours: xpDuration / 3600 });
+      return t('commands.economy.shop.effects.xpBoost', {
+        lng: locale,
+        multiplier,
+        hours: xpDuration / 3600,
+      });
     case 'role':
       return t('commands.economy.shop.effects.role', { lng: locale });
     default:

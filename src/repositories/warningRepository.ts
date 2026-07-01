@@ -204,7 +204,9 @@ export class WarningRepository {
         editedAt: new Date(),
         editedBy: moderatorId,
       })
-      .where(and(eq(warnings.guildId, guildId), eq(warnings.userId, userId), eq(warnings.active, true)))
+      .where(
+        and(eq(warnings.guildId, guildId), eq(warnings.userId, userId), eq(warnings.active, true))
+      )
       .returning({ warnId: warnings.warnId });
 
     return {

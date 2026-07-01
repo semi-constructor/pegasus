@@ -227,12 +227,7 @@ export class AutoModRepository extends BaseRepository {
       const records = await this.db
         .select()
         .from(quarantineVault)
-        .where(
-          and(
-            eq(quarantineVault.guildId, guildId),
-            eq(quarantineVault.released, false)
-          )
-        );
+        .where(and(eq(quarantineVault.guildId, guildId), eq(quarantineVault.released, false)));
       return records as unknown as QuarantineVault[];
     });
   }

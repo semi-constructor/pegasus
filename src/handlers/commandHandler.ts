@@ -33,7 +33,10 @@ export async function loadCommands(client: Client): Promise<void> {
         const filePath = join(categoryPath, file);
         const commandModule = (await import(filePath)) as CommandModule;
 
-        if (commandModule.isSubcommand || (commandModule.default && commandModule.default.isSubcommand)) {
+        if (
+          commandModule.isSubcommand ||
+          (commandModule.default && commandModule.default.isSubcommand)
+        ) {
           continue;
         }
 

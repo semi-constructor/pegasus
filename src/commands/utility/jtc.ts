@@ -1,4 +1,10 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  PermissionFlagsBits,
+  ChannelType,
+  MessageFlags,
+} from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { jtcService } from '../../services/jtcService';
@@ -9,47 +15,43 @@ export const data = new SlashCommandBuilder()
   .setName('jtc')
   .setDescription(t('commands.jtc.description'))
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-  .addSubcommand((subcommand) =>
+  .addSubcommand(subcommand =>
     subcommand
       .setName('setup')
       .setDescription(t('commands.jtc.setup.description'))
-      .addChannelOption((option) =>
+      .addChannelOption(option =>
         option
           .setName('base_voice')
           .setDescription(t('commands.jtc.setup.baseVoice'))
           .addChannelTypes(ChannelType.GuildVoice)
           .setRequired(true)
       )
-      .addChannelOption((option) =>
+      .addChannelOption(option =>
         option
           .setName('category')
           .setDescription(t('commands.jtc.setup.category'))
           .addChannelTypes(ChannelType.GuildCategory)
           .setRequired(true)
       )
-      .addChannelOption((option) =>
+      .addChannelOption(option =>
         option
           .setName('panel_channel')
           .setDescription(t('commands.jtc.setup.panelChannel'))
           .addChannelTypes(ChannelType.GuildText)
           .setRequired(true)
       )
-      .addStringOption((option) =>
+      .addStringOption(option =>
         option
           .setName('name_format')
           .setDescription(t('commands.jtc.setup.nameFormat'))
           .setRequired(false)
       )
   )
-  .addSubcommand((subcommand) =>
-    subcommand
-      .setName('disable')
-      .setDescription(t('commands.jtc.disable.description'))
+  .addSubcommand(subcommand =>
+    subcommand.setName('disable').setDescription(t('commands.jtc.disable.description'))
   )
-  .addSubcommand((subcommand) =>
-    subcommand
-      .setName('panel')
-      .setDescription(t('commands.jtc.panel.description'))
+  .addSubcommand(subcommand =>
+    subcommand.setName('panel').setDescription(t('commands.jtc.panel.description'))
   );
 
 export const category = CommandCategory.Utility;

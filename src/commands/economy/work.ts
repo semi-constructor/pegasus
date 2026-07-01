@@ -11,7 +11,9 @@ export const isSubcommand = true;
 
 export const data = new SlashCommandBuilder()
   .setName('work')
-  .setDescription(t('commands.economy.subcommands.work.description', { defaultValue: 'Work to earn money' }))
+  .setDescription(
+    t('commands.economy.subcommands.work.description', { defaultValue: 'Work to earn money' })
+  )
   .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.economy.work));
 
 export const category = CommandCategory.Economy;
@@ -37,23 +39,40 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const settings = await economyRepository.ensureSettings(guildId);
 
     const embed = new EmbedBuilder()
-      .setTitle(t('commands.economy.subcommands.work.embed.title', { defaultValue: 'Work Complete!', lng: locale }))
+      .setTitle(
+        t('commands.economy.subcommands.work.embed.title', {
+          defaultValue: 'Work Complete!',
+          lng: locale,
+        })
+      )
       .setDescription(result.transaction!.description!)
       .setColor(0x3498db)
       .setThumbnail(interaction.user.displayAvatarURL())
       .addFields(
         {
-          name: t('commands.economy.subcommands.work.embed.earned', { defaultValue: 'Earned', lng: locale }),
+          name: t('commands.economy.subcommands.work.embed.earned', {
+            defaultValue: 'Earned',
+            lng: locale,
+          }),
           value: `${settings.currencySymbol} ${result.transaction!.amount.toLocaleString()}`,
           inline: true,
         },
         {
-          name: t('commands.economy.subcommands.work.embed.newBalance', { defaultValue: 'New Balance', lng: locale }),
+          name: t('commands.economy.subcommands.work.embed.newBalance', {
+            defaultValue: 'New Balance',
+            lng: locale,
+          }),
           value: `${settings.currencySymbol} ${result.balance!.balance.toLocaleString()}`,
           inline: true,
         }
       )
-      .setFooter({ text: t('commands.economy.subcommands.work.embed.footer', { defaultValue: `You can work again in ${settings.workCooldown / 60} minutes`, minutes: settings.workCooldown / 60, lng: locale }) })
+      .setFooter({
+        text: t('commands.economy.subcommands.work.embed.footer', {
+          defaultValue: `You can work again in ${settings.workCooldown / 60} minutes`,
+          minutes: settings.workCooldown / 60,
+          lng: locale,
+        }),
+      })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -62,7 +81,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     await interaction.editReply({
       embeds: [
         embedBuilder.createErrorEmbed(
-          t('commands.economy.subcommands.work.error', { defaultValue: 'Failed to complete work. Please try again later.', lng: locale })
+          t('commands.economy.subcommands.work.error', {
+            defaultValue: 'Failed to complete work. Please try again later.',
+            lng: locale,
+          })
         ),
       ],
     });

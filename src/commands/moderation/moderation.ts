@@ -94,18 +94,66 @@ export const data = new SlashCommandBuilder()
           .setMinValue(1)
           .setMaxValue(40320) // 28 days in minutes
           .addChoices(
-            { name: '60 seconds', value: 1, name_localizations: { de: '60 Sekunden', 'es-ES': '60 segundos', fr: '60 secondes' } },
-            { name: '5 minutes', value: 5, name_localizations: { de: '5 Minuten', 'es-ES': '5 minutos', fr: '5 minutes' } },
-            { name: '10 minutes', value: 10, name_localizations: { de: '10 Minuten', 'es-ES': '10 minutos', fr: '10 minutes' } },
-            { name: '30 minutes', value: 30, name_localizations: { de: '30 Minuten', 'es-ES': '30 minutos', fr: '30 minutes' } },
-            { name: '1 hour', value: 60, name_localizations: { de: '1 Stunde', 'es-ES': '1 hora', fr: '1 heure' } },
-            { name: '6 hours', value: 360, name_localizations: { de: '6 Stunden', 'es-ES': '6 horas', fr: '6 heures' } },
-            { name: '12 hours', value: 720, name_localizations: { de: '12 Stunden', 'es-ES': '12 horas', fr: '12  heures' } },
-            { name: '1 day', value: 1440, name_localizations: { de: '1 Tag', 'es-ES': '1 día', fr: '1 jour' } },
-            { name: '3 days', value: 4320, name_localizations: { de: '3 Tage', 'es-ES': '3 días', fr: '3 jours' } },
-            { name: '1 week', value: 10080, name_localizations: { de: '1 Woche', 'es-ES': '1 semana', fr: '1  semaine' } },
-            { name: '2 weeks', value: 20160, name_localizations: { de: '2 Wochen', 'es-ES': '2 semanas', fr: '2  semaines' } },
-            { name: '4 weeks', value: 40320, name_localizations: { de: '4 Wochen', 'es-ES': '4 semanas', fr: '4  semaines' } }
+            {
+              name: '60 seconds',
+              value: 1,
+              name_localizations: { de: '60 Sekunden', 'es-ES': '60 segundos', fr: '60 secondes' },
+            },
+            {
+              name: '5 minutes',
+              value: 5,
+              name_localizations: { de: '5 Minuten', 'es-ES': '5 minutos', fr: '5 minutes' },
+            },
+            {
+              name: '10 minutes',
+              value: 10,
+              name_localizations: { de: '10 Minuten', 'es-ES': '10 minutos', fr: '10 minutes' },
+            },
+            {
+              name: '30 minutes',
+              value: 30,
+              name_localizations: { de: '30 Minuten', 'es-ES': '30 minutos', fr: '30 minutes' },
+            },
+            {
+              name: '1 hour',
+              value: 60,
+              name_localizations: { de: '1 Stunde', 'es-ES': '1 hora', fr: '1 heure' },
+            },
+            {
+              name: '6 hours',
+              value: 360,
+              name_localizations: { de: '6 Stunden', 'es-ES': '6 horas', fr: '6 heures' },
+            },
+            {
+              name: '12 hours',
+              value: 720,
+              name_localizations: { de: '12 Stunden', 'es-ES': '12 horas', fr: '12  heures' },
+            },
+            {
+              name: '1 day',
+              value: 1440,
+              name_localizations: { de: '1 Tag', 'es-ES': '1 día', fr: '1 jour' },
+            },
+            {
+              name: '3 days',
+              value: 4320,
+              name_localizations: { de: '3 Tage', 'es-ES': '3 días', fr: '3 jours' },
+            },
+            {
+              name: '1 week',
+              value: 10080,
+              name_localizations: { de: '1 Woche', 'es-ES': '1 semana', fr: '1  semaine' },
+            },
+            {
+              name: '2 weeks',
+              value: 20160,
+              name_localizations: { de: '2 Wochen', 'es-ES': '2 semanas', fr: '2  semaines' },
+            },
+            {
+              name: '4 weeks',
+              value: 40320,
+              name_localizations: { de: '4 Wochen', 'es-ES': '4 semanas', fr: '4  semaines' },
+            }
           )
       )
       .addStringOption(option =>
@@ -1395,9 +1443,7 @@ async function handleModlog(interaction: ChatInputCommandInteraction): Promise<a
     const entries = Array.from(auditLogs.entries.values());
     if (targetUser) {
       auditEntries = entries
-        .filter(
-          entry => entry.executorId === targetUser.id || entry.targetId === targetUser.id
-        )
+        .filter(entry => entry.executorId === targetUser.id || entry.targetId === targetUser.id)
         .slice(0, limit);
     } else {
       auditEntries = entries.slice(0, limit);
@@ -1459,7 +1505,8 @@ async function handleModlog(interaction: ChatInputCommandInteraction): Promise<a
         ? auditEntries
             .map(entry => {
               const timestamp = Math.floor(entry.createdTimestamp / 1000);
-              const actionName = AuditLogEvent[entry.action as AuditLogEvent] ?? `Action (${entry.action})`;
+              const actionName =
+                AuditLogEvent[entry.action as AuditLogEvent] ?? `Action (${entry.action})`;
               const executor = entry.executorId ? `<@${entry.executorId}>` : t('common.unknown');
 
               let targetStr = t('common.unknown');
@@ -1659,31 +1706,46 @@ async function handleResetXP(interaction: ChatInputCommandInteraction): Promise<
 }
 
 function formatDuration(minutes: number): string {
-  const minStr = t('common.duration.minutes', { count: minutes, defaultValue: `${minutes} minute${minutes !== 1 ? 's' : ''}` });
+  const minStr = t('common.duration.minutes', {
+    count: minutes,
+    defaultValue: `${minutes} minute${minutes !== 1 ? 's' : ''}`,
+  });
   if (minutes < 60) {
     return minStr;
   }
 
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  const hrStr = t('common.duration.hours', { count: hours, defaultValue: `${hours} hour${hours !== 1 ? 's' : ''}` });
+  const hrStr = t('common.duration.hours', {
+    count: hours,
+    defaultValue: `${hours} hour${hours !== 1 ? 's' : ''}`,
+  });
 
   if (hours < 24) {
     if (remainingMinutes === 0) {
       return hrStr;
     }
-    const remMinStr = t('common.duration.minutes', { count: remainingMinutes, defaultValue: `${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}` });
+    const remMinStr = t('common.duration.minutes', {
+      count: remainingMinutes,
+      defaultValue: `${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`,
+    });
     return `${hrStr} ${remMinStr}`;
   }
 
   const days = Math.floor(hours / 24);
   const remainingHours = hours % 24;
-  const dayStr = t('common.duration.days', { count: days, defaultValue: `${days} day${days !== 1 ? 's' : ''}` });
+  const dayStr = t('common.duration.days', {
+    count: days,
+    defaultValue: `${days} day${days !== 1 ? 's' : ''}`,
+  });
 
   if (remainingHours === 0) {
     return dayStr;
   }
-  const remHrStr = t('common.duration.hours', { count: remainingHours, defaultValue: `${remainingHours} hour${remainingHours !== 1 ? 's' : ''}` });
+  const remHrStr = t('common.duration.hours', {
+    count: remainingHours,
+    defaultValue: `${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`,
+  });
   return `${dayStr} ${remHrStr}`;
 }
 

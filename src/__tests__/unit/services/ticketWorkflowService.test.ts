@@ -26,7 +26,10 @@ describe('TicketWorkflowService', () => {
 
     it('should send embed with select menu if departments exist', async () => {
       const mockGuild = { id: 'guild123' } as Guild;
-      const mockChannel = { id: 'channel123', send: jest.fn().mockResolvedValue({ id: 'msg123' }) } as unknown as TextChannel;
+      const mockChannel = {
+        id: 'channel123',
+        send: jest.fn().mockResolvedValue({ id: 'msg123' }),
+      } as unknown as TextChannel;
 
       (ticketWorkflowRepository.getPanelByCustomId as jest.Mock).mockResolvedValue({
         id: 'panel_uuid',
@@ -49,7 +52,12 @@ describe('TicketWorkflowService', () => {
       await ticketWorkflowService.sendPanelWithDepartments(mockGuild, mockChannel, 'panel1');
 
       expect(mockChannel.send).toHaveBeenCalled();
-      expect(ticketRepository.setPanelMessage).toHaveBeenCalledWith('panel1', 'guild123', 'msg123', 'channel123');
+      expect(ticketRepository.setPanelMessage).toHaveBeenCalledWith(
+        'panel1',
+        'guild123',
+        'msg123',
+        'channel123'
+      );
     });
   });
 
@@ -66,8 +74,8 @@ describe('TicketWorkflowService', () => {
         departmentId: 'support',
         name: 'General Support',
         modalFields: [
-          { customId: 'reason', label: 'Describe issue', style: 'Paragraph', required: true }
-        ]
+          { customId: 'reason', label: 'Describe issue', style: 'Paragraph', required: true },
+        ],
       });
 
       await ticketWorkflowService.handleDepartmentSelect(mockInteraction, 'panel_uuid', 'support');

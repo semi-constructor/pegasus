@@ -248,7 +248,8 @@ function deepMerge(target: any, ...sources: any[]): any {
 export async function getTranslation(guildId: string, userId: string): Promise<LocaleObject> {
   const locale = await resolveLocale(userId, guildId);
   const bundle = i18next.getResourceBundle(locale, 'translation') as LocaleObject | undefined;
-  const enBundle = (i18next.getResourceBundle('en', 'translation') as LocaleObject) || ({} as LocaleObject);
+  const enBundle =
+    (i18next.getResourceBundle('en', 'translation') as LocaleObject) || ({} as LocaleObject);
 
   if (bundle && locale !== 'en') {
     return deepMerge({}, enBundle, bundle);

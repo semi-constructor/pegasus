@@ -102,7 +102,9 @@ async function handleTicketCloseReason(
     );
 
     await interaction.editReply({
-      content: t('tickets.closingWithReason', { reason: closeReason || t('common.noReasonProvided') }),
+      content: t('tickets.closingWithReason', {
+        reason: closeReason || t('common.noReasonProvided'),
+      }),
     });
 
     // Delete channel after 5 seconds

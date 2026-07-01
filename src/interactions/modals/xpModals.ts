@@ -27,7 +27,11 @@ export async function handleXPModals(interaction: ModalSubmitInteraction): Promi
         const colorLabel = (locale.commands.xp.card as any)[name] || name;
         const embed = new EmbedBuilder()
           .setColor(0xff0000)
-          .setDescription(locale.commands.xp.card.invalidColor.replace('{{color}}', colorLabel).replace('{{value}}', value));
+          .setDescription(
+            locale.commands.xp.card.invalidColor
+              .replace('{{color}}', colorLabel)
+              .replace('{{value}}', value)
+          );
 
         await interaction.editReply({ embeds: [embed] });
         return;

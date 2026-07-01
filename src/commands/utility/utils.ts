@@ -14,28 +14,40 @@ import { HelpService } from '../../services/helpService';
 import { logger } from '../../utils/logger';
 import * as os from 'os';
 import { version as djsVersion } from 'discord.js';
-import { createLocalizationMap, commandNames, commandDescriptions, subcommandDescriptions, optionDescriptions } from '../../utils/localization';
+import {
+  createLocalizationMap,
+  commandNames,
+  commandDescriptions,
+  subcommandDescriptions,
+  optionDescriptions,
+} from '../../utils/localization';
 
 const realSteamService =
-  process.env.STEAM_API_KEY && process.env.STEAM_API_KEY !== ''
-    ? new RealSteamService()
-    : null;
+  process.env.STEAM_API_KEY && process.env.STEAM_API_KEY !== '' ? new RealSteamService() : null;
 const helpService = new HelpService();
 
 export const data = new SlashCommandBuilder()
   .setName('utils')
-  .setDescription(t('commands.utils.description', { defaultValue: 'Utility commands for various information' }))
+  .setDescription(
+    t('commands.utils.description', { defaultValue: 'Utility commands for various information' })
+  )
   .setNameLocalizations(createLocalizationMap(commandNames.utils))
   .setDescriptionLocalizations(createLocalizationMap(commandDescriptions.utils))
   .addSubcommand(subcommand =>
     subcommand
       .setName('avatar')
-      .setDescription(t('commands.utils.subcommands.avatar.description', { defaultValue: "Get a user's avatar" }))
+      .setDescription(
+        t('commands.utils.subcommands.avatar.description', { defaultValue: "Get a user's avatar" })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.avatar))
       .addUserOption(option =>
         option
           .setName('user')
-          .setDescription(t('commands.utils.subcommands.avatar.options.user', { defaultValue: 'The user to get avatar for' }))
+          .setDescription(
+            t('commands.utils.subcommands.avatar.options.user', {
+              defaultValue: 'The user to get avatar for',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
           .setRequired(false)
       )
@@ -43,12 +55,18 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('banner')
-      .setDescription(t('commands.utils.subcommands.banner.description', { defaultValue: "Get a user's banner" }))
+      .setDescription(
+        t('commands.utils.subcommands.banner.description', { defaultValue: "Get a user's banner" })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.banner))
       .addUserOption(option =>
         option
           .setName('user')
-          .setDescription(t('commands.utils.subcommands.banner.options.user', { defaultValue: 'The user to get banner for' }))
+          .setDescription(
+            t('commands.utils.subcommands.banner.options.user', {
+              defaultValue: 'The user to get banner for',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
           .setRequired(false)
       )
@@ -56,17 +74,25 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('steam')
-      .setDescription(t('commands.utils.subcommands.steam.description', { defaultValue: 'Get Steam profile information' }))
+      .setDescription(
+        t('commands.utils.subcommands.steam.description', {
+          defaultValue: 'Get Steam profile information',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.steam))
       .addStringOption(option =>
         option
           .setName('username')
-          .setDescription(t('commands.utils.subcommands.steam.options.username', { defaultValue: 'Steam username or profile URL' }))
+          .setDescription(
+            t('commands.utils.subcommands.steam.options.username', {
+              defaultValue: 'Steam username or profile URL',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.username))
           .setRequired(true)
       )
   )
-/*
+  /*
   .addSubcommand(subcommand =>
     subcommand
       .setName('geizhals')
@@ -92,12 +118,20 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('userinfo')
-      .setDescription(t('commands.utils.subcommands.userinfo.description', { defaultValue: 'Get detailed user information' }))
+      .setDescription(
+        t('commands.utils.subcommands.userinfo.description', {
+          defaultValue: 'Get detailed user information',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.userinfo))
       .addUserOption(option =>
         option
           .setName('user')
-          .setDescription(t('commands.utils.subcommands.userinfo.options.user', { defaultValue: 'The user to get information for' }))
+          .setDescription(
+            t('commands.utils.subcommands.userinfo.options.user', {
+              defaultValue: 'The user to get information for',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user))
           .setRequired(false)
       )
@@ -105,12 +139,18 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('whois')
-      .setDescription(t('commands.utils.subcommands.whois.description', { defaultValue: 'Look up user by ID' }))
+      .setDescription(
+        t('commands.utils.subcommands.whois.description', { defaultValue: 'Look up user by ID' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.whois))
       .addStringOption(option =>
         option
           .setName('user_id')
-          .setDescription(t('commands.utils.subcommands.whois.options.user_id', { defaultValue: 'The user ID to look up' }))
+          .setDescription(
+            t('commands.utils.subcommands.whois.options.user_id', {
+              defaultValue: 'The user ID to look up',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.user_id))
           .setRequired(true)
       )
@@ -118,12 +158,20 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('roleinfo')
-      .setDescription(t('commands.utils.subcommands.roleinfo.description', { defaultValue: 'Get role information' }))
+      .setDescription(
+        t('commands.utils.subcommands.roleinfo.description', {
+          defaultValue: 'Get role information',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.roleinfo))
       .addRoleOption(option =>
         option
           .setName('role')
-          .setDescription(t('commands.utils.subcommands.roleinfo.options.role', { defaultValue: 'The role to get information for' }))
+          .setDescription(
+            t('commands.utils.subcommands.roleinfo.options.role', {
+              defaultValue: 'The role to get information for',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.role))
           .setRequired(true)
       )
@@ -131,18 +179,28 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('serverinfo')
-      .setDescription(t('commands.utils.subcommands.serverinfo.description', { defaultValue: 'Get server information' }))
+      .setDescription(
+        t('commands.utils.subcommands.serverinfo.description', {
+          defaultValue: 'Get server information',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.serverinfo))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('help')
-      .setDescription(t('commands.utils.subcommands.help.description', { defaultValue: 'Get help for commands' }))
+      .setDescription(
+        t('commands.utils.subcommands.help.description', { defaultValue: 'Get help for commands' })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.help))
       .addStringOption(option =>
         option
           .setName('command')
-          .setDescription(t('commands.utils.subcommands.help.options.command', { defaultValue: 'The command to get help for' }))
+          .setDescription(
+            t('commands.utils.subcommands.help.options.command', {
+              defaultValue: 'The command to get help for',
+            })
+          )
           .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.command))
           .setRequired(false)
           .setAutocomplete(true)
@@ -151,13 +209,21 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('support')
-      .setDescription(t('commands.utils.subcommands.support.description', { defaultValue: 'Get support server link' }))
+      .setDescription(
+        t('commands.utils.subcommands.support.description', {
+          defaultValue: 'Get support server link',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.support))
   )
   .addSubcommand(subcommand =>
     subcommand
       .setName('stats')
-      .setDescription(t('commands.utils.subcommands.stats.description', { defaultValue: 'View bot statistics and system information' }))
+      .setDescription(
+        t('commands.utils.subcommands.stats.description', {
+          defaultValue: 'View bot statistics and system information',
+        })
+      )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.stats))
   );
 
@@ -705,7 +771,10 @@ async function handleSupport(
     .setColor(0x7289da)
     .addFields({
       name: t('commands.utils.support.link', { lng: locale }),
-      value: t('commands.utils.support.linkValue', { lng: locale, defaultValue: '[discord.gg/vaultscope](https://discord.gg/vaultscope)' }),
+      value: t('commands.utils.support.linkValue', {
+        lng: locale,
+        defaultValue: '[discord.gg/vaultscope](https://discord.gg/vaultscope)',
+      }),
       inline: false,
     })
     .setFooter({ text: t('commands.utils.support.footer', { lng: locale }) })
@@ -783,7 +852,9 @@ async function handleStats(
     const freeMem = os.freemem();
     const usedMem = totalMem - freeMem;
     const cpuCores = os.cpus().length;
-    const cpuModel = os.cpus()[0]?.model || t('commands.utils.stats.unknown', { lng: locale, defaultValue: 'Unknown' });
+    const cpuModel =
+      os.cpus()[0]?.model ||
+      t('commands.utils.stats.unknown', { lng: locale, defaultValue: 'Unknown' });
     const osType = os.type();
     const osRelease = os.release();
     const hostname = os.hostname();
@@ -810,12 +881,20 @@ async function handleStats(
       const secs = Math.floor(seconds % 60);
 
       const parts = [];
-      if (days > 0) parts.push(`${days}${t('common.time.daysShort', { lng: locale, defaultValue: 'd' })}`);
-      if (hours > 0) parts.push(`${hours}${t('common.time.hoursShort', { lng: locale, defaultValue: 'h' })}`);
-      if (minutes > 0) parts.push(`${minutes}${t('common.time.minutesShort', { lng: locale, defaultValue: 'm' })}`);
-      if (secs > 0) parts.push(`${secs}${t('common.time.secondsShort', { lng: locale, defaultValue: 's' })}`);
+      if (days > 0)
+        parts.push(`${days}${t('common.time.daysShort', { lng: locale, defaultValue: 'd' })}`);
+      if (hours > 0)
+        parts.push(`${hours}${t('common.time.hoursShort', { lng: locale, defaultValue: 'h' })}`);
+      if (minutes > 0)
+        parts.push(
+          `${minutes}${t('common.time.minutesShort', { lng: locale, defaultValue: 'm' })}`
+        );
+      if (secs > 0)
+        parts.push(`${secs}${t('common.time.secondsShort', { lng: locale, defaultValue: 's' })}`);
 
-      return parts.join(' ') || `0${t('common.time.secondsShort', { lng: locale, defaultValue: 's' })}`;
+      return (
+        parts.join(' ') || `0${t('common.time.secondsShort', { lng: locale, defaultValue: 's' })}`
+      );
     };
 
     // Format bytes

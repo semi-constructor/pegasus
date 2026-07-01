@@ -22,7 +22,12 @@ import { Command } from '../../types/command';
 import { TicketService } from '../../services/ticketService';
 import { TicketRepository } from '../../repositories/ticketRepository';
 import { t, getGuildLocale, withLocale } from '../../i18n';
-import { createLocalizationMap, commandNames, commandDescriptions, subcommandDescriptions } from '../../utils/localization';
+import {
+  createLocalizationMap,
+  commandNames,
+  commandDescriptions,
+  subcommandDescriptions,
+} from '../../utils/localization';
 // import { GuildService } from '../../services/guildService';
 import { CommandCategory } from '../../types/command';
 import { ticketWorkflowService } from '../../services/ticketWorkflowService';
@@ -149,13 +154,25 @@ export const ticket: Command = {
     .addSubcommandGroup(group =>
       group
         .setName('panel')
-        .setDescription(t('commands.ticket.subcommands.panel.description', { defaultValue: 'Manage ticket panels' }))
-        .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.group))
+        .setDescription(
+          t('commands.ticket.subcommands.panel.description', {
+            defaultValue: 'Manage ticket panels',
+          })
+        )
+        .setDescriptionLocalizations(
+          createLocalizationMap(subcommandDescriptions.ticket.panel.group)
+        )
         .addSubcommand(subcommand =>
           subcommand
             .setName('create')
-            .setDescription(t('commands.ticket.subcommands.panel.create.description', { defaultValue: 'Create a new ticket panel configuration' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.create))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.create.description', {
+                defaultValue: 'Create a new ticket panel configuration',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.create)
+            )
             .addStringOption(option =>
               option
                 .setName('panel_id')
@@ -189,10 +206,42 @@ export const ticket: Command = {
                 .setName('button_style')
                 .setDescription('Button style')
                 .addChoices(
-                  { name: 'Primary (Blue)', value: ButtonStyle.Primary, name_localizations: { de: 'Primär (Blau)', 'es-ES': 'Primario (Azul)', fr: 'Primaire (Bleu)' } },
-                  { name: 'Secondary (Gray)', value: ButtonStyle.Secondary, name_localizations: { de: 'Sekundär (Grau)', 'es-ES': 'Secundario (Gris)', fr: 'Secondaire (Gris)' } },
-                  { name: 'Success (Green)', value: ButtonStyle.Success, name_localizations: { de: 'Erfolg (Grün)', 'es-ES': 'Éxito (Verde)', fr: 'Succès (Vert)' } },
-                  { name: 'Danger (Red)', value: ButtonStyle.Danger, name_localizations: { de: 'Gefahr (Rot)', 'es-ES': 'Peligro (Rojo)', fr: 'Danger (Rouge)' } }
+                  {
+                    name: 'Primary (Blue)',
+                    value: ButtonStyle.Primary,
+                    name_localizations: {
+                      de: 'Primär (Blau)',
+                      'es-ES': 'Primario (Azul)',
+                      fr: 'Primaire (Bleu)',
+                    },
+                  },
+                  {
+                    name: 'Secondary (Gray)',
+                    value: ButtonStyle.Secondary,
+                    name_localizations: {
+                      de: 'Sekundär (Grau)',
+                      'es-ES': 'Secundario (Gris)',
+                      fr: 'Secondaire (Gris)',
+                    },
+                  },
+                  {
+                    name: 'Success (Green)',
+                    value: ButtonStyle.Success,
+                    name_localizations: {
+                      de: 'Erfolg (Grün)',
+                      'es-ES': 'Éxito (Verde)',
+                      fr: 'Succès (Vert)',
+                    },
+                  },
+                  {
+                    name: 'Danger (Red)',
+                    value: ButtonStyle.Danger,
+                    name_localizations: {
+                      de: 'Gefahr (Rot)',
+                      'es-ES': 'Peligro (Rojo)',
+                      fr: 'Danger (Rouge)',
+                    },
+                  }
                 )
             )
             .addChannelOption(option =>
@@ -221,8 +270,14 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('load')
-            .setDescription(t('commands.ticket.subcommands.panel.load.description', { defaultValue: 'Load and send a ticket panel' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.load))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.load.description', {
+                defaultValue: 'Load and send a ticket panel',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.load)
+            )
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel to load').setRequired(true)
             )
@@ -237,8 +292,14 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('delete')
-            .setDescription(t('commands.ticket.subcommands.panel.delete.description', { defaultValue: 'Delete a ticket panel' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.delete))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.delete.description', {
+                defaultValue: 'Delete a ticket panel',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.delete)
+            )
             .addStringOption(option =>
               option
                 .setName('panel_id')
@@ -249,14 +310,26 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('list')
-            .setDescription(t('commands.ticket.subcommands.panel.list.description', { defaultValue: 'List all ticket panels in this server' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.list))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.list.description', {
+                defaultValue: 'List all ticket panels in this server',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.list)
+            )
         )
         .addSubcommand(subcommand =>
           subcommand
             .setName('edit')
-            .setDescription(t('commands.ticket.subcommands.panel.edit.description', { defaultValue: 'Edit an existing ticket panel' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.edit))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.edit.description', {
+                defaultValue: 'Edit an existing ticket panel',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.edit)
+            )
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel to edit').setRequired(true)
             )
@@ -264,8 +337,14 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('add_dept')
-            .setDescription(t('commands.ticket.subcommands.panel.add_dept.description', { defaultValue: 'Add a department to a ticket panel' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.add_dept))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.add_dept.description', {
+                defaultValue: 'Add a department to a ticket panel',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.add_dept)
+            )
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel').setRequired(true)
             )
@@ -276,23 +355,37 @@ export const ticket: Command = {
               option.setName('name').setDescription('Department name').setRequired(true)
             )
             .addStringOption(option =>
-              option.setName('description').setDescription('Department description').setRequired(true)
+              option
+                .setName('description')
+                .setDescription('Department description')
+                .setRequired(true)
             )
             .addRoleOption(option =>
               option.setName('support_role').setDescription('Support role for this department')
             )
             .addChannelOption(option =>
-              option.setName('category').setDescription('Category for this department').addChannelTypes(ChannelType.GuildCategory)
+              option
+                .setName('category')
+                .setDescription('Category for this department')
+                .addChannelTypes(ChannelType.GuildCategory)
             )
             .addStringOption(option =>
-              option.setName('welcome_message').setDescription('Welcome message for this department')
+              option
+                .setName('welcome_message')
+                .setDescription('Welcome message for this department')
             )
         )
         .addSubcommand(subcommand =>
           subcommand
             .setName('list_depts')
-            .setDescription(t('commands.ticket.subcommands.panel.list_depts.description', { defaultValue: 'List all departments for a ticket panel' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.list_depts))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.list_depts.description', {
+                defaultValue: 'List all departments for a ticket panel',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.list_depts)
+            )
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel').setRequired(true)
             )
@@ -300,26 +393,41 @@ export const ticket: Command = {
         .addSubcommand(subcommand =>
           subcommand
             .setName('remove_dept')
-            .setDescription(t('commands.ticket.subcommands.panel.remove_dept.description', { defaultValue: 'Remove a department from a ticket panel' }))
-            .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.panel.remove_dept))
+            .setDescription(
+              t('commands.ticket.subcommands.panel.remove_dept.description', {
+                defaultValue: 'Remove a department from a ticket panel',
+              })
+            )
+            .setDescriptionLocalizations(
+              createLocalizationMap(subcommandDescriptions.ticket.panel.remove_dept)
+            )
             .addStringOption(option =>
               option.setName('panel_id').setDescription('ID of the panel').setRequired(true)
             )
             .addStringOption(option =>
-              option.setName('dept_id').setDescription('ID of the department to remove').setRequired(true)
+              option
+                .setName('dept_id')
+                .setDescription('ID of the department to remove')
+                .setRequired(true)
             )
         )
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('claim')
-        .setDescription(t('commands.ticket.subcommands.claim.description', { defaultValue: 'Claim a ticket (for support staff)' }))
+        .setDescription(
+          t('commands.ticket.subcommands.claim.description', {
+            defaultValue: 'Claim a ticket (for support staff)',
+          })
+        )
         .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.claim))
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('close')
-        .setDescription(t('commands.ticket.subcommands.close.description', { defaultValue: 'Close a ticket' }))
+        .setDescription(
+          t('commands.ticket.subcommands.close.description', { defaultValue: 'Close a ticket' })
+        )
         .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.ticket.close))
         .addStringOption(option =>
           option
@@ -384,7 +492,10 @@ export const ticket: Command = {
         }
       } catch (error: any) {
         await interaction.reply({
-          content: t('common.error', { lng: locale }) + ': ' + t(error.message, { defaultValue: error.message, lng: locale }),
+          content:
+            t('common.error', { lng: locale }) +
+            ': ' +
+            t(error.message, { defaultValue: error.message, lng: locale }),
           ephemeral: true,
         });
       }
@@ -402,7 +513,9 @@ async function handlePanelCreate(
   const panelId = interaction.options.getString('panel_id', true);
   const title = interaction.options.getString('title', true);
   const description = interaction.options.getString('description', true);
-  const buttonLabel = interaction.options.getString('button_label') || t('tickets.defaultButtonLabel', { defaultValue: 'Create Ticket' });
+  const buttonLabel =
+    interaction.options.getString('button_label') ||
+    t('tickets.defaultButtonLabel', { defaultValue: 'Create Ticket' });
   const buttonStyle = interaction.options.getInteger('button_style') || ButtonStyle.Primary;
   const category = interaction.options.getChannel('category');
   const supportRole = interaction.options.getRole('support_role');
@@ -516,7 +629,9 @@ async function handlePanelCreate(
                 .setCustomId('roleIds')
                 .setLabel(t('tickets.modals.addRolesLabel'))
                 .setStyle(TextInputStyle.Paragraph)
-                .setPlaceholder(t('tickets.modals.placeholders.roleId', { defaultValue: '123456789012345678' }))
+                .setPlaceholder(
+                  t('tickets.modals.placeholders.roleId', { defaultValue: '123456789012345678' })
+                )
                 .setRequired(false)
             )
           );
@@ -580,7 +695,11 @@ async function handlePanelCreate(
                 .setCustomId('imageUrl')
                 .setLabel(t('tickets.modals.imageLabel'))
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder(t('tickets.modals.placeholders.imageUrl', { defaultValue: 'https://example.com/panel.png' }))
+                .setPlaceholder(
+                  t('tickets.modals.placeholders.imageUrl', {
+                    defaultValue: 'https://example.com/panel.png',
+                  })
+                )
                 .setRequired(false)
                 .setMaxLength(512)
             )
@@ -756,9 +875,13 @@ async function handlePanelAddDept(interaction: ChatInputCommandInteraction, _loc
       welcomeMessage: welcomeMessage ?? undefined,
     });
 
-    await interaction.editReply({ content: `✅ Department **${name}** added successfully to panel **${panelCustomId}**.` });
+    await interaction.editReply({
+      content: `✅ Department **${name}** added successfully to panel **${panelCustomId}**.`,
+    });
   } catch (error: any) {
-    await interaction.editReply({ content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }) });
+    await interaction.editReply({
+      content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }),
+    });
   }
 }
 
@@ -776,18 +899,24 @@ async function handlePanelListDepts(interaction: ChatInputCommandInteraction, _l
 
     const depts = await ticketWorkflowRepository.listDepartmentsByPanel(guildId, panel.id);
     if (depts.length === 0) {
-      await interaction.editReply({ content: `No departments found for panel **${panelCustomId}**.` });
+      await interaction.editReply({
+        content: `No departments found for panel **${panelCustomId}**.`,
+      });
       return;
     }
 
     const embed = new EmbedBuilder()
       .setTitle(`Departments for Panel: ${panelCustomId}`)
       .setColor(0x5865f2)
-      .setDescription(depts.map(d => `• **${d.name}** (\`${d.departmentId}\`): ${d.description}`).join('\n'));
+      .setDescription(
+        depts.map(d => `• **${d.name}** (\`${d.departmentId}\`): ${d.description}`).join('\n')
+      );
 
     await interaction.editReply({ embeds: [embed] });
   } catch (error: any) {
-    await interaction.editReply({ content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }) });
+    await interaction.editReply({
+      content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }),
+    });
   }
 }
 
@@ -804,15 +933,25 @@ async function handlePanelRemoveDept(interaction: ChatInputCommandInteraction, _
       return;
     }
 
-    const removed = await ticketWorkflowRepository.deleteDepartment(guildId, panel.id, departmentId);
+    const removed = await ticketWorkflowRepository.deleteDepartment(
+      guildId,
+      panel.id,
+      departmentId
+    );
     if (!removed) {
-      await interaction.editReply({ content: `Department \`${departmentId}\` not found on panel **${panelCustomId}**.` });
+      await interaction.editReply({
+        content: `Department \`${departmentId}\` not found on panel **${panelCustomId}**.`,
+      });
       return;
     }
 
-    await interaction.editReply({ content: `✅ Department \`${departmentId}\` removed from panel **${panelCustomId}**.` });
+    await interaction.editReply({
+      content: `✅ Department \`${departmentId}\` removed from panel **${panelCustomId}**.`,
+    });
   } catch (error: any) {
-    await interaction.editReply({ content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }) });
+    await interaction.editReply({
+      content: t('common.error', { error: t(error.message, { defaultValue: error.message }) }),
+    });
   }
 }
 
@@ -833,7 +972,10 @@ async function handlePanelDelete(
     });
   } catch (error: any) {
     await interaction.editReply({
-      content: t('common.error', { lng: locale, error: t(error.message, { defaultValue: error.message, lng: locale }) }),
+      content: t('common.error', {
+        lng: locale,
+        error: t(error.message, { defaultValue: error.message, lng: locale }),
+      }),
     });
   }
 }
@@ -1172,7 +1314,11 @@ async function handlePanelEdit(
                   .setCustomId('value')
                   .setLabel(t('tickets.modals.buttonStyleLabel'))
                   .setStyle(TextInputStyle.Short)
-                  .setPlaceholder(t('tickets.modals.placeholders.buttonStyle', { defaultValue: 'primary | secondary | success | danger | link' }))
+                  .setPlaceholder(
+                    t('tickets.modals.placeholders.buttonStyle', {
+                      defaultValue: 'primary | secondary | success | danger | link',
+                    })
+                  )
                   .setRequired(true)
               )
             );
@@ -1271,7 +1417,11 @@ async function handlePanelEdit(
                   .setLabel(t('tickets.modals.imageLabel'))
                   .setStyle(TextInputStyle.Short)
                   .setValue(panelDraft.imageUrl ?? '')
-                  .setPlaceholder(t('tickets.modals.placeholders.imageUrl', { defaultValue: 'https://example.com/panel.png' }))
+                  .setPlaceholder(
+                    t('tickets.modals.placeholders.imageUrl', {
+                      defaultValue: 'https://example.com/panel.png',
+                    })
+                  )
                   .setRequired(false)
               )
             );
