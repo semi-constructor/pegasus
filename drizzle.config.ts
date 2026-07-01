@@ -4,9 +4,9 @@ import { config } from './src/config/env';
 export default {
   schema: './src/database/schema/index.ts',
   out: './drizzle',
-  driver: 'pg',
+  dialect: 'postgresql',
   dbCredentials: {
-    connectionString: config.DATABASE_URL,
+    url: config.DATABASE_URL,
     ssl: config.DB_SSL ? { rejectUnauthorized: false } : undefined,
   },
   verbose: true,
