@@ -175,7 +175,7 @@ async function handleLeaderboardCommand(
                   : entry.rank === 3
                     ? (locale.commands.xp.leaderboard as any).medals?.third || '🥉'
                     : `**${entry.rank}.**`;
-            return `${medal} <@${entry.userId}> - ${locale.commands.xp.leaderboard.entry
+            return `${medal} @${entry.userId} - ${locale.commands.xp.leaderboard.entry
               .replace('{{level}}', entry.level.toString())
               .replace('{{xp}}', entry.xp.toLocaleString())}`;
           })
