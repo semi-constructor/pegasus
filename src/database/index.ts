@@ -83,7 +83,7 @@ export async function withTransaction<T>(
   for (let i = 0; i < retries; i++) {
     try {
       return await db.transaction(async tx => {
-        return await callback(tx as typeof db);
+        return await callback(tx as unknown as typeof db);
       });
     } catch (error) {
       lastError = error as Error;
