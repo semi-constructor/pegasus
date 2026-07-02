@@ -3,6 +3,7 @@ import { jest } from '@jest/globals';
 
 dotenv.config({ path: '.env.test' });
 
+// @ts-expect-error - NODE_ENV may be readonly in some type definitions
 process.env.NODE_ENV = 'test';
 process.env.DISCORD_TOKEN = 'test_token';
 process.env.DISCORD_CLIENT_ID = '123456789012345678';

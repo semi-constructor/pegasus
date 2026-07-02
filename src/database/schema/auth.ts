@@ -6,7 +6,7 @@ import {
   integer,
   boolean,
 } from "drizzle-orm/pg-core";
-import type { AdapterAccountType } from "next-auth/adapters";
+type AdapterAccountType = "oauth" | "email" | "credentials" | "oidc" | "webauthn";
 
 export const authUsers = pgTable("auth_user", {
   id: text("id")
