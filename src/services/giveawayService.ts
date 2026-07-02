@@ -36,7 +36,10 @@ export interface CreateGiveawayData {
   description: string | null;
   requirements: GiveawayRequirements;
   bonusEntries: GiveawayBonusEntries;
+  embedTitle?: string | null;
   embedColor: number;
+  embedImage?: string | null;
+  embedThumbnail?: string | null;
 }
 
 export interface GiveawayResult {
@@ -71,6 +74,7 @@ export interface GiveawayData {
 
 export class GiveawayService {
   private activeTimers = new Map<string, NodeJS.Timeout>();
+  public startCommandEmbedCache = new Map<string, {embedTitle?: string|null, embedImage?: string|null, embedThumbnail?: string|null}>();
 
   async createGiveaway(data: CreateGiveawayData) {
     const giveawayId = `GW${generateId(10)}`;
@@ -395,6 +399,9 @@ export class GiveawayService {
       winnerCount: number;
       endTime: Date;
       announcementSent?: boolean;
+      embedTitle?: string | null;
+      embedImage?: string | null;
+      embedThumbnail?: string | null;
     } | null,
     winners?: string[]
   ) {
@@ -416,7 +423,7 @@ export class GiveawayService {
         .setColor(giveaway.status === 'active' ? giveaway.embedColor || 0x0099ff : 0x808080)
         .setTitle(
           giveaway.status === 'active'
-            ? t('commands.giveaway.embed.title')
+            ? (giveaway.embedTitle || t('commands.giveaway.embed.title'))
             : t('commands.giveaway.embed.ended')
         )
         .setDescription(
@@ -439,6 +446,9 @@ export class GiveawayService {
           text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId }),
         })
         .setTimestamp();
+        
+      if (giveaway.embedImage) embed.setImage(giveaway.embedImage);
+      if (giveaway.embedThumbnail) embed.setThumbnail(giveaway.embedThumbnail);
 
       if (giveaway.status === 'active') {
         embed.addFields({

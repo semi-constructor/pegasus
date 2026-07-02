@@ -48,6 +48,9 @@ RUN apk add --no-cache \
     pixman \
     fontconfig \
     ttf-dejavu \
+    font-noto \
+    font-noto-cjk \
+    font-noto-emoji \
     curl
 
 # Create non-root user

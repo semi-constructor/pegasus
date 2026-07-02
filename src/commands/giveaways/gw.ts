@@ -11,6 +11,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
   ModalActionRowComponentBuilder,
+  ChannelType,
 } from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
@@ -52,7 +53,16 @@ export const data = new SlashCommandBuilder()
             .setName('channel')
             .setDescription(t('commands.giveaway.subcommands.start.options.channel'))
             .setRequired(false)
-            .addChannelTypes(0) // Text channels only
+            .addChannelTypes(ChannelType.GuildText)
+      )
+      .addStringOption(option =>
+        option.setName('embed_title').setDescription('Custom embed title')
+      )
+      .addAttachmentOption(option =>
+        option.setName('embed_image').setDescription('Custom embed image')
+      )
+      .addAttachmentOption(option =>
+        option.setName('embed_thumbnail').setDescription('Custom embed thumbnail')
       )
   )
   .addSubcommand(subcommand =>
@@ -78,7 +88,16 @@ export const data = new SlashCommandBuilder()
           .setDescription(t('commands.giveaway.subcommands.simple.options.winners'))
           .setRequired(true)
           .setMinValue(1)
-          .setMaxValue(20)
+          .setMaxValue(50)
+      )
+      .addStringOption(option =>
+        option.setName('embed_title').setDescription('Custom embed title')
+      )
+      .addAttachmentOption(option =>
+        option.setName('embed_image').setDescription('Custom embed image')
+      )
+      .addAttachmentOption(option =>
+        option.setName('embed_thumbnail').setDescription('Custom embed thumbnail')
       )
   )
   .addSubcommand(subcommand =>
@@ -120,6 +139,15 @@ export const data = new SlashCommandBuilder()
           .setName('giveaway_id')
           .setDescription(t('commands.giveaway.subcommands.configure.options.giveawayId'))
           .setRequired(true)
+      )
+      .addStringOption(option =>
+        option.setName('embed_title').setDescription('Custom embed title')
+      )
+      .addAttachmentOption(option =>
+        option.setName('embed_image').setDescription('Custom embed image')
+      )
+      .addAttachmentOption(option =>
+        option.setName('embed_thumbnail').setDescription('Custom embed thumbnail')
       )
   );
 
@@ -163,6 +191,18 @@ async function handleStart(interaction: ChatInputCommandInteraction): Promise<an
   const channel =
     (interaction.options.getChannel('channel') as TextChannel) ||
     (interaction.channel as TextChannel);
+
+  const embedTitle = interaction.options.getString('embed_title');
+  const embedImage = interaction.options.getAttachment('embed_image')?.url;
+  const embedThumbnail = interaction.options.getAttachment('embed_thumbnail')?.url;
+
+  if (embedTitle || embedImage || embedThumbnail) {
+    giveawayService.startCommandEmbedCache.set(interaction.user.id, {
+      embedTitle,
+      embedImage,
+      embedThumbnail,
+    });
+  }
 
   // Parse duration
   const durationMs = parseDuration(duration);
@@ -252,6 +292,9 @@ async function handleSimple(interaction: ChatInputCommandInteraction): Promise<a
   const duration = interaction.options.getString('duration', true);
   const winners = interaction.options.getInteger('winners', true);
   const channel = interaction.channel as TextChannel;
+  const embedTitle = interaction.options.getString('embed_title');
+  const embedImage = interaction.options.getAttachment('embed_image')?.url;
+  const embedThumbnail = interaction.options.getAttachment('embed_thumbnail')?.url;
 
   // Parse duration
   const durationMs = parseDuration(duration);
@@ -272,12 +315,15 @@ async function handleSimple(interaction: ChatInputCommandInteraction): Promise<a
       description: null,
       requirements: {},
       bonusEntries: {},
+      embedTitle,
       embedColor: 0x0099ff,
+      embedImage,
+      embedThumbnail,
     });
 
     const embed = new EmbedBuilder()
       .setColor(0x0099ff)
-      .setTitle(t('commands.giveaway.embed.title'))
+      .setTitle(embedTitle || t('commands.giveaway.embed.title'))
       .setDescription(t('commands.giveaway.embed.simpleDescription', { prize }))
       .addFields(
         {
@@ -299,7 +345,10 @@ async function handleSimple(interaction: ChatInputCommandInteraction): Promise<a
       .setFooter({
         text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId }),
       })
-      .setTimestamp();
+      .setTimestamp(giveaway.endTime);
+
+    if (embedImage) embed.setImage(embedImage);
+    if (embedThumbnail) embed.setThumbnail(embedThumbnail);
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -399,6 +448,9 @@ async function handleReroll(interaction: ChatInputCommandInteraction): Promise<a
 
 async function handleConfigure(interaction: ChatInputCommandInteraction): Promise<any> {
   const giveawayId = interaction.options.getString('giveaway_id', true);
+  const embedTitle = interaction.options.getString('embed_title');
+  const embedImage = interaction.options.getAttachment('embed_image')?.url;
+  const embedThumbnail = interaction.options.getAttachment('embed_thumbnail')?.url;
 
   // Verify giveaway exists and user has permission
   const giveaway = await giveawayService.getGiveaway(giveawayId);
@@ -413,6 +465,14 @@ async function handleConfigure(interaction: ChatInputCommandInteraction): Promis
     return interaction.reply({
       content: t('commands.giveaway.notActive'),
       ephemeral: true,
+    });
+  }
+
+  if (embedTitle || embedImage || embedThumbnail) {
+    giveawayService.startCommandEmbedCache.set(interaction.user.id, {
+      embedTitle,
+      embedImage,
+      embedThumbnail,
     });
   }
 

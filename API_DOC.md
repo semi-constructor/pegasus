@@ -1637,7 +1637,11 @@ Creates a giveaway, posts an interactive embed with an entry button in Discord, 
     { "roleId": "88877766655544433", "entries": 2 }
   ],
   "allowedRoles": [],
-  "blockedRoles": []
+  "blockedRoles": [],
+  "embedTitle": "Custom Giveaway!",
+  "embedImage": "https://example.com/giveaway-banner.png",
+  "embedThumbnail": "https://example.com/icon.png",
+  "embedColor": "#FF5500"
 }
 ```
 *(Where `duration` is in milliseconds; `86400000` = 1 day).*
@@ -1663,7 +1667,11 @@ Updates properties of an active giveaway and edits the Discord embed message.
 - **Request Body Schema:** *(Any subset of the creation schema)*
 ```json
 {
-  "winnerCount": 3
+  "winnerCount": 3,
+  "embedTitle": "Updated Custom Giveaway!",
+  "embedImage": "https://example.com/new-giveaway-banner.png",
+  "embedThumbnail": "https://example.com/new-icon.png",
+  "embedColor": "#00AAFF"
 }
 ```
 - **Response Schema:**

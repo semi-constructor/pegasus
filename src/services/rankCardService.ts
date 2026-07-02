@@ -172,12 +172,12 @@ export class RankCardService {
       const contentWidth = this.cardWidth - textX - this.padding;
 
       // Username
-      ctx.font = 'bold 36px sans-serif';
+      ctx.font = 'bold 36px sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
       ctx.fillStyle = textColor;
       ctx.fillText(this.truncateText(ctx, rankData.username, contentWidth), textX, 70);
 
       // Rank and Level
-      ctx.font = '24px sans-serif';
+      ctx.font = '24px sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
       ctx.fillStyle = accentColor;
       ctx.fillText(`Rank #${rankData.rank}`, textX, 110);
 
@@ -185,7 +185,7 @@ export class RankCardService {
       ctx.fillText(`Level ${rankData.level}`, textX + 150, 110);
 
       // XP Text
-      ctx.font = '20px sans-serif';
+      ctx.font = '20px sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
       ctx.fillStyle = textColor;
       const xpText = `${rankData.xp.toLocaleString()} / ${rankData.nextLevelXp.toLocaleString()} XP`;
       ctx.fillText(xpText, textX, 145);
@@ -269,7 +269,7 @@ export class RankCardService {
     ctx.fill();
 
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 48px sans-serif';
+    ctx.font = 'bold 48px sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('?', x + this.avatarSize / 2, y + this.avatarSize / 2);

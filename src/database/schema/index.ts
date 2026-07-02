@@ -11,3 +11,4 @@ export * from './jtc';
 export * from './automod';
 export * from './engagement';
 export * from './ticket_workflows';
+export * from './auth';

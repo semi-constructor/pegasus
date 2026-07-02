@@ -7,6 +7,7 @@ import {
   uuid,
   bigint,
   text,
+  serial,
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
@@ -62,7 +63,7 @@ export const blacklist = pgTable(
 export const auditLogs = pgTable(
   'audit_logs',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     action: varchar('action', { length: 100 }).notNull(),
     userId: varchar('user_id', { length: 20 }).notNull(),
     guildId: varchar('guild_id', { length: 20 }).notNull(),

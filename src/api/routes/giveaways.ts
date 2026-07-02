@@ -35,6 +35,10 @@ const createGiveawaySchema = z.object({
     .optional(),
   allowedRoles: z.array(z.string()).optional(),
   blockedRoles: z.array(z.string()).optional(),
+  embedTitle: z.string().max(255).optional(),
+  embedColor: z.string().or(z.number()).optional(),
+  embedImage: z.string().url().max(500).optional(),
+  embedThumbnail: z.string().url().max(500).optional(),
 });
 
 const updateGiveawaySchema = z.object({
@@ -51,6 +55,10 @@ const updateGiveawaySchema = z.object({
       })
     )
     .optional(),
+  embedTitle: z.string().max(255).optional(),
+  embedColor: z.string().or(z.number()).optional(),
+  embedImage: z.string().url().max(500).optional(),
+  embedThumbnail: z.string().url().max(500).optional(),
 });
 
 // Helper function to select random winners
@@ -95,9 +103,11 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
     const giveawayId = uuidv4();
     const endTime = new Date(Date.now() + data.duration);
 
+    const color = typeof data.embedColor === 'string' ? parseInt(data.embedColor.replace('#', ''), 16) : (data.embedColor || 0x5865f2);
+
     // Create giveaway embed
     const embed = new EmbedBuilder()
-      .setTitle('🎉 GIVEAWAY 🎉')
+      .setTitle(data.embedTitle || '🎉 GIVEAWAY 🎉')
       .setDescription(
         `**Prize:** ${data.prize}\n${data.description || ''}\n\nReact with 🎉 to enter!`
       )
@@ -106,9 +116,12 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
         { name: 'Winners', value: data.winnerCount.toString(), inline: true },
         { name: 'Hosted By', value: `<@${data.hostedBy}>`, inline: true }
       )
-      .setColor(0x5865f2)
+      .setColor(color)
       .setFooter({ text: `Giveaway ID: ${giveawayId}` })
       .setTimestamp(endTime);
+
+    if (data.embedImage) embed.setImage(data.embedImage);
+    if (data.embedThumbnail) embed.setThumbnail(data.embedThumbnail);
 
     if (data.requiredRole) {
       embed.addFields({ name: 'Required Role', value: `<@&${data.requiredRole}>`, inline: false });
@@ -138,6 +151,10 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       prize: data.prize,
       description: data.description || null,
       winnerCount: data.winnerCount,
+      embedTitle: data.embedTitle || null,
+      embedColor: color,
+      embedImage: data.embedImage || null,
+      embedThumbnail: data.embedThumbnail || null,
       hostedBy: data.hostedBy,
       endTime,
       status: 'active',
@@ -225,6 +242,10 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
     if (updates.requiredRole !== undefined)
       updateData.requirements = { requiredRole: updates.requiredRole };
     if (updates.bonusEntries) updateData.bonusEntries = updates.bonusEntries || {};
+    if (updates.embedTitle !== undefined) updateData.embedTitle = updates.embedTitle;
+    if (updates.embedColor !== undefined) updateData.embedColor = typeof updates.embedColor === 'string' ? parseInt(updates.embedColor.replace('#', ''), 16) : updates.embedColor;
+    if (updates.embedImage !== undefined) updateData.embedImage = updates.embedImage;
+    if (updates.embedThumbnail !== undefined) updateData.embedThumbnail = updates.embedThumbnail;
 
     await db
       .update(giveaways)
@@ -240,8 +261,13 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
         const message = await channel.messages.fetch(giveaway.messageId);
         const endTime = updateData.endTime || giveaway.endTime;
 
+        const embedColor = updateData.embedColor !== undefined ? updateData.embedColor : giveaway.embedColor;
+        const embedTitle = updateData.embedTitle !== undefined ? updateData.embedTitle : giveaway.embedTitle;
+        const embedImage = updateData.embedImage !== undefined ? updateData.embedImage : giveaway.embedImage;
+        const embedThumbnail = updateData.embedThumbnail !== undefined ? updateData.embedThumbnail : giveaway.embedThumbnail;
+
         const embed = new EmbedBuilder()
-          .setTitle('🎉 GIVEAWAY 🎉')
+          .setTitle(embedTitle || '🎉 GIVEAWAY 🎉')
           .setDescription(
             `**Prize:** ${updateData.prize || giveaway.prize}\n${updateData.description || giveaway.description || ''}\n\nReact with 🎉 to enter!`
           )
@@ -254,9 +280,12 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
             },
             { name: 'Hosted By', value: `<@${giveaway.hostedBy}>`, inline: true }
           )
-          .setColor(0x5865f2)
+          .setColor(embedColor)
           .setFooter({ text: `Giveaway ID: ${giveawayId}` })
           .setTimestamp(endTime);
+
+        if (embedImage) embed.setImage(embedImage);
+        if (embedThumbnail) embed.setThumbnail(embedThumbnail);
 
         await message.edit({ embeds: [embed] });
       } catch (error) {

@@ -95,6 +95,11 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
   }
 
   try {
+    const cachedEmbed = giveawayService.startCommandEmbedCache.get(interaction.user.id);
+    if (cachedEmbed) {
+      giveawayService.startCommandEmbedCache.delete(interaction.user.id);
+    }
+
     const giveaway = await giveawayService.createGiveaway({
       guildId: interaction.guild!.id,
       channelId: channel.id,
@@ -106,12 +111,15 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
       requirements,
       bonusEntries,
       embedColor,
+      embedTitle: cachedEmbed?.embedTitle,
+      embedImage: cachedEmbed?.embedImage,
+      embedThumbnail: cachedEmbed?.embedThumbnail,
     });
 
     // Build embed
     const embed = new EmbedBuilder()
       .setColor(embedColor)
-      .setTitle(t('commands.giveaway.embed.title'))
+      .setTitle(cachedEmbed?.embedTitle || t('commands.giveaway.embed.title'))
       .setDescription(description || t('commands.giveaway.embed.description', { prize }))
       .addFields(
         {
@@ -133,7 +141,10 @@ async function handleGiveawayStart(interaction: ModalSubmitInteraction, params: 
       .setFooter({
         text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId }),
       })
-      .setTimestamp();
+      .setTimestamp(giveaway.endTime);
+
+    if (cachedEmbed?.embedImage) embed.setImage(cachedEmbed.embedImage);
+    if (cachedEmbed?.embedThumbnail) embed.setThumbnail(cachedEmbed.embedThumbnail);
 
     // Add requirements field if any
     if (Object.keys(requirements).length > 0) {
@@ -260,6 +271,11 @@ async function handleGiveawayConfigure(interaction: ModalSubmitInteraction, give
   }
 
   try {
+    const cachedEmbed = giveawayService.startCommandEmbedCache.get(interaction.user.id);
+    if (cachedEmbed) {
+      giveawayService.startCommandEmbedCache.delete(interaction.user.id);
+    }
+
     await giveawayService.updateGiveaway(
       giveawayId,
       {
@@ -268,6 +284,9 @@ async function handleGiveawayConfigure(interaction: ModalSubmitInteraction, give
         description,
         requirements,
         bonusEntries,
+        ...(cachedEmbed?.embedTitle !== undefined ? { embedTitle: cachedEmbed.embedTitle } : {}),
+        ...(cachedEmbed?.embedImage !== undefined ? { embedImage: cachedEmbed.embedImage } : {}),
+        ...(cachedEmbed?.embedThumbnail !== undefined ? { embedThumbnail: cachedEmbed.embedThumbnail } : {}),
       },
       interaction.user
     );
