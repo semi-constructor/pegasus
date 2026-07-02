@@ -213,7 +213,7 @@ export const RateLimitPresets = {
   // Stats endpoint rate limit (matches dashboard refresh rate)
   stats: {
     windowMs: 500,
-    maxRequests: 2,
+    maxRequests: 50,
     keyGenerator: (req: Request) => {
       const ip = req.ip || 'unknown';
       return `stats:${ip}`;
