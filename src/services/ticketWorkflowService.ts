@@ -23,6 +23,8 @@ import { ticketRepository } from '../repositories/ticketRepository';
 import { t } from '../i18n';
 
 export class TicketWorkflowService {
+  private creationLocks = new Set<string>();
+
   async sendPanelWithDepartments(
     guild: Guild,
     channel: TextChannel,
@@ -82,7 +84,7 @@ export class TicketWorkflowService {
     departmentId: string
   ): Promise<void> {
     const guild = interaction.guild!;
-    const department = await ticketWorkflowRepository.getDepartment(guild.id, departmentId);
+    const department = await ticketWorkflowRepository.getDepartment(guild.id, panelDbId, departmentId);
     if (!department) {
       await interaction.reply({ content: t('tickets.departmentNotFound'), ephemeral: true });
       return;
@@ -136,13 +138,20 @@ export class TicketWorkflowService {
     const panel = await ticketRepository.getPanelById(panelDbId);
     if (!panel) throw new Error(t('tickets.panelNotFound'));
 
-    const department = await ticketWorkflowRepository.getDepartment(guild.id, departmentId);
+    const department = await ticketWorkflowRepository.getDepartment(guild.id, panel.id, departmentId);
     if (!department) throw new Error(t('tickets.departmentNotFound'));
 
-    const openTickets = await ticketRepository.getUserOpenTicketsByPanel(member.id, panel.id);
-    if (openTickets.length >= panel.maxTicketsPerUser) {
-      throw new Error(t('tickets.maxTicketsReached', { max: panel.maxTicketsPerUser }));
+    const lockKey = `${panel.id}:${member.id}`;
+    if (this.creationLocks.has(lockKey)) {
+      throw new Error('Please wait, a ticket is already being created for you.');
     }
+    this.creationLocks.add(lockKey);
+
+    try {
+      const openTickets = await ticketRepository.getUserOpenTicketsByPanel(member.id, panel.id);
+      if (openTickets.length >= panel.maxTicketsPerUser) {
+        throw new Error(t('tickets.maxTicketsReached', { max: panel.maxTicketsPerUser }));
+      }
 
     const ticketNumber = await ticketRepository.getNextTicketNumber(guild.id);
     const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace(
@@ -158,10 +167,10 @@ export class TicketWorkflowService {
       } catch (error) {}
     }
 
-    const supportRoles = [
+    const supportRoles = Array.from(new Set([
       ...(department.supportRoles ?? []),
       ...((panel.supportRoles as string[]) ?? []),
-    ];
+    ])).filter(roleId => guild.roles.cache.has(roleId));
 
     const ticketChannel = await guild.channels.create({
       name: ticketName,
@@ -289,6 +298,9 @@ export class TicketWorkflowService {
     );
 
     return { ticket, channel: ticketChannel };
+    } finally {
+      this.creationLocks.delete(lockKey);
+    }
   }
 
   async handleTicketRating(

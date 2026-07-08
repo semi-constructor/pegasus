@@ -80,11 +80,12 @@ async function logModAction(
     .returning();
 
   if (type === 'ban' && expiresAt) {
-    await moderationScheduler.scheduleTempBan({
+    await moderationScheduler.scheduleTempAction({
       caseId: newCase.id,
       guildId,
       userId,
       expiresAt,
+      type: 'ban',
     });
   }
 

@@ -2,6 +2,7 @@ import { Message, GuildMember } from 'discord.js';
 import { autoModRepository } from '../repositories/autoModRepository';
 import { logger } from '../utils/logger';
 import type { AutoModRule, QuarantineVault } from '../types';
+import { safeRegexTest } from '../utils/regexUtils';
 
 export class AutoModService {
   async evaluateMessage(message: Message): Promise<boolean> {
@@ -52,12 +53,7 @@ export class AutoModService {
       case 'REGEX': {
         const patterns: string[] = triggerMetadata?.regexPatterns || [];
         return patterns.some(pattern => {
-          try {
-            const regex = new RegExp(pattern, 'i');
-            return regex.test(content);
-          } catch {
-            return false;
-          }
+          return safeRegexTest(pattern, 'i', content);
         });
       }
       case 'MENTION_SPAM': {

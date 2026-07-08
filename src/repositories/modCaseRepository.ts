@@ -106,13 +106,13 @@ export class ModCaseRepository {
     return results.map(record => this.mapCase(record));
   }
 
-  async getActiveTempBans(): Promise<ModCase[]> {
+  async getActiveTempActions(): Promise<ModCase[]> {
     const results = await this.db
       .select()
       .from(modCases)
       .where(
         and(
-          eq(modCases.type, 'ban'),
+          or(eq(modCases.type, 'ban'), eq(modCases.type, 'mute')),
           isNotNull(modCases.expiresAt),
           gt(modCases.expiresAt, new Date())
         )
@@ -121,7 +121,7 @@ export class ModCaseRepository {
     return results.map(record => this.mapCase(record));
   }
 
-  async markTempBanCompleted(caseId: number): Promise<void> {
+  async markTempActionCompleted(caseId: number): Promise<void> {
     await this.db
       .update(modCases)
       .set({

@@ -72,6 +72,9 @@ export class EconomyService {
 
       const updatedBalance = await economyRepository.addToBalance(userId, guildId, amount);
       if (!updatedBalance) {
+        if (amount < 0) {
+          return { success: false, error: t('commands.economy.errors.insufficientFunds') };
+        }
         return { success: false, error: t('commands.economy.errors.general') };
       }
 
@@ -120,7 +123,7 @@ export class EconomyService {
       }
 
       // Add to receiver
-      await this.addMoney(
+      const receiverResult = await this.addMoney(
         toUserId,
         guildId,
         amount,
@@ -128,6 +131,12 @@ export class EconomyService {
         description || `Transfer from user`,
         { relatedUserId: fromUserId }
       );
+
+      if (!receiverResult.success) {
+        // Revert deduction
+        await this.addMoney(fromUserId, guildId, amount, 'transfer_revert', 'Transfer failed');
+        return receiverResult;
+      }
 
       return senderResult;
     } catch (error) {
@@ -168,11 +177,7 @@ export class EconomyService {
 
         // If claimed within 48 hours, continue streak
         if (timeSinceLastClaim < oneDayMs * 2) {
-          type CooldownWithMetadata = typeof lastCooldown & {
-            streakDays?: number;
-          };
-          const metadata = lastCooldown as CooldownWithMetadata;
-          streakDays = (metadata.streakDays ?? 0) + 1;
+          streakDays = lastCooldown.streakDays + 1;
           totalAmount += settings.dailyStreakBonus * (streakDays - 1);
         }
       }
@@ -186,6 +191,7 @@ export class EconomyService {
         commandType: 'daily',
         lastUsed: now,
         nextAvailable,
+        streakDays,
       });
 
       // Add money
@@ -333,6 +339,10 @@ export class EconomyService {
         const maxSteal = Math.floor(robberBalance.balance * 0.5);
         amount = Math.min(amount, maxSteal);
 
+        if (amount <= 0) {
+          return { success: false, error: t('commands.economy.rob.notEnoughMoney') };
+        }
+
         // Transfer money
         await this.addMoney(victimId, guildId, -amount, 'rob', 'Got robbed', { robberId });
         const robberResult = await this.addMoney(
@@ -369,7 +379,7 @@ export class EconomyService {
           return {
             success: false,
             amount: -fine,
-            robberBalance: result.balance ?? ({} as EconomyBalance),
+            robberBalance: result.balance ?? robberBalance,
             error:
               t('commands.economy.rob.failedText', { user: '' }) +
               ` (${fine} ${settings.currencyName})`,
@@ -427,7 +437,7 @@ export class EconomyService {
         }
       }
 
-      // Deduct money
+      // Deduct money FIRST
       const transactionResult = await this.addMoney(
         userId,
         guildId,
@@ -441,31 +451,46 @@ export class EconomyService {
         return { success: false, error: transactionResult.error };
       }
 
+      if (item.stock !== null && item.stock !== -1) {
+        const stockConsumed = await economyRepository.consumeShopItemStock(itemId, quantity);
+        if (!stockConsumed) {
+          // Revert money deduction
+          await this.addMoney(userId, guildId, totalCost, 'shop_refund', `Refund for failed purchase of ${item.name}`);
+          return { success: false, error: t('commands.economy.errors.notEnoughStock') };
+        }
+      }
+
       // Check if user already has this item
       const existingItem = await economyRepository.getUserItem(userId, guildId, itemId);
+
+      // Calculate expiration if applicable
+      let expiresAt: Date | undefined;
+      if (item.effectType === 'rob_protection' && item.effectValue) {
+        interface EffectValue {
+          duration?: number;
+        }
+        const effectValue = item.effectValue as EffectValue;
+        const duration = effectValue.duration ?? 86400;
+        expiresAt = new Date(Date.now() + duration * 1000);
+      }
 
       let userItem: EconomyUserItem;
       if (existingItem) {
         // Update quantity
         const updatedItem = await economyRepository.updateUserItem(existingItem.id, {
           quantity: existingItem.quantity + quantity,
+          expiresAt: expiresAt ?? existingItem.expiresAt,
         });
         if (!updatedItem) {
+          // Revert money and stock
+          await this.addMoney(userId, guildId, totalCost, 'shop_refund', `Refund`);
+          if (item.stock !== null && item.stock !== -1) {
+            await economyRepository.updateShopItem(itemId, { stock: item.stock - quantity + quantity });
+          }
           return { success: false, error: t('commands.economy.errors.general') };
         }
         userItem = updatedItem;
       } else {
-        // Calculate expiration if applicable
-        let expiresAt: Date | undefined;
-        if (item.effectType === 'rob_protection' && item.effectValue) {
-          interface EffectValue {
-            duration?: number;
-          }
-          const effectValue = item.effectValue as EffectValue;
-          const duration = effectValue.duration ?? 86400;
-          expiresAt = new Date(Date.now() + duration * 1000);
-        }
-
         // Add item to user inventory
         userItem = await economyRepository.addUserItem({
           userId,
@@ -473,13 +498,6 @@ export class EconomyService {
           itemId,
           quantity,
           expiresAt,
-        });
-      }
-
-      // Update stock if not unlimited
-      if (item.stock !== null && item.stock !== -1) {
-        await economyRepository.updateShopItem(itemId, {
-          stock: item.stock - quantity,
         });
       }
 

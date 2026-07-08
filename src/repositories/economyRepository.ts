@@ -64,6 +64,15 @@ export class EconomyRepository {
     guildId: string,
     amount: number
   ): Promise<EconomyBalance | null> {
+    const conditions = [
+      eq(economyBalances.userId, userId),
+      eq(economyBalances.guildId, guildId)
+    ];
+    
+    if (amount < 0) {
+      conditions.push(gte(economyBalances.balance, Math.abs(amount)));
+    }
+
     const [updated] = await this.db
       .update(economyBalances)
       .set({
@@ -72,7 +81,7 @@ export class EconomyRepository {
         totalSpent:
           amount < 0 ? sql`${economyBalances.totalSpent} + ${Math.abs(amount)}` : undefined,
       })
-      .where(and(eq(economyBalances.userId, userId), eq(economyBalances.guildId, guildId)))
+      .where(and(...conditions))
       .returning();
 
     return updated || null;
@@ -143,6 +152,16 @@ export class EconomyRepository {
       .returning();
 
     return updated || null;
+  }
+
+  async consumeShopItemStock(itemId: string, quantity: number): Promise<boolean> {
+    const [updated] = await this.db
+      .update(economyShopItems)
+      .set({ stock: sql`${economyShopItems.stock} - ${quantity}` })
+      .where(and(eq(economyShopItems.id, itemId), gte(economyShopItems.stock, quantity)))
+      .returning();
+
+    return !!updated;
   }
 
   // User items operations
@@ -255,6 +274,7 @@ export class EconomyRepository {
         set: {
           lastUsed: data.lastUsed,
           nextAvailable: data.nextAvailable,
+          streakDays: data.streakDays,
         },
       })
       .returning();
@@ -298,58 +318,46 @@ export class EconomyRepository {
     wagered: number,
     payout: number
   ): Promise<EconomyGamblingStats> {
-    const existing = await this.getGamblingStats(userId, guildId, gameType);
-
     const netAmount = payout - wagered;
     const isWin = netAmount > 0;
+    const netAbs = Math.abs(netAmount);
 
-    if (existing) {
-      const newStreak = won ? existing.currentStreak + 1 : 0;
-      const [updated] = await this.db
-        .update(economyGamblingStats)
-        .set({
-          gamesPlayed: existing.gamesPlayed + 1,
-          gamesWon: existing.gamesWon + (won ? 1 : 0),
-          totalWagered: existing.totalWagered + wagered,
-          totalWon: existing.totalWon + (isWin ? netAmount : 0),
-          biggestWin: isWin && netAmount > existing.biggestWin ? netAmount : existing.biggestWin,
-          biggestLoss:
-            !isWin && Math.abs(netAmount) > existing.biggestLoss
-              ? Math.abs(netAmount)
-              : existing.biggestLoss,
-          currentStreak: newStreak,
-          bestStreak: newStreak > existing.bestStreak ? newStreak : existing.bestStreak,
-        })
-        .where(
-          and(
-            eq(economyGamblingStats.userId, userId),
-            eq(economyGamblingStats.guildId, guildId),
-            eq(economyGamblingStats.gameType, gameType)
-          )
-        )
-        .returning();
+    const [updated] = await this.db
+      .insert(economyGamblingStats)
+      .values({
+        userId,
+        guildId,
+        gameType,
+        gamesPlayed: 1,
+        gamesWon: won ? 1 : 0,
+        totalWagered: wagered,
+        totalWon: isWin ? netAmount : 0,
+        biggestWin: isWin ? netAmount : 0,
+        biggestLoss: !isWin ? netAbs : 0,
+        currentStreak: won ? 1 : 0,
+        bestStreak: won ? 1 : 0,
+      })
+      .onConflictDoUpdate({
+        target: [
+          economyGamblingStats.userId,
+          economyGamblingStats.guildId,
+          economyGamblingStats.gameType,
+        ],
+        set: {
+          gamesPlayed: sql`${economyGamblingStats.gamesPlayed} + 1`,
+          gamesWon: sql`${economyGamblingStats.gamesWon} + ${won ? 1 : 0}`,
+          totalWagered: sql`${economyGamblingStats.totalWagered} + ${wagered}`,
+          totalWon: sql`${economyGamblingStats.totalWon} + ${isWin ? netAmount : 0}`,
+          biggestWin: sql`GREATEST(${economyGamblingStats.biggestWin}, ${isWin ? netAmount : 0})`,
+          biggestLoss: sql`GREATEST(${economyGamblingStats.biggestLoss}, ${!isWin ? netAbs : 0})`,
+          currentStreak: won ? sql`${economyGamblingStats.currentStreak} + 1` : 0,
+          bestStreak: won ? sql`GREATEST(${economyGamblingStats.bestStreak}, ${economyGamblingStats.currentStreak} + 1)` : economyGamblingStats.bestStreak,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
 
-      return updated;
-    } else {
-      const [created] = await this.db
-        .insert(economyGamblingStats)
-        .values({
-          userId,
-          guildId,
-          gameType,
-          gamesPlayed: 1,
-          gamesWon: won ? 1 : 0,
-          totalWagered: wagered,
-          totalWon: isWin ? netAmount : 0,
-          biggestWin: isWin ? netAmount : 0,
-          biggestLoss: !isWin ? Math.abs(netAmount) : 0,
-          currentStreak: won ? 1 : 0,
-          bestStreak: won ? 1 : 0,
-        })
-        .returning();
-
-      return created;
-    }
+    return updated;
   }
 
   async getRecentGambles(userId: string, guildId: string, seconds: number): Promise<number> {

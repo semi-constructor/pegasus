@@ -68,6 +68,7 @@ pnpm-lock.yaml
 
 # Claude specific
 .claude/
+.ai/
 *.md
 !README.md
 !SECURITY.md

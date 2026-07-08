@@ -615,6 +615,19 @@ async function processXPGain(message: Message) {
         }
       }
     }
+
+    // Remove old roles
+    if (result.rolesToRemove && result.rolesToRemove.length > 0) {
+      for (const roleId of result.rolesToRemove) {
+        try {
+          if (message.member && message.member.roles.cache.has(roleId)) {
+            await message.member.roles.remove(roleId);
+          }
+        } catch (error) {
+          logger.error(`Failed to remove role ${roleId} from member ${message.author.id}:`, error);
+        }
+      }
+    }
   } catch (error) {
     logger.error('Failed to process XP gain:', error);
   }

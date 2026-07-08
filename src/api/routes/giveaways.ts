@@ -5,6 +5,7 @@ import { giveaways, giveawayEntries } from '../../database/schema';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
 import { z } from 'zod';
+import { t } from '../../i18n';
 import { v4 as uuidv4 } from 'uuid';
 import {
   EmbedBuilder,
@@ -13,6 +14,7 @@ import {
   ButtonStyle,
   TextChannel,
 } from 'discord.js';
+import { giveawayService } from '../../services/giveawayService';
 
 const router = Router();
 
@@ -61,11 +63,7 @@ const updateGiveawaySchema = z.object({
   embedThumbnail: z.string().url().max(500).optional(),
 });
 
-// Helper function to select random winners
-function selectWinners(entries: string[], count: number): string[] {
-  const shuffled = [...entries].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(count, entries.length));
-}
+// Helper function to select random winners (Removed as we use giveawayService)
 
 // POST /guilds/{guildId}/giveaways - Create giveaway
 router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
@@ -99,11 +97,11 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       });
     }
 
-    const db = getDatabase();
     const giveawayId = uuidv4();
     const endTime = new Date(Date.now() + data.duration);
 
-    const color = typeof data.embedColor === 'string' ? parseInt(data.embedColor.replace('#', ''), 16) : (data.embedColor || 0x5865f2);
+    let color = typeof data.embedColor === 'string' ? parseInt(data.embedColor.replace('#', ''), 16) : (data.embedColor || 0x5865f2);
+    if (isNaN(color)) color = 0x5865f2;
 
     // Create giveaway embed
     const embed = new EmbedBuilder()
@@ -127,58 +125,56 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       embed.addFields({ name: 'Required Role', value: `<@&${data.requiredRole}>`, inline: false });
     }
 
-    // Create button for entering
-    const button = new ButtonBuilder()
-      .setCustomId(`giveaway_enter_${giveawayId}`)
-      .setLabel('0 Entries')
-      .setStyle(ButtonStyle.Primary)
-      .setEmoji('🎉');
-
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
-
-    // Send giveaway message
+    // Send giveaway message initially
     const message = await channel.send({
       embeds: [embed],
-      components: [row],
     });
 
-    // Create giveaway in database
-    await db.insert(giveaways).values({
-      giveawayId,
+    // Create giveaway using giveawayService
+    const giveaway = await giveawayService.createGiveaway({
       guildId,
       channelId: data.channelId,
-      messageId: message.id,
+      hostedBy: data.hostedBy,
       prize: data.prize,
-      description: data.description || null,
       winnerCount: data.winnerCount,
+      endTime,
+      description: data.description || null,
+      requirements: data.requiredRole ? { roleIds: [data.requiredRole] } : {},
+      bonusEntries: data.bonusEntries ? { roles: Object.fromEntries(data.bonusEntries.map(b => [b.roleId, b.entries])) } : {},
       embedTitle: data.embedTitle || null,
       embedColor: color,
       embedImage: data.embedImage || null,
       embedThumbnail: data.embedThumbnail || null,
-      hostedBy: data.hostedBy,
-      endTime,
-      status: 'active',
-      requirements: data.requiredRole ? { requiredRole: data.requiredRole } : {},
-      bonusEntries: data.bonusEntries || {},
-      createdAt: new Date(),
     });
 
-    // Schedule giveaway end
-    setTimeout(async () => {
-      try {
-        // Auto-end the giveaway
-        await endGiveaway(giveawayId, guildId);
-      } catch (error) {
-        logger.error(`Failed to auto-end giveaway ${giveawayId}:`, error);
-      }
-    }, data.duration);
+    // Update message ID in the database
+    await giveawayService.updateGiveawayMessage(giveaway.giveawayId, message.id);
 
-    logger.info(`Created giveaway ${giveawayId} in guild ${guildId}`);
+    // Also update our button customId to use gw_enter
+    const button = new ButtonBuilder()
+      .setCustomId(`gw_enter:${giveaway.giveawayId}`)
+      .setLabel(t('commands.giveaway.buttons.enter', { defaultValue: 'Enter' }))
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('🎉');
+
+    const infoButton = new ButtonBuilder()
+      .setCustomId(`gw_info:${giveaway.giveawayId}`)
+      .setLabel(t('commands.giveaway.buttons.info', { defaultValue: 'Info' }))
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('ℹ️');
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button, infoButton);
+    
+    embed.setFooter({ text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId, defaultValue: `Giveaway ID: ${giveaway.giveawayId}` }) });
+    
+    await message.edit({ embeds: [embed], components: [row] });
+
+    logger.info(`Created giveaway ${giveaway.giveawayId} in guild ${guildId}`);
 
     return res.status(201).json({
       success: true,
       giveaway: {
-        id: giveawayId,
+        id: giveaway.giveawayId,
         prize: data.prize,
         channelId: data.channelId,
         messageId: message.id,
@@ -243,7 +239,10 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
       updateData.requirements = { requiredRole: updates.requiredRole };
     if (updates.bonusEntries) updateData.bonusEntries = updates.bonusEntries || {};
     if (updates.embedTitle !== undefined) updateData.embedTitle = updates.embedTitle;
-    if (updates.embedColor !== undefined) updateData.embedColor = typeof updates.embedColor === 'string' ? parseInt(updates.embedColor.replace('#', ''), 16) : updates.embedColor;
+    if (updates.embedColor !== undefined) {
+      const parsedColor = typeof updates.embedColor === 'string' ? parseInt(updates.embedColor.replace('#', ''), 16) : updates.embedColor;
+      if (!isNaN(parsedColor as number)) updateData.embedColor = parsedColor;
+    }
     if (updates.embedImage !== undefined) updateData.embedImage = updates.embedImage;
     if (updates.embedThumbnail !== undefined) updateData.embedThumbnail = updates.embedThumbnail;
 
@@ -363,88 +362,20 @@ router.delete('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respo
   }
 });
 
-// Helper function to end a giveaway
-async function endGiveaway(giveawayId: string, guildId: string) {
-  const db = getDatabase();
-
-  // Get giveaway
-  const [giveaway] = await db
-    .select()
-    .from(giveaways)
-    .where(and(eq(giveaways.giveawayId, giveawayId), eq(giveaways.guildId, guildId)))
-    .limit(1);
-
-  if (!giveaway || giveaway.status !== 'active') {
-    return null;
-  }
-
-  // Get all entries
-  const entries = await db
-    .select()
-    .from(giveawayEntries)
-    .where(eq(giveawayEntries.giveawayId, giveawayId));
-
-  // Select winners
-  const uniqueUsers = [...new Set(entries.map(e => e.userId))];
-  const winners = selectWinners(uniqueUsers, giveaway.winnerCount);
-
-  // Update giveaway status
-  await db
-    .update(giveaways)
-    .set({
-      status: 'ended',
-      winners,
-      endedAt: new Date(),
-    })
-    .where(eq(giveaways.giveawayId, giveawayId));
-
-  // Update message
-  const guild = client.guilds.cache.get(guildId);
-  const channel = guild?.channels.cache.get(giveaway.channelId) as TextChannel;
-
-  if (channel && giveaway.messageId) {
-    try {
-      const message = await channel.messages.fetch(giveaway.messageId);
-
-      const embed = new EmbedBuilder()
-        .setTitle('🎉 GIVEAWAY ENDED 🎉')
-        .setDescription(`**Prize:** ${giveaway.prize}`)
-        .addFields({
-          name: 'Winners',
-          value: winners.length > 0 ? winners.map(w => `<@${w}>`).join(', ') : 'No valid entries',
-          inline: false,
-        })
-        .setColor(0xff0000)
-        .setFooter({ text: `Giveaway ID: ${giveawayId}` })
-        .setTimestamp();
-
-      await message.edit({ embeds: [embed], components: [] });
-
-      // Announce winners
-      if (winners.length > 0) {
-        await channel.send({
-          content: `Congratulations ${winners.map(w => `<@${w}>`).join(', ')}! You won **${giveaway.prize}**!`,
-        });
-      }
-    } catch (error) {
-      logger.error(`Could not update giveaway end message: ${error}`);
-    }
-  }
-
-  return winners;
-}
+// Helper function to end a giveaway removed, use giveawayService
 
 // POST /guilds/{guildId}/giveaways/{giveawayId}/end - End giveaway
 router.post('/:guildId/giveaways/:giveawayId/end', async (req: Request, res: Response) => {
   const { guildId, giveawayId } = req.params;
 
   try {
-    const winners = await endGiveaway(giveawayId, guildId);
+    // API end request, mock the user
+    const result = await giveawayService.endGiveaway(giveawayId, { id: 'api' } as any);
 
-    if (winners === null) {
+    if (!result.success) {
       return res.status(400).json({
         error: 'Bad Request',
-        message: 'Giveaway not found or already ended',
+        message: result.error || 'Giveaway not found or already ended',
       });
     }
 
@@ -452,7 +383,7 @@ router.post('/:guildId/giveaways/:giveawayId/end', async (req: Request, res: Res
 
     return res.json({
       success: true,
-      winners,
+      winners: result.winners,
       message: 'Giveaway ended successfully',
     });
   } catch (error) {
@@ -468,59 +399,13 @@ router.post('/:guildId/giveaways/:giveawayId/end', async (req: Request, res: Res
 router.post('/:guildId/giveaways/:giveawayId/reroll', async (req: Request, res: Response) => {
   const { guildId, giveawayId } = req.params;
   const { count = 1 } = req.body;
-
   try {
-    const db = getDatabase();
+    const result = await giveawayService.rerollGiveaway(giveawayId, { id: 'api' } as any, count);
 
-    // Get giveaway
-    const [giveaway] = await db
-      .select()
-      .from(giveaways)
-      .where(and(eq(giveaways.giveawayId, giveawayId), eq(giveaways.guildId, guildId)))
-      .limit(1);
-
-    if (!giveaway) {
-      return res.status(404).json({
-        error: 'Not Found',
-        message: 'Giveaway not found',
-      });
-    }
-
-    if (giveaway.status !== 'ended') {
+    if (!result.success) {
       return res.status(400).json({
         error: 'Bad Request',
-        message: 'Can only reroll ended giveaways',
-      });
-    }
-
-    // Get all entries
-    const entries = await db
-      .select()
-      .from(giveawayEntries)
-      .where(eq(giveawayEntries.giveawayId, giveawayId));
-
-    // Select new winners (excluding previous winners)
-    const previousWinners = (giveaway.winners as string[]) || [];
-    const eligibleUsers = [...new Set(entries.map(e => e.userId))].filter(
-      u => !previousWinners.includes(u)
-    );
-
-    const newWinners = selectWinners(eligibleUsers, count);
-
-    if (newWinners.length === 0) {
-      return res.status(400).json({
-        error: 'Bad Request',
-        message: 'No eligible participants for reroll',
-      });
-    }
-
-    // Announce new winners
-    const guild = client.guilds.cache.get(guildId);
-    const channel = guild?.channels.cache.get(giveaway.channelId) as TextChannel;
-
-    if (channel) {
-      await channel.send({
-        content: `🎉 **REROLL!** Congratulations ${newWinners.map(w => `<@${w}>`).join(', ')}! You won **${giveaway.prize}**!`,
+        message: result.error || 'No eligible participants for reroll',
       });
     }
 
@@ -528,7 +413,7 @@ router.post('/:guildId/giveaways/:giveawayId/reroll', async (req: Request, res: 
 
     return res.json({
       success: true,
-      newWinners,
+      newWinners: result.winners,
       message: 'Giveaway rerolled successfully',
     });
   } catch (error) {

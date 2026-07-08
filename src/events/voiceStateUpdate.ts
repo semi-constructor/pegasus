@@ -27,6 +27,17 @@ export async function execute(oldState: VoiceState, newState: VoiceState) {
       await handleVoiceLeave(oldState);
       await handleVoiceJoin(newState);
     }
+    // User muted/unmuted in the same channel
+    else if (oldState.channel && newState.channel && oldState.channel.id === newState.channel.id) {
+      const wasMuted = oldState.mute || oldState.deaf || oldState.selfMute || oldState.selfDeaf;
+      const isMuted = newState.mute || newState.deaf || newState.selfMute || newState.selfDeaf;
+      
+      if (!wasMuted && isMuted) {
+        await handleVoiceLeave(newState);
+      } else if (wasMuted && !isMuted) {
+        await handleVoiceJoin(newState);
+      }
+    }
   } catch (error) {
     logger.error('Error in voiceStateUpdate event:', error);
   }
@@ -96,6 +107,19 @@ async function handleVoiceLeave(state: VoiceState) {
             }
           } catch (error) {
             logger.error(`Failed to add role ${roleId} to member ${state.member.id}:`, error);
+          }
+        }
+      }
+      
+      // Remove old roles
+      if (result.rolesToRemove && result.rolesToRemove.length > 0) {
+        for (const roleId of result.rolesToRemove) {
+          try {
+            if (state.member.roles.cache.has(roleId)) {
+              await state.member.roles.remove(roleId);
+            }
+          } catch (error) {
+            logger.error(`Failed to remove role ${roleId} from member ${state.member.id}:`, error);
           }
         }
       }

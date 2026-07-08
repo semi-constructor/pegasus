@@ -127,6 +127,7 @@ export const economyCooldowns = pgTable(
     commandType: varchar('command_type', { length: 50 }).notNull(), // daily, work, rob
     lastUsed: timestamp('last_used').notNull(),
     nextAvailable: timestamp('next_available').notNull(),
+    streakDays: integer('streak_days').notNull().default(0),
   },
   table => ({
     pk: primaryKey({ columns: [table.userId, table.guildId, table.commandType] }),

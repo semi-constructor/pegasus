@@ -25,6 +25,7 @@ import { eq, and } from 'drizzle-orm';
 import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
+import { moderationScheduler } from '../../services/moderationScheduler';
 
 export const data = new SlashCommandBuilder()
   .setName('moderation')
@@ -878,20 +879,17 @@ async function handleMute(interaction: ChatInputCommandInteraction): Promise<any
     const durationMs = durationMinutes ? durationMinutes * 60 * 1000 : null;
     const expiresAt = durationMs ? new Date(Date.now() + durationMs) : null;
 
-    if (durationMs) {
-      setTimeout(async () => {
-        try {
-          const refreshedMember = await interaction.guild!.members.fetch(user.id).catch(() => null);
-          if (refreshedMember?.roles.cache.has(muteRole.id)) {
-            await refreshedMember.roles.remove(muteRole, 'Mute duration expired');
-          }
-        } catch (error) {
-          logger.warn(`Failed to automatically unmute ${user.id}:`, error);
-        }
-      }, durationMs);
-    }
+    const record = await recordModCase(interaction, user.id, 'mute', reason, durationMs ?? undefined, expiresAt);
 
-    await recordModCase(interaction, user.id, 'mute', reason, durationMs ?? undefined, expiresAt);
+    if (durationMs && record) {
+      await moderationScheduler.scheduleTempAction({
+        caseId: record.id,
+        guildId: interaction.guild!.id,
+        userId: user.id,
+        expiresAt: expiresAt!,
+        type: 'mute'
+      });
+    }
 
     await auditLogger.logAction({
       action: 'MEMBER_MUTE',
@@ -1816,9 +1814,9 @@ async function recordModCase(
   reason?: string,
   durationMs?: number,
   expiresAt?: Date | null
-): Promise<void> {
+) {
   try {
-    await modCaseRepository.create({
+    return await modCaseRepository.create({
       guildId: interaction.guild!.id,
       userId,
       moderatorId: interaction.user.id,
@@ -1829,5 +1827,6 @@ async function recordModCase(
     });
   } catch (error) {
     logger.error('Failed to record moderation case:', error);
+    return null;
   }
 }

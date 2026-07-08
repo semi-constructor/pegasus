@@ -16,10 +16,12 @@ import {
   ModalSubmitInteraction,
 } from 'discord.js';
 import { TicketRepository, TicketPanelData } from '../repositories/ticketRepository';
+import { ticketWorkflowRepository } from '../repositories/ticketWorkflowRepository';
 import { t } from '../i18n';
 
 export class TicketService {
   private ticketRepository: TicketRepository;
+  private creationLocks = new Set<string>();
 
   constructor() {
     this.ticketRepository = new TicketRepository();
@@ -134,31 +136,38 @@ export class TicketService {
     }
     const member = interaction.member as GuildMember;
 
-    // Check user's open tickets
-    const openTickets = await this.ticketRepository.getUserOpenTicketsByPanel(member.id, panel.id);
-    if (openTickets.length >= panel.maxTicketsPerUser) {
-      throw new Error(t('tickets.maxTicketsReached', { max: panel.maxTicketsPerUser }));
+    const lockKey = `${panel.id}:${member.id}`;
+    if (this.creationLocks.has(lockKey)) {
+      throw new Error('Please wait, a ticket is already being created for you.');
     }
+    this.creationLocks.add(lockKey);
 
-    // Get next ticket number
-    const ticketNumber = await this.ticketRepository.getNextTicketNumber(guild.id);
-    const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace(
-      '{number}',
-      ticketNumber.toString()
-    );
-
-    // Get or create category
-    let category: CategoryChannel | null = null;
-    if (panel.categoryId) {
-      try {
-        category = (await guild.channels.fetch(panel.categoryId)) as CategoryChannel;
-      } catch (error) {
-        // Category might have been deleted
+    try {
+      // Check user's open tickets
+      const openTickets = await this.ticketRepository.getUserOpenTicketsByPanel(member.id, panel.id);
+      if (openTickets.length >= panel.maxTicketsPerUser) {
+        throw new Error(t('tickets.maxTicketsReached', { max: panel.maxTicketsPerUser }));
       }
-    }
 
-    // Create ticket channel
-    const ticketChannel = await guild.channels.create({
+      // Get next ticket number
+      const ticketNumber = await this.ticketRepository.getNextTicketNumber(guild.id);
+      const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace(
+        '{number}',
+        ticketNumber.toString()
+      );
+
+      // Get or create category
+      let category: CategoryChannel | null = null;
+      if (panel.categoryId) {
+        try {
+          category = (await guild.channels.fetch(panel.categoryId)) as CategoryChannel;
+        } catch (error) {
+          // Category might have been deleted
+        }
+      }
+
+      // Create ticket channel
+      const ticketChannel = await guild.channels.create({
       name: ticketName,
       type: ChannelType.GuildText,
       parent: category?.id,
@@ -180,7 +189,9 @@ export class TicketService {
           type: OverwriteType.Member,
         },
         // Add support roles
-        ...(panel.supportRoles ?? []).map((roleId: string) => ({
+        ...Array.from(new Set(panel.supportRoles ?? [] as string[]))
+          .filter((roleId: string) => guild.roles.cache.has(roleId))
+          .map((roleId: string) => ({
           id: roleId,
           allow: [
             PermissionFlagsBits.ViewChannel,
@@ -195,82 +206,85 @@ export class TicketService {
       ],
     });
 
-    // Create ticket in database
-    const ticket = await this.ticketRepository.createTicket({
-      guildId: guild.id,
-      panelId: panel.id,
-      userId: member.id,
-      channelId: ticketChannel.id,
-      reason,
-      ticketNumber,
-    });
+      // Create ticket in database
+      const ticket = await this.ticketRepository.createTicket({
+        guildId: guild.id,
+        panelId: panel.id,
+        userId: member.id,
+        channelId: ticketChannel.id,
+        reason,
+        ticketNumber,
+      });
 
-    // Create ticket embed
-    const ticketEmbed = new EmbedBuilder()
-      .setTitle(t('tickets.ticketCreated', { number: ticketNumber }))
-      .setDescription(panel.welcomeMessage || t('tickets.welcomeMessage'))
-      .addFields([
-        {
-          name: t('tickets.createdBy'),
-          value: `<@${member.id}>`,
-          inline: true,
-        },
-        {
-          name: t('tickets.reason'),
-          value: reason || t('tickets.noReason'),
-          inline: false,
-        },
-      ])
-      .setColor(0x00ff00)
-      .setTimestamp();
+      // Create ticket embed
+      const ticketEmbed = new EmbedBuilder()
+        .setTitle(t('tickets.ticketCreated', { number: ticketNumber }))
+        .setDescription(panel.welcomeMessage || t('tickets.welcomeMessage'))
+        .addFields([
+          {
+            name: t('tickets.createdBy'),
+            value: `<@${member.id}>`,
+            inline: true,
+          },
+          {
+            name: t('tickets.reason'),
+            value: reason || t('tickets.noReason'),
+            inline: false,
+          },
+        ])
+        .setColor(0x00ff00)
+        .setTimestamp();
 
-    // Create control buttons
-    const controlButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`ticket_close:${ticket.id}`)
-        .setLabel(t('tickets.close'))
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('🔒'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_close_reason:${ticket.id}`)
-        .setLabel(t('tickets.closeWithReason'))
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('📝'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_lock:${ticket.id}`)
-        .setLabel(t('tickets.lock'))
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('🔐'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_freeze:${ticket.id}`)
-        .setLabel(t('tickets.freeze'))
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('❄️'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_claim:${ticket.id}`)
-        .setLabel(t('tickets.claim'))
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji('🙋')
-    );
+      // Create control buttons
+      const controlButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`ticket_close:${ticket.id}`)
+          .setLabel(t('tickets.close'))
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('🔒'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_close_reason:${ticket.id}`)
+          .setLabel(t('tickets.closeWithReason'))
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('📝'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_lock:${ticket.id}`)
+          .setLabel(t('tickets.lock'))
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('🔐'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_freeze:${ticket.id}`)
+          .setLabel(t('tickets.freeze'))
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('❄️'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_claim:${ticket.id}`)
+          .setLabel(t('tickets.claim'))
+          .setStyle(ButtonStyle.Primary)
+          .setEmoji('🙋')
+      );
 
-    // Send ticket panel and ping support roles
-    const supportPings = (panel.supportRoles ?? [])
-      .map((roleId: string) => `<@&${roleId}>`)
-      .join(' ');
-    await ticketChannel.send({
-      content: supportPings,
-      embeds: [ticketEmbed],
-      components: [controlButtons],
-    });
+      // Send ticket panel and ping support roles
+      const supportPings = (panel.supportRoles ?? [])
+        .map((roleId: string) => `<@&${roleId}>`)
+        .join(' ');
+      await ticketChannel.send({
+        content: supportPings,
+        embeds: [ticketEmbed],
+        components: [controlButtons],
+      });
 
-    // Log ticket creation
-    await this.ticketRepository.addTicketMessage(
-      ticket.id,
-      member.id,
-      t('tickets.ticketCreatedLog', { user: member.user.tag, reason })
-    );
+      // Log ticket creation
+      await this.ticketRepository.addTicketMessage(
+        ticket.id,
+        member.id,
+        t('tickets.ticketCreatedLog', { user: member.user.tag, reason })
+      );
 
-    return { ticket, channel: ticketChannel };
+      return { ticket, channel: ticketChannel };
+    } finally {
+      this.creationLocks.delete(lockKey);
+    }
   }
 
   // Ticket actions
@@ -372,9 +386,25 @@ export class TicketService {
       SendMessages: false,
     });
 
-    // Deny send messages for support roles
+    const rolesToFreeze = new Set<string>();
     if (panel && panel.supportRoles) {
       for (const roleId of panel.supportRoles as string[]) {
+        rolesToFreeze.add(roleId);
+      }
+    }
+
+    if (ticket.departmentId && panel) {
+      const department = await ticketWorkflowRepository.getDepartment(guild.id, panel.id, ticket.departmentId);
+      if (department && department.supportRoles) {
+        for (const roleId of department.supportRoles as string[]) {
+          rolesToFreeze.add(roleId);
+        }
+      }
+    }
+
+    // Deny send messages for support roles
+    for (const roleId of rolesToFreeze) {
+      if (guild.roles.cache.has(roleId)) {
         await channel.permissionOverwrites.edit(roleId, {
           SendMessages: false,
         });

@@ -39,7 +39,7 @@ export class TicketWorkflowRepository extends BaseRepository {
     });
   }
 
-  async getDepartment(guildId: string, departmentId: string): Promise<TicketDepartment | null> {
+  async getDepartment(guildId: string, panelId: string, departmentId: string): Promise<TicketDepartment | null> {
     return this.executeQuery('getDepartment', async () => {
       const [record] = await this.db
         .select()
@@ -47,6 +47,7 @@ export class TicketWorkflowRepository extends BaseRepository {
         .where(
           and(
             eq(ticketDepartments.guildId, guildId),
+            eq(ticketDepartments.panelId, panelId),
             eq(ticketDepartments.departmentId, departmentId)
           )
         )

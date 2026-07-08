@@ -7,7 +7,7 @@ import {
   members,
   economyBalances,
 } from '../../database/schema';
-import { inArray, desc, sql } from 'drizzle-orm';
+import { inArray, desc, eq, sql } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
 import { cacheManager, CacheTTL } from '../middleware/cache';
 
@@ -48,6 +48,11 @@ interface GuildSummary {
  */
 router.post('/guilds', async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body || typeof req.body !== 'object') {
+      res.status(400).json({ error: 'Bad Request', message: 'Invalid request body' });
+      return;
+    }
+
     const { guildIds, fields = ['basic', 'features'] } = req.body as BatchGuildRequest;
 
     if (!guildIds || !Array.isArray(guildIds) || guildIds.length === 0) {
@@ -219,6 +224,11 @@ router.post('/guilds', async (req: Request, res: Response): Promise<void> => {
  */
 router.post('/members', async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body || typeof req.body !== 'object') {
+      res.status(400).json({ error: 'Bad Request', message: 'Invalid request body' });
+      return;
+    }
+
     const { guildIds, limit = 10 } = req.body;
 
     if (!guildIds || !Array.isArray(guildIds) || guildIds.length === 0) {
@@ -240,35 +250,30 @@ router.post('/members', async (req: Request, res: Response): Promise<void> => {
     const db = getDatabase();
     const results: Record<string, any> = {};
 
-    // Fetch top members for each guild
-    const topMembers = await db
-      .select({
-        guildId: members.guildId,
-        userId: members.userId,
-        xp: members.xp,
-        level: members.level,
-        messages: members.messages,
-      })
-      .from(members)
-      .where(inArray(members.guildId, guildIds))
-      .orderBy(desc(members.xp))
-      .limit(limit * guildIds.length)
-      .execute();
+    // Fetch top members for each guild individually to prevent global limit overriding
+    await Promise.all(
+      guildIds.map(async (guildId: string) => {
+        const topMembers = await db
+          .select({
+            userId: members.userId,
+            xp: members.xp,
+            level: members.level,
+            messages: members.messages,
+          })
+          .from(members)
+          .where(eq(members.guildId, guildId))
+          .orderBy(desc(members.xp))
+          .limit(limit)
+          .execute();
 
-    // Group by guild
-    for (const member of topMembers) {
-      if (!results[member.guildId]) {
-        results[member.guildId] = [];
-      }
-      if (results[member.guildId].length < limit) {
-        results[member.guildId].push({
-          userId: member.userId,
-          xp: member.xp || 0,
-          level: member.level || 0,
-          messages: member.messages || 0,
-        });
-      }
-    }
+        results[guildId] = topMembers.map(m => ({
+          userId: m.userId,
+          xp: m.xp || 0,
+          level: m.level || 0,
+          messages: m.messages || 0,
+        }));
+      })
+    );
 
     res.json({
       guilds: results,
@@ -289,6 +294,10 @@ router.post('/members', async (req: Request, res: Response): Promise<void> => {
  */
 router.post('/stats', async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body || typeof req.body !== 'object') {
+      res.status(400).json({ error: 'Bad Request', message: 'Invalid request body' });
+      return;
+    }
     const { guildIds } = req.body;
 
     if (!guildIds || !Array.isArray(guildIds) || guildIds.length === 0) {

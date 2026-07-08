@@ -15,6 +15,7 @@ export interface XPGainResult {
   newLevel: number;
   leveledUp: boolean;
   rewardRoles?: string[];
+  rolesToRemove?: string[];
 }
 
 export interface RankData {
@@ -67,6 +68,15 @@ export class XPService {
     const key = `${userId}-${guildId}`;
     const now = Date.now();
     const lastGain = this.xpCooldowns.get(key) || 0;
+
+    // Prune randomly to prevent memory leak
+    if (Math.random() < 0.01) {
+      for (const [k, v] of this.xpCooldowns.entries()) {
+        if (now - v > 3600 * 1000) {
+          this.xpCooldowns.delete(k);
+        }
+      }
+    }
 
     return now - lastGain < cooldownSeconds * 1000;
   }
@@ -123,6 +133,7 @@ export class XPService {
       // Apply database multipliers
       for (const dbMultiplier of dbMultipliers) {
         if (dbMultiplier.targetType === 'role' && memberRoles.includes(dbMultiplier.targetId)) {
+          if (config.roleMultipliers[dbMultiplier.targetId]) continue; // prevent double stacking
           multiplier *= dbMultiplier.multiplier / 100;
         }
         if (dbMultiplier.targetType === 'channel' && channelId === dbMultiplier.targetId) {
@@ -143,7 +154,8 @@ export class XPService {
     guildId: string,
     member: GuildMember,
     xpAmount: number,
-    channelId?: string
+    channelId?: string,
+    isVoiceActivity: boolean = false
   ): Promise<XPGainResult | null> {
     try {
       const config = await configurationService.getXPConfig(guildId);
@@ -168,42 +180,36 @@ export class XPService {
       // Ensure user exists in database before XP operations
       await ensureUserExists(member.user);
 
-      // Get or create user XP data
-      const [userXpData] = await getDatabase()
-        .select()
-        .from(userXp)
-        .where(and(eq(userXp.userId, userId), eq(userXp.guildId, guildId)))
-        .limit(1);
-
-      const oldXp = userXpData?.xp || 0;
-      const oldLevel = userXpData?.level || 0;
-      const newXp = oldXp + xpToAdd;
-      const newLevel = this.calculateLevel(newXp);
-
-      // Update or insert XP data
-      if (userXpData) {
-        await getDatabase()
-          .update(userXp)
-          .set({
-            xp: newXp,
-            level: newLevel,
-            lastXpGain: new Date(),
-            updatedAt: new Date(),
-          })
-          .where(and(eq(userXp.userId, userId), eq(userXp.guildId, guildId)));
-      } else {
-        await getDatabase().insert(userXp).values({
+      const [updated] = await getDatabase()
+        .insert(userXp)
+        .values({
           userId,
           guildId,
-          xp: newXp,
-          level: newLevel,
+          xp: xpToAdd,
+          level: this.calculateLevel(xpToAdd),
           lastXpGain: new Date(),
-        });
-      }
+          lastVoiceActivity: isVoiceActivity ? new Date() : null,
+        })
+        .onConflictDoUpdate({
+          target: [userXp.userId, userXp.guildId],
+          set: {
+            xp: sql`${userXp.xp} + ${xpToAdd}`,
+            level: sql`CAST(FLOOR(0.1 * SQRT(${userXp.xp} + ${xpToAdd})) AS INTEGER)`,
+            lastXpGain: new Date(),
+            lastVoiceActivity: isVoiceActivity ? new Date() : sql`${userXp.lastVoiceActivity}`,
+            updatedAt: new Date(),
+          }
+        })
+        .returning();
+
+      const newXp = updated.xp;
+      const newLevel = updated.level;
+      const oldLevel = this.calculateLevel(newXp - xpToAdd);
 
       // Check for level up
       const leveledUp = newLevel > oldLevel;
       let rewardRoles: string[] = [];
+      let rolesToRemove: string[] = [];
 
       if (leveledUp && config.levelUpRewardsEnabled) {
         // Get role rewards for levels between old and new
@@ -222,6 +228,9 @@ export class XPService {
               current.level > prev.level ? current : prev
             );
             rewardRoles = [highestReward.roleId];
+            rolesToRemove = roleRewards
+              .filter(reward => reward.level <= newLevel && reward.roleId !== highestReward.roleId)
+              .map(reward => reward.roleId);
           }
         }
       }
@@ -233,6 +242,7 @@ export class XPService {
         newLevel,
         leveledUp,
         rewardRoles: rewardRoles.length > 0 ? rewardRoles : undefined,
+        rolesToRemove: rolesToRemove.length > 0 ? rolesToRemove : undefined,
       };
     } catch (error) {
       logger.error(`Failed to add XP for user ${userId} in guild ${guildId}:`, error);
@@ -417,13 +427,32 @@ export class XPService {
     customization: RankCardCustomization
   ): Promise<boolean> {
     try {
-      await getDatabase()
+      const [updated] = await getDatabase()
         .update(users)
         .set({
           rankCardData: JSON.stringify(customization),
           updatedAt: new Date(),
         })
-        .where(eq(users.id, userId));
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updated) {
+        await getDatabase()
+          .insert(users)
+          .values({
+            id: userId,
+            username: 'Unknown',
+            discriminator: '0000',
+            rankCardData: JSON.stringify(customization),
+          })
+          .onConflictDoUpdate({
+            target: [users.id],
+            set: {
+              rankCardData: JSON.stringify(customization),
+              updatedAt: new Date(),
+            }
+          });
+      }
 
       return true;
     } catch (error) {
@@ -458,16 +487,8 @@ export class XPService {
     const config = await configurationService.getXPConfig(guildId);
     const xpToAdd = minutes * config.perVoiceMinute;
 
-    // Update last voice activity
-    await getDatabase()
-      .update(userXp)
-      .set({
-        lastVoiceActivity: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(and(eq(userXp.userId, userId), eq(userXp.guildId, guildId)));
-
-    return this.addXP(userId, guildId, member, xpToAdd);
+    // Update last voice activity is now handled inside addXP via isVoiceActivity
+    return this.addXP(userId, guildId, member, xpToAdd, undefined, true);
   }
 
   // Get all voice states (for cleanup)

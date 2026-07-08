@@ -9,6 +9,7 @@ import {
   type WordFilterSeverity,
 } from '../types';
 import { logger } from '../utils/logger';
+import { safeRegexMatch } from '../utils/regexUtils';
 
 const CACHE_TTL_MS = 60 * 1000;
 
@@ -31,7 +32,17 @@ export class WordFilterService {
 
   async listRules(guildId: string): Promise<WordFilterRule[]> {
     const cached = this.cache.get(guildId);
-    if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    const now = Date.now();
+
+    if (Math.random() < 0.05) {
+      for (const [k, v] of this.cache.entries()) {
+        if (now - v.fetchedAt > CACHE_TTL_MS * 2) {
+          this.cache.delete(k);
+        }
+      }
+    }
+
+    if (cached && now - cached.fetchedAt < CACHE_TTL_MS) {
       return cached.rules;
     }
 
@@ -71,10 +82,10 @@ export class WordFilterService {
     const violations: WordFilterViolation[] = [];
 
     for (const rule of rules) {
-      const regex = this.buildMatcher(rule);
-      if (!regex) continue;
+      const matcher = this.buildMatcher(rule);
+      if (!matcher) continue;
 
-      const matches = this.extractMatches(content, regex);
+      const { matches } = safeRegexMatch(matcher.pattern, matcher.flags, content);
 
       if (matches.length > 0) {
         violations.push({ rule, matches });
@@ -103,17 +114,17 @@ export class WordFilterService {
     this.cache.delete(guildId);
   }
 
-  private buildMatcher(rule: WordFilterRule): RegExp | null {
+  private buildMatcher(rule: WordFilterRule): { pattern: string; flags: string } | null {
     const flags = rule.caseSensitive ? 'g' : 'gi';
 
     try {
       if (rule.matchType === 'regex') {
-        return new RegExp(rule.pattern, flags);
+        return { pattern: rule.pattern, flags };
       }
 
       const escaped = escapeRegExp(rule.pattern);
       const source = rule.wholeWord ? `\\b${escaped}\\b` : escaped;
-      return new RegExp(source, flags);
+      return { pattern: source, flags };
     } catch (error) {
       logger.warn(
         `Failed to build word filter matcher for guild ${rule.guildId} rule ${rule.id}:`,
@@ -121,25 +132,6 @@ export class WordFilterService {
       );
       return null;
     }
-  }
-
-  private extractMatches(content: string, regex: RegExp): string[] {
-    const matches = [];
-    let result: RegExpExecArray | null;
-    const global = regex.global;
-    const clone = global ? regex : new RegExp(regex.source, `${regex.flags}g`);
-
-    // Reset lastIndex to ensure fresh search
-    clone.lastIndex = 0;
-
-    while ((result = clone.exec(content)) !== null) {
-      matches.push(result[0]);
-      if (!global) {
-        break;
-      }
-    }
-
-    return matches;
   }
 }
 
