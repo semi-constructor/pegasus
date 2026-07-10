@@ -77,7 +77,9 @@ export async function execute(message: Message) {
           if (prefix && message.content.startsWith(prefix)) {
             const args = message.content.slice(prefix.length).trim().split(/ +/);
             const commandName = args.shift()?.toLowerCase();
-            if (commandName && commandName === cmd.name?.toLowerCase()) {
+            const expectedName = cmd.name?.toLowerCase() || '';
+            
+            if (commandName && (commandName === expectedName || `${prefix.toLowerCase()}${commandName}` === expectedName)) {
               if (cmd.reply) {
                 await message.reply(cmd.reply);
                 return;
