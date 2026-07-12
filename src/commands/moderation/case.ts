@@ -1,0 +1,281 @@
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  PermissionFlagsBits,
+  EmbedBuilder,
+  GuildMember,
+  TextChannel,
+  NewsChannel,
+  ChannelType,
+  Collection,
+  Snowflake,
+  Message,
+  Role,
+  GuildBasedChannel,
+  Guild,
+  AuditLogEvent,
+} from 'discord.js';
+import { CommandCategory } from '../../types/command';
+import { t } from '../../i18n';
+import { createLocalizationMap, commandNames, commandDescriptions } from '../../utils/localization';
+import { auditLogger } from '../../security/audit';
+import { getDatabase } from '../../database/connection';
+import { userXp } from '../../database/schema/xp';
+import { eq, and } from 'drizzle-orm';
+import { ensureUserAndGuildExist } from '../../utils/userUtils';
+import { logger } from '../../utils/logger';
+import { modCaseRepository } from '../../repositories/modCaseRepository';
+import { moderationScheduler } from '../../services/moderationScheduler';
+
+
+export const data = new SlashCommandBuilder()
+  .setName('case')
+      .setDescription(t('commands.moderation.subcommands.case.description'))
+  .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
+
+export const category = CommandCategory.Moderation;
+export const cooldown = 3;
+export const permissions = [PermissionFlagsBits.ModerateMembers];
+
+export async function execute(interaction: ChatInputCommandInteraction): Promise<any> {
+  const subcommand = interaction.options.getSubcommand();
+  if (subcommand === 'view') {
+    return handleCaseView(interaction);
+  } else if (subcommand === 'delete') {
+    return handleCaseDelete(interaction);
+  } else {
+    return interaction.reply({ content: t('common.unknownSubcommand'), ephemeral: true });
+  }
+}
+
+async function handleCaseView(interaction: ChatInputCommandInteraction): Promise<any> {
+  await interaction.deferReply({ ephemeral: true });
+
+  const caseId = interaction.options.getInteger('id', true);
+  const record = await modCaseRepository.getById(interaction.guild!.id, caseId);
+
+  if (!record) {
+    return interaction.editReply({
+      content: t('commands.moderation.subcommands.case.view.notFound', { id: caseId }),
+    });
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(0x9b59b6)
+    .setTitle(t('commands.moderation.subcommands.case.view.title', { id: record.id }))
+    .addFields(
+      {
+        name: t('commands.moderation.subcommands.case.view.fields.user'),
+        value: `<@${record.userId}>`,
+        inline: true,
+      },
+      {
+        name: t('commands.moderation.subcommands.case.view.fields.moderator'),
+        value: `<@${record.moderatorId}>`,
+        inline: true,
+      },
+      {
+        name: t('commands.moderation.subcommands.case.view.fields.action'),
+        value: record.type.toUpperCase(),
+        inline: false,
+      },
+      {
+        name: t('commands.moderation.subcommands.case.view.fields.reason'),
+        value: record.reason || t('common.noReasonProvided'),
+        inline: false,
+      }
+    )
+    .setTimestamp(record.createdAt ?? new Date());
+
+  if (record.duration) {
+    embed.addFields({
+      name: t('commands.moderation.subcommands.case.view.fields.duration'),
+      value: formatDuration(Math.round(record.duration / 60000)),
+      inline: true,
+    });
+  }
+
+  if (record.expiresAt) {
+    embed.addFields({
+      name: t('commands.moderation.subcommands.case.view.fields.expires'),
+      value: `<t:${Math.floor(new Date(record.expiresAt).getTime() / 1000)}:f>`,
+      inline: true,
+    });
+  }
+
+  await interaction.editReply({ embeds: [embed] });
+}
+
+
+
+async function handleCaseDelete(interaction: ChatInputCommandInteraction): Promise<any> {
+  await interaction.deferReply({ ephemeral: true });
+
+  const executor = interaction.member as GuildMember;
+  if (!executor.permissions.has(PermissionFlagsBits.ManageGuild)) {
+    return interaction.editReply({
+      content: t('commands.moderation.errors.missingManageGuild'),
+    });
+  }
+
+  const caseId = interaction.options.getInteger('id', true);
+  const record = await modCaseRepository.getById(interaction.guild!.id, caseId);
+
+  if (!record) {
+    return interaction.editReply({
+      content: t('commands.moderation.subcommands.case.delete.notFound', { id: caseId }),
+    });
+  }
+
+  const success = await modCaseRepository.delete(interaction.guild!.id, caseId);
+
+  if (!success) {
+    return interaction.editReply({
+      content: t('commands.moderation.subcommands.case.delete.error'),
+    });
+  }
+
+  await auditLogger.logAction({
+    action: 'MOD_CASE_DELETE',
+    userId: interaction.user.id,
+    guildId: interaction.guild!.id,
+    targetId: record.userId,
+    details: { caseId },
+  });
+
+  await interaction.editReply({
+    content: t('commands.moderation.subcommands.case.delete.success', { id: caseId }),
+  });
+}
+
+
+
+function formatDuration(minutes: number): string {
+  const minStr = t('common.duration.minutes', {
+    count: minutes,
+    defaultValue: `${minutes} minute${minutes !== 1 ? 's' : ''}`,
+  });
+  if (minutes < 60) {
+    return minStr;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  const hrStr = t('common.duration.hours', {
+    count: hours,
+    defaultValue: `${hours} hour${hours !== 1 ? 's' : ''}`,
+  });
+
+  if (hours < 24) {
+    if (remainingMinutes === 0) {
+      return hrStr;
+    }
+    const remMinStr = t('common.duration.minutes', {
+      count: remainingMinutes,
+      defaultValue: `${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`,
+    });
+    return `${hrStr} ${remMinStr}`;
+  }
+
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  const dayStr = t('common.duration.days', {
+    count: days,
+    defaultValue: `${days} day${days !== 1 ? 's' : ''}`,
+  });
+
+  if (remainingHours === 0) {
+    return dayStr;
+  }
+  const remHrStr = t('common.duration.hours', {
+    count: remainingHours,
+    defaultValue: `${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`,
+  });
+  return `${dayStr} ${remHrStr}`;
+}
+
+type ModerationTextChannel = TextChannel | NewsChannel;
+
+function resolveModerationChannel(
+  interaction: ChatInputCommandInteraction,
+  channel?: GuildBasedChannel | null
+): ModerationTextChannel | null {
+  if (channel && isModerationTextChannel(channel)) {
+    return channel;
+  }
+
+  const currentChannel = interaction.channel as GuildBasedChannel | null;
+  if (currentChannel && isModerationTextChannel(currentChannel)) {
+    return currentChannel;
+  }
+
+  return null;
+}
+
+function isModerationTextChannel(
+  channel: GuildBasedChannel | null
+): channel is ModerationTextChannel {
+  if (!channel) {
+    return false;
+  }
+
+  return channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement;
+}
+
+async function getOrCreateMuteRole(guild: Guild): Promise<Role> {
+  let muteRole = guild.roles.cache.find(role => role.name.toLowerCase() === 'muted') ?? null;
+
+  if (!muteRole) {
+    muteRole = await guild.roles.create({
+      name: 'Muted',
+      color: 0x808080,
+      permissions: [],
+      reason: 'Mute role required for moderation commands',
+    });
+
+    for (const channel of guild.channels.cache.values()) {
+      if (!('permissionOverwrites' in channel)) {
+        continue;
+      }
+
+      try {
+        await channel.permissionOverwrites.edit(muteRole, {
+          SendMessages: false,
+          AddReactions: false,
+          Speak: false,
+          Connect: false,
+        });
+      } catch (error) {
+        logger.debug(`Failed to set mute role permissions in channel ${channel.id}`, error);
+      }
+    }
+  }
+
+  return muteRole;
+}
+
+async function recordModCase(
+  interaction: ChatInputCommandInteraction,
+  userId: string,
+  type: string,
+  reason?: string,
+  durationMs?: number,
+  expiresAt?: Date | null
+) {
+  try {
+    return await modCaseRepository.create({
+      guildId: interaction.guild!.id,
+      userId,
+      moderatorId: interaction.user.id,
+      type,
+      reason,
+      duration: durationMs ?? null,
+      expiresAt: expiresAt ?? null,
+    });
+  } catch (error) {
+    logger.error('Failed to record moderation case:', error);
+    return null;
+  }
+}
+
+

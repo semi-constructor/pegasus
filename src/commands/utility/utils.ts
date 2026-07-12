@@ -10,7 +10,7 @@ import {
 import { Command, CommandCategory } from '../../types/command';
 import { t, getGuildLocale } from '../../i18n';
 import { SteamService as RealSteamService } from '../../services/steamService';
-import { HelpService } from '../../services/helpService';
+
 import { logger } from '../../utils/logger';
 import * as os from 'os';
 import { version as djsVersion } from 'discord.js';
@@ -24,7 +24,7 @@ import {
 
 const realSteamService =
   process.env.STEAM_API_KEY && process.env.STEAM_API_KEY !== '' ? new RealSteamService() : null;
-const helpService = new HelpService();
+
 
 export const data = new SlashCommandBuilder()
   .setName('utils')
@@ -186,26 +186,7 @@ export const data = new SlashCommandBuilder()
       )
       .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.serverinfo))
   )
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName('help')
-      .setDescription(
-        t('commands.utils.subcommands.help.description', { defaultValue: 'Get help for commands' })
-      )
-      .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.help))
-      .addStringOption(option =>
-        option
-          .setName('command')
-          .setDescription(
-            t('commands.utils.subcommands.help.options.command', {
-              defaultValue: 'The command to get help for',
-            })
-          )
-          .setDescriptionLocalizations(createLocalizationMap(optionDescriptions.command))
-          .setRequired(false)
-          .setAutocomplete(true)
-      )
-  )
+
   .addSubcommand(subcommand =>
     subcommand
       .setName('support')
@@ -257,9 +238,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       case 'serverinfo':
         await handleServerInfo(interaction, locale);
         break;
-      case 'help':
-        await handleHelp(interaction, locale);
-        break;
+
       case 'support':
         await handleSupport(interaction, locale);
         break;
@@ -740,26 +719,7 @@ async function handleServerInfo(
   await interaction.reply({ embeds: [embed] });
 }
 
-async function handleHelp(interaction: ChatInputCommandInteraction, locale: string): Promise<void> {
-  const commandName = interaction.options.getString('command');
 
-  if (commandName) {
-    const commandHelp = await helpService.getCommandHelp(commandName, locale);
-
-    if (!commandHelp) {
-      await interaction.reply({
-        content: t('commands.utils.help.commandNotFound', { lng: locale }),
-        ephemeral: true,
-      });
-      return;
-    }
-
-    await interaction.reply({ embeds: [commandHelp] });
-  } else {
-    const helpMenu = await helpService.getHelpMenu(locale);
-    await interaction.reply({ embeds: [helpMenu] });
-  }
-}
 
 async function handleSupport(
   interaction: ChatInputCommandInteraction,
@@ -811,19 +771,7 @@ function getUserBadges(user: User): string[] {
   return badges;
 }
 
-export async function autocomplete(interaction: AutocompleteInteraction): Promise<void> {
-  const focused = interaction.options.getFocused();
-  const subcommand = interaction.options.getSubcommand();
 
-  if (subcommand === 'help') {
-    const commands = await helpService.getCommandList();
-    const filtered = commands
-      .filter(cmd => cmd.toLowerCase().includes(focused.toLowerCase()))
-      .slice(0, 25);
-
-    await interaction.respond(filtered.map(cmd => ({ name: cmd, value: cmd })));
-  }
-}
 
 async function handleStats(
   interaction: ChatInputCommandInteraction,
@@ -1005,5 +953,5 @@ export default {
   category,
   cooldown,
   execute,
-  autocomplete,
+
 } as Command;
