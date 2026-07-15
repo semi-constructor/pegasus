@@ -381,8 +381,8 @@ export class EconomyService {
             amount: -fine,
             robberBalance: result.balance ?? robberBalance,
             error:
-              t('commands.economy.rob.failedText', { user: '' }) +
-              ` (${fine} ${settings.currencyName})`,
+              `${t('commands.economy.rob.failedText', { user: '' }) 
+              } (${fine} ${settings.currencyName})`,
           };
         }
 

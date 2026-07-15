@@ -396,7 +396,7 @@ export class TicketService {
     if (ticket.departmentId && panel) {
       const department = await ticketWorkflowRepository.getDepartment(guild.id, panel.id, ticket.departmentId);
       if (department && department.supportRoles) {
-        for (const roleId of department.supportRoles as string[]) {
+        for (const roleId of department.supportRoles) {
           rolesToFreeze.add(roleId);
         }
       }

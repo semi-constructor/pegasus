@@ -86,7 +86,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
   }
 
   // Check if user is trying to ban the bot
-  if (user.id === interaction.client.user!.id) {
+  if (user.id === interaction.client.user.id) {
     return interaction.editReply({
       content: t('commands.moderation.subcommands.ban.cannotBanBot'),
     });
@@ -123,7 +123,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         .setDescription(
           t('commands.moderation.subcommands.ban.dmDescription', {
             guild: interaction.guild!.name,
-            reason: reason,
+            reason,
           })
         )
         .setTimestamp();

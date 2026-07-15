@@ -27,6 +27,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
     await interaction.editReply({ content: result.message });
   } catch (error: any) {
-    await interaction.editReply({ content: t('common.error') + ': ' + error.message });
+    await interaction.editReply({ content: `${t('common.error')  }: ${  error.message}` });
   }
 }

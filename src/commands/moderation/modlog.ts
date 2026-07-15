@@ -154,7 +154,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
               return t('commands.moderation.subcommands.modlog.auditEntry', {
                 action: actionName,
                 target: targetStr,
-                executor: executor,
+                executor,
                 reason: entry.reason || t('common.noReasonProvided'),
                 time: `<t:${timestamp}:R>`,
               });

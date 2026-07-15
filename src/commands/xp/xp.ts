@@ -355,7 +355,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.backgroundColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.backgroundColor || '#23272A')
-      .setPlaceholder((locale.commands.xp.card as any).placeholders?.backgroundColor || '#23272A')
+      .setPlaceholder((locale.commands.xp.card).placeholders?.backgroundColor || '#23272A')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);
@@ -365,7 +365,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.progressBarColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.progressBarColor || '#5865F2')
-      .setPlaceholder((locale.commands.xp.card as any).placeholders?.progressBarColor || '#5865F2')
+      .setPlaceholder((locale.commands.xp.card).placeholders?.progressBarColor || '#5865F2')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);
@@ -375,7 +375,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.textColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.textColor || '#FFFFFF')
-      .setPlaceholder((locale.commands.xp.card as any).placeholders?.textColor || '#FFFFFF')
+      .setPlaceholder((locale.commands.xp.card).placeholders?.textColor || '#FFFFFF')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);
@@ -385,7 +385,7 @@ async function handleCardCustomizationCommand(
       .setLabel(locale.commands.xp.card.accentColor)
       .setStyle(TextInputStyle.Short)
       .setValue(currentCustomization.accentColor || '#EB459E')
-      .setPlaceholder((locale.commands.xp.card as any).placeholders?.accentColor || '#EB459E')
+      .setPlaceholder((locale.commands.xp.card).placeholders?.accentColor || '#EB459E')
       .setRequired(false)
       .setMaxLength(7)
       .setMinLength(7);

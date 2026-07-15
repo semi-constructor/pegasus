@@ -241,7 +241,7 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
     if (updates.embedTitle !== undefined) updateData.embedTitle = updates.embedTitle;
     if (updates.embedColor !== undefined) {
       const parsedColor = typeof updates.embedColor === 'string' ? parseInt(updates.embedColor.replace('#', ''), 16) : updates.embedColor;
-      if (!isNaN(parsedColor as number)) updateData.embedColor = parsedColor;
+      if (!isNaN(parsedColor)) updateData.embedColor = parsedColor;
     }
     if (updates.embedImage !== undefined) updateData.embedImage = updates.embedImage;
     if (updates.embedThumbnail !== undefined) updateData.embedThumbnail = updates.embedThumbnail;

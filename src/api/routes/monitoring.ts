@@ -71,8 +71,8 @@ router.get('/metrics', async (_req: Request, res: Response): Promise<void> => {
       timestamp: new Date().toISOString(),
       cache: {
         ...cacheStats,
-        efficiency: cacheStats.hitRate.toFixed(2) + '%',
-        memoryUsage: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+        efficiency: `${cacheStats.hitRate.toFixed(2)  }%`,
+        memoryUsage: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)  } MB`,
       },
       rateLimit: {
         ...rateLimitStats,
@@ -85,21 +85,21 @@ router.get('/metrics', async (_req: Request, res: Response): Promise<void> => {
           slowQueries: slowQueries.length,
           avgResponseTime:
             queryMetrics.length > 0
-              ? (queryMetrics.reduce((sum, m) => sum + m.avgTime, 0) / queryMetrics.length).toFixed(
+              ? `${(queryMetrics.reduce((sum, m) => sum + m.avgTime, 0) / queryMetrics.length).toFixed(
                   2
-                ) + ' ms'
+                )  } ms`
               : '0 ms',
         },
         topSlowQueries: slowQueries.slice(0, 5).map(q => ({
           name: q.query,
-          avgTime: q.avgTime.toFixed(2) + ' ms',
+          avgTime: `${q.avgTime.toFixed(2)  } ms`,
           count: q.count,
           lastExecuted: q.lastExecuted.toISOString(),
         })),
       },
       aggregator: {
         updateInterval: '500ms',
-        lastUpdate: statsAggregator.getStatsAge() + ' ms ago',
+        lastUpdate: `${statsAggregator.getStatsAge()  } ms ago`,
         healthy: statsAggregator.getStatsAge() < 2000,
       },
       api: {

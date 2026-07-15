@@ -141,7 +141,7 @@ async function handleBlacklistUser(
   }
 
   // Check if user is trying to blacklist the bot
-  if (user.id === interaction.client.user!.id) {
+  if (user.id === interaction.client.user.id) {
     await interaction.editReply({
       content: t('commands.blacklist.subcommands.user.cannotBlacklistBot', { lng: locale }),
     });

@@ -79,7 +79,7 @@ export class EngagementService {
     channel?: TextChannel
   ): Promise<void> {
     try {
-      let progressObj = await engagementRepository.getUserQuestProgress(guildId, userId, quest.id);
+      const progressObj = await engagementRepository.getUserQuestProgress(guildId, userId, quest.id);
       if (progressObj?.completed) return; // Already completed
 
       const newProgress = (progressObj?.progress || 0) + amount;

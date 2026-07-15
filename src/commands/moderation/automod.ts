@@ -117,7 +117,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     }
   } catch (error: any) {
     logger.error('Failed to execute automod command:', error);
-    const content = t('common.error') + ': ' + error.message;
+    const content = `${t('common.error')  }: ${  error.message}`;
     if (interaction.deferred || interaction.replied) {
       await interaction.followUp({ content, ephemeral: true });
     } else {

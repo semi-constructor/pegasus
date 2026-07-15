@@ -82,7 +82,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 
-  if (user.id === interaction.client.user!.id) {
+  if (user.id === interaction.client.user.id) {
     return interaction.editReply({
       content: t('commands.moderation.subcommands.mute.cannotMuteBot'),
     });

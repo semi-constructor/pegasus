@@ -123,7 +123,7 @@ router.post('/guilds', async (req: Request, res: Response): Promise<void> => {
       const dbGuildMap = new Map(dbGuilds.map(g => [g.id, g]));
 
       // Get additional stats if requested
-      let statsMap = new Map<string, any>();
+      const statsMap = new Map<string, any>();
       if (fields.includes('stats')) {
         const memberStats = await db
           .select({

@@ -55,7 +55,7 @@ export class JTCService {
       if (!channel || channel.type !== ChannelType.GuildText) {
         throw new Error('Invalid panel channel');
       }
-      panelChannel = channel as TextChannel;
+      panelChannel = channel;
     } catch (error) {
       logger.error(`Failed to fetch JTC panel channel for guild ${guild.id}:`, error);
       throw new Error('Panel channel not found or inaccessible');
@@ -200,7 +200,7 @@ export class JTCService {
         return;
       }
 
-      const voiceChannel = channel as VoiceChannel;
+      const voiceChannel = channel;
       if (voiceChannel.members.size === 0) {
         await voiceChannel.delete('JTC temp channel empty');
         await jtcRepository.deleteTempChannel(state.channelId);

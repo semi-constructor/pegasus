@@ -45,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           lng: locale,
         })
       )
-      .setDescription(result.transaction!.description!)
+      .setDescription(result.transaction!.description)
       .setColor(0x3498db)
       .setThumbnail(interaction.user.displayAvatarURL())
       .addFields(

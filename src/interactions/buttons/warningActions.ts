@@ -142,10 +142,10 @@ async function handleWarningAction(
 
         await interaction.editReply({
           content:
-            t('commands.moderation.subcommands.mute.success.description', {
+            `${t('commands.moderation.subcommands.mute.success.description', {
               user: member.user.tag,
               moderator: interaction.user.tag,
-            }) + ` (${duration}m)`,
+            })  } (${duration}m)`,
         });
         break;
 

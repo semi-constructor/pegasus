@@ -542,7 +542,7 @@ router.post('/:guildId/moderation/mute', async (req: Request, res: Response) => 
       setTimeout(
         async () => {
           try {
-            await member.roles.remove(muteRole!.id, 'Mute duration expired');
+            await member.roles.remove(muteRole.id, 'Mute duration expired');
             logger.info(`Unmuted user ${userId} in guild ${guildId} (duration expired)`);
           } catch (error) {
             logger.error(`Failed to unmute user ${userId}:`, error);
