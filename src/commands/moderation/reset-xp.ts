@@ -19,13 +19,13 @@ import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { createLocalizationMap, commandNames, commandDescriptions } from '../../utils/localization';
 import { auditLogger } from '../../security/audit';
-import { getDatabase } from '../../database/connection';
+
 import { userXp } from '../../database/schema/xp';
 import { eq, and } from 'drizzle-orm';
 import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
-import { moderationScheduler } from '../../services/moderationScheduler';
+
 
 
 export const data = new SlashCommandBuilder()

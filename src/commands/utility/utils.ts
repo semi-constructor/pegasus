@@ -1,7 +1,6 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
-  AutocompleteInteraction,
   EmbedBuilder,
   User,
   Role,
@@ -602,7 +601,7 @@ async function handleRoleInfo(
       },
       {
         name: t('commands.utils.roleinfo.permissions', { lng: locale }),
-        value: permissions.length > 1024 ? permissions.substring(0, 1021) + '...' : permissions,
+        value: permissions.length > 1024 ? `${permissions.substring(0, 1021)  }...` : permissions,
         inline: false,
       },
     ])
@@ -668,7 +667,7 @@ async function handleServerInfo(
           total: channels.size,
           text: textChannels,
           voice: voiceChannels,
-          categories: categories,
+          categories,
         }),
         inline: true,
       },
@@ -711,7 +710,7 @@ async function handleServerInfo(
   }
 
   if (guild.bannerURL()) {
-    embed.setImage(guild.bannerURL({ size: 1024 })!);
+    embed.setImage(guild.bannerURL({ size: 1024 }));
   }
 
   embed.setFooter({ text: t('commands.utils.serverinfo.footer', { lng: locale }) }).setTimestamp();

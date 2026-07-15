@@ -9,7 +9,6 @@ import { HelpService } from '../../services/helpService';
 import { logger } from '../../utils/logger';
 import {
   createLocalizationMap,
-  commandDescriptions,
   subcommandDescriptions,
   optionDescriptions,
 } from '../../utils/localization';

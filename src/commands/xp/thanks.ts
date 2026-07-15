@@ -1,7 +1,6 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
-  GuildMember,
   TextChannel,
 } from 'discord.js';
 import { CommandCategory } from '../../types/command';
@@ -51,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       interaction.guildId!,
       targetUser.id,
       interaction.user.id,
-      targetMember as GuildMember,
+      targetMember,
       reason,
       interaction.channel as TextChannel
     );
@@ -60,6 +59,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       content: `💖 <@${interaction.user.id}> gave thanks to <@${targetUser.id}>! Reason: ${reason}`,
     });
   } catch (error: any) {
-    await interaction.editReply({ content: t('common.error') + ': ' + error.message });
+    await interaction.editReply({ content: `${t('common.error')  }: ${  error.message}` });
   }
 }

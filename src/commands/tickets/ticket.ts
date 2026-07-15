@@ -4,7 +4,6 @@ import {
   PermissionFlagsBits,
   EmbedBuilder,
   ChannelType,
-  TextChannel,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -493,9 +492,9 @@ export const ticket: Command = {
       } catch (error: any) {
         await interaction.reply({
           content:
-            t('common.error', { lng: locale }) +
-            ': ' +
-            t(error.message, { defaultValue: error.message, lng: locale }),
+            `${t('common.error', { lng: locale }) 
+            }: ${ 
+            t(error.message, { defaultValue: error.message, lng: locale })}`,
           ephemeral: true,
         });
       }
@@ -612,7 +611,7 @@ async function handlePanelCreate(
           collector.stop();
         } catch (error: any) {
           await buttonInteraction.reply({
-            content: t('common.error') + ': ' + t(error.message, { defaultValue: error.message }),
+            content: `${t('common.error')  }: ${  t(error.message, { defaultValue: error.message })}`,
             ephemeral: true,
           });
         }
@@ -828,7 +827,7 @@ async function handlePanelLoad(
   await interaction.deferReply({ ephemeral: true });
 
   const panelId = interaction.options.getString('panel_id', true);
-  const channel = interaction.options.getChannel('channel', true) as TextChannel;
+  const channel = interaction.options.getChannel('channel', true);
 
   try {
     await ticketWorkflowService.sendPanelWithDepartments(interaction.guild!, channel, panelId);
