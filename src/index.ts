@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, ActivityType } from 'discord.js';
 import chalk from 'chalk';
 import { config } from './config/env';
 import { initializeDatabase } from './database/connection';
@@ -53,7 +53,7 @@ class PegasusBot extends Client {
         activities: [
           {
             name: 'Starting up...',
-            type: 0,
+            type: ActivityType.Playing,
           },
         ],
       },
