@@ -7,8 +7,6 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ComponentType,
-  ActionRow,
-  MessageActionRowComponent,
   ButtonComponent,
 } from 'discord.js';
 import { TicketService } from '../../services/ticketService';
@@ -202,7 +200,7 @@ async function handleTicketLock(
 
     const originalMessage = interaction.message;
     if (originalMessage.editable) {
-      const actionRows = originalMessage.components as ActionRow<MessageActionRowComponent>[];
+      const actionRows = originalMessage.components as any[];
 
       const updatedRows = actionRows
         .map(row => {
