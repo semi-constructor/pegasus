@@ -18,6 +18,7 @@ import {
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { createLocalizationMap, commandNames, commandDescriptions } from '../../utils/localization';
+import { getDatabase } from '../../database/connection';
 import { auditLogger } from '../../security/audit';
 
 import { userXp } from '../../database/schema/xp';

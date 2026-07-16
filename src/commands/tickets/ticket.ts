@@ -4,6 +4,7 @@ import {
   PermissionFlagsBits,
   EmbedBuilder,
   ChannelType,
+  TextChannel,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -827,7 +828,7 @@ async function handlePanelLoad(
   await interaction.deferReply({ ephemeral: true });
 
   const panelId = interaction.options.getString('panel_id', true);
-  const channel = interaction.options.getChannel('channel', true);
+  const channel = interaction.options.getChannel('channel', true) as TextChannel;
 
   try {
     await ticketWorkflowService.sendPanelWithDepartments(interaction.guild!, channel, panelId);
