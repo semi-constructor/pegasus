@@ -1,157 +1,106 @@
-import { EmbedBuilder } from 'discord.js';
+import { Client, Collection, EmbedBuilder } from 'discord.js';
 import { t, withLocale } from '../i18n';
-import { readdirSync } from 'fs';
-import { join } from 'path';
 import { Command, CommandCategory } from '../types/command';
 import { logger } from '../utils/logger';
 
-interface CommandModule {
-  default?: Command | Record<string, unknown>;
-  data?: Command['data'];
-  execute?: Command['execute'];
-  category?: CommandCategory;
-  cooldown?: number;
-  permissions?: Command['permissions'];
-  autocomplete?: Command['autocomplete'];
-  isSubcommand?: boolean;
+// ─── Serialized Discord API option shapes (from .toJSON()) ────────────────────
+
+interface JsonOption {
+  type: number;
+  name: string;
+  description: string;
+  required?: boolean;
+  options?: JsonOption[];
 }
 
+// Discord ApplicationCommandOptionType values
+const OPT_SUB_COMMAND       = 1;
+const OPT_SUB_COMMAND_GROUP = 2;
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
 export class HelpService {
-  private commands: Map<string, Command> = new Map();
+  /**
+   * The client's command collection.
+   * Populated lazily on first use via setClient() or directly.
+   */
+  private clientCommands: Collection<string, Command> | null = null;
   private commandsByCategory: Map<CommandCategory, Command[]> = new Map();
 
-  constructor() {
-    void this.loadCommands();
+  // ─── Wiring ─────────────────────────────────────────────────────────────────
+
+  private lastClient: Client | null = null;
+
+  /**
+   * Point the service at the Discord client so it can read already-loaded
+   * commands (which were imported after i18n was initialized).
+   * Rebuilds the category index only when the client reference changes.
+   */
+  setClient(client: Client): void {
+    if (client === this.lastClient) return;
+    if (!('commands' in client)) {
+      logger.warn('HelpService: client.commands not available');
+      return;
+    }
+    this.lastClient = client;
+    this.clientCommands = (client as any).commands as Collection<string, Command>;
+    this.rebuildCategoryIndex();
   }
 
-  private async loadCommands(): Promise<void> {
-    try {
-      const commandsPath = join(__dirname, '..', 'commands');
-      const categoryFolders = readdirSync(commandsPath, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+  /**
+   * Directly supply a pre-built collection (useful in tests or when the
+   * client isn't available yet).
+   */
+  setCommands(commands: Collection<string, Command>): void {
+    this.clientCommands = commands;
+    this.rebuildCategoryIndex();
+  }
 
-      for (const category of categoryFolders) {
-        const categoryPath = join(commandsPath, category);
-        const commandFiles = readdirSync(categoryPath).filter(
-          file => (file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts')
-        );
+  private get commands(): Collection<string, Command> {
+    return this.clientCommands ?? new Collection();
+  }
 
-        for (const file of commandFiles) {
-          try {
-            const filePath = join(categoryPath, file);
-            const commandModule = (await import(filePath)) as CommandModule;
-
-            if (
-              commandModule.isSubcommand ||
-              (commandModule.default &&
-                'isSubcommand' in commandModule.default &&
-                (commandModule.default as any).isSubcommand)
-            ) {
-              continue;
-            }
-
-            let commandData: Command['data'] | null = null;
-            let commandCategory: CommandCategory = this.getCategoryFromPath(category);
-            let executeFunction: Command['execute'] | null = null;
-
-            // Handle different export patterns
-            if (commandModule.default && typeof commandModule.default === 'object') {
-              // Default export pattern
-              const defaultExport = commandModule.default as Command;
-              if (
-                'data' in defaultExport &&
-                'execute' in defaultExport &&
-                typeof defaultExport.execute === 'function'
-              ) {
-                commandData = defaultExport.data;
-                commandCategory = defaultExport.category || this.getCategoryFromPath(category);
-                executeFunction = defaultExport.execute;
-              }
-            } else {
-              // Named export pattern (data, execute, category)
-              if (
-                commandModule.data &&
-                commandModule.execute &&
-                typeof commandModule.execute === 'function'
-              ) {
-                commandData = commandModule.data;
-                commandCategory = commandModule.category || this.getCategoryFromPath(category);
-                executeFunction = commandModule.execute;
-              }
-            }
-
-            if (commandData && executeFunction) {
-              const moduleExport = (commandModule.default as Command) || commandModule;
-              const cmd: Command = {
-                data: commandData,
-                execute: executeFunction,
-                category: commandCategory,
-                cooldown:
-                  typeof moduleExport === 'object' && moduleExport && 'cooldown' in moduleExport
-                    ? moduleExport.cooldown
-                    : commandModule.cooldown,
-                permissions:
-                  typeof moduleExport === 'object' && moduleExport && 'permissions' in moduleExport
-                    ? moduleExport.permissions
-                    : commandModule.permissions,
-                autocomplete:
-                  typeof moduleExport === 'object' && moduleExport && 'autocomplete' in moduleExport
-                    ? moduleExport.autocomplete
-                    : commandModule.autocomplete,
-              };
-
-              const commandName = cmd.data.name;
-              this.commands.set(commandName, cmd);
-
-              if (!this.commandsByCategory.has(cmd.category)) {
-                this.commandsByCategory.set(cmd.category, []);
-              }
-
-              const categoryCommands = this.commandsByCategory.get(cmd.category);
-              if (categoryCommands) {
-                categoryCommands.push(cmd);
-              }
-              logger.debug(`Loaded command: ${commandName} (${cmd.category})`);
-            }
-          } catch (error) {
-            logger.error(`Error loading command ${file}:`, error);
-          }
-        }
+  private rebuildCategoryIndex(): void {
+    this.commandsByCategory.clear();
+    for (const cmd of this.commands.values()) {
+      if (!this.commandsByCategory.has(cmd.category)) {
+        this.commandsByCategory.set(cmd.category, []);
       }
-
-      logger.info(
-        `Loaded ${this.commands.size} commands across ${this.commandsByCategory.size} categories`
-      );
-    } catch (error) {
-      logger.error('Error loading commands for help service:', error);
+      this.commandsByCategory.get(cmd.category)!.push(cmd);
     }
   }
 
-  private getCategoryFromPath(categoryPath: string): CommandCategory {
-    const categoryMap: Record<string, CommandCategory> = {
-      utility: CommandCategory.Utility,
-      moderation: CommandCategory.Moderation,
-      economy: CommandCategory.Economy,
-      xp: CommandCategory.XP,
-      giveaways: CommandCategory.Giveaways,
-      tickets: CommandCategory.Tickets,
-      fun: CommandCategory.Fun,
-      admin: CommandCategory.Admin,
-    };
+  // ─── Core helper: serialize builder → plain JSON options ─────────────────
 
-    return categoryMap[categoryPath.toLowerCase()] || CommandCategory.Utility;
+  /**
+   * Calls `.toJSON()` on the Discord.js builder so we get plain objects
+   * with numeric `type` fields, regardless of builder class.
+   */
+  private getJsonOptions(command: Command): JsonOption[] {
+    try {
+      const json = command.data.toJSON() as { options?: JsonOption[] };
+      return json.options ?? [];
+    } catch (err) {
+      logger.warn(`HelpService: toJSON() failed for /${command.data.name}: ${err}`);
+      return [];
+    }
   }
 
+  // ─── Overview embed ───────────────────────────────────────────────────────
+
+  /**
+   * Category overview — every subcommand leaf gets its own line so users can
+   * see all available commands at a glance.
+   */
   async getHelpMenu(locale: string): Promise<EmbedBuilder> {
     return withLocale(locale, () => {
       const embed = new EmbedBuilder()
         .setTitle(t('commands.help.title'))
         .setDescription(t('commands.help.description'))
-        .setColor(0x7289da)
+        .setColor(0x5865f2)
         .setTimestamp();
 
-      const categoryOrder = [
+      const categoryOrder: CommandCategory[] = [
         CommandCategory.Utility,
         CommandCategory.Moderation,
         CommandCategory.Economy,
@@ -163,203 +112,233 @@ export class HelpService {
       ];
 
       for (const category of categoryOrder) {
-        const commands = this.commandsByCategory.get(category);
+        const cmds = this.commandsByCategory.get(category);
+        if (!cmds || cmds.length === 0) continue;
 
-        if (commands && commands.length > 0) {
-          const commandList = commands.map(cmd => `\`/${cmd.data.name}\``).join(', ');
+        const lines: string[] = [];
 
-          embed.addFields({
-            name: t(`commands.help.categories.${category}`),
-            value: commandList || t('common.none'),
-            inline: false,
-          });
+        for (const cmd of cmds) {
+          const options = this.getJsonOptions(cmd);
+          const leaves  = this.flattenToLeaves(options);
+
+          if (leaves.length > 0) {
+            for (const leaf of leaves) {
+              lines.push(`\`/${cmd.data.name} ${leaf.fullName}\` — ${leaf.description}`);
+            }
+          } else {
+            lines.push(
+              `\`/${cmd.data.name}\` — ${cmd.data.description || t('commands.help.noDescription')}`
+            );
+          }
         }
-      }
 
-      embed.setFooter({
-        text: t('commands.help.menuFooter'),
-      });
-
-      return Promise.resolve(embed);
-    });
-  }
-
-  async getCommandHelp(commandName: string, locale: string): Promise<EmbedBuilder | null> {
-    const command = this.commands.get(commandName);
-
-    if (!command) {
-      return null;
-    }
-
-    return withLocale(locale, () => {
-      const embed = new EmbedBuilder()
-        .setTitle(t('commands.help.commandInfo'))
-        .setColor(0x7289da)
-        .addFields([
-          {
-            name: t('commands.help.commandName'),
-            value: `\`/${command.data.name}\``,
-            inline: true,
-          },
-          {
-            name: t('commands.help.category'),
-            value: t(`commands.help.categories.${command.category}`),
-            inline: true,
-          },
-        ]);
-
-      // Add description
-      const description = command.data.description || t('commands.help.noDescription');
-      embed.addFields({
-        name: t('commands.help.description'),
-        value: description,
-        inline: false,
-      });
-
-      // Add usage
-      embed.addFields({
-        name: t('commands.help.usage'),
-        value: this.generateUsage(command),
-        inline: false,
-      });
-
-      // Add cooldown if exists
-      if (command.cooldown) {
+        const raw = lines.join('\n') || t('common.none');
         embed.addFields({
-          name: t('commands.help.cooldown'),
-          value: t('commands.help.cooldownValue', {
-            seconds: command.cooldown,
-          }),
-          inline: true,
-        });
-      }
-
-      // Add permissions if required
-      if (command.permissions && command.permissions.length > 0) {
-        embed.addFields({
-          name: t('commands.help.permissions'),
-          value: command.permissions.map(p => `\`${String(p)}\``).join(', '),
+          name:   t(`commands.help.categories.${category}`),
+          value:  raw.length > 1024 ? raw.slice(0, 1021) + '…' : raw,
           inline: false,
         });
       }
 
-      // Add subcommands if any
-      if ('options' in command.data && command.data.options && command.data.options.length > 0) {
-        const subcommands = this.getSubcommands(command);
-        if (subcommands.length > 0) {
-          embed.addFields({
-            name: t('commands.help.subcommands'),
-            value: subcommands.join('\n'),
-            inline: false,
-          });
-        }
-      }
-
-      embed.setFooter({
-        text: t('commands.help.commandFooter'),
-      });
-
-      embed.setTimestamp();
-
+      embed.setFooter({ text: t('commands.help.menuFooter') });
       return Promise.resolve(embed);
     });
   }
 
-  private generateUsage(command: Command): string {
-    let usage = `\`/${command.data.name}`;
+  // ─── Per-command detail embed ─────────────────────────────────────────────
 
-    if ('options' in command.data && command.data.options) {
-      const options = command.data.options as unknown as Array<{
-        type: number;
-        name: string;
-        description?: string;
-        required?: boolean;
-        options?: Array<{
-          type: number;
-          name: string;
-          description?: string;
-          required?: boolean;
-        }>;
-      }>;
+  /**
+   * Detailed view for a single command.
+   * Plain commands show their options; subcommand commands get one field per
+   * subcommand (or per group child), each with its own options listed.
+   */
+  async getCommandHelp(commandName: string, locale: string): Promise<EmbedBuilder | null> {
+    const command = this.commands.get(commandName);
+    if (!command) return null;
 
-      for (const option of options) {
-        if (option.type === 1) {
-          // Subcommand
-          usage += ` ${option.name}`;
+    return withLocale(locale, () => {
+      const embed = new EmbedBuilder()
+        .setTitle(t('commands.help.commandInfo'))
+        .setColor(0x5865f2)
+        .setTimestamp();
 
-          if (option.options) {
-            for (const subOption of option.options) {
-              usage += subOption.required ? ` <${subOption.name}>` : ` [${subOption.name}]`;
-            }
+      const options    = this.getJsonOptions(command);
+      const hasSubcmds = options.some(
+        o => o.type === OPT_SUB_COMMAND || o.type === OPT_SUB_COMMAND_GROUP
+      );
+
+      // ── Header: name | category | cooldown ───────────────────────────────
+      embed.addFields(
+        {
+          name:   t('commands.help.commandName'),
+          value:  `\`/${command.data.name}\``,
+          inline: true,
+        },
+        {
+          name:   t('commands.help.category'),
+          value:  t(`commands.help.categories.${command.category}`),
+          inline: true,
+        },
+        {
+          name:   t('commands.help.cooldown'),
+          value:  command.cooldown
+            ? t('commands.help.cooldownValue', { seconds: command.cooldown })
+            : t('commands.help.noCooldown'),
+          inline: true,
+        }
+      );
+
+      // ── Description ───────────────────────────────────────────────────────
+      embed.addFields({
+        name:   t('commands.help.description', { defaultValue: 'Description' }),
+        value:  command.data.description || t('commands.help.noDescription'),
+        inline: false,
+      });
+
+      // ── Required permissions ──────────────────────────────────────────────
+      if (command.permissions && command.permissions.length > 0) {
+        embed.addFields({
+          name:   t('commands.help.permissions'),
+          value:  command.permissions.map(p => `\`${String(p)}\``).join(', '),
+          inline: false,
+        });
+      }
+
+      // ── Options / subcommands ─────────────────────────────────────────────
+      if (options.length === 0) {
+        embed.addFields({
+          name:   t('commands.help.usage'),
+          value:  `\`/${command.data.name}\``,
+          inline: false,
+        });
+      } else if (!hasSubcmds) {
+        // Plain command with options only
+        embed.addFields({
+          name:   t('commands.help.usage'),
+          value:  this.buildUsageLine(command.data.name, options),
+          inline: false,
+        });
+        const optLines = this.renderOptions(options);
+        if (optLines.length > 0) {
+          embed.addFields({
+            name:   t('commands.help.options'),
+            value:  optLines.join('\n'),
+            inline: false,
+          });
+        }
+      } else {
+        // One field per subcommand / group child
+        for (const option of options) {
+          if (option.type === OPT_SUB_COMMAND) {
+            this.addSubcommandField(embed, command.data.name, option);
+          } else if (option.type === OPT_SUB_COMMAND_GROUP) {
+            this.addGroupFields(embed, command.data.name, option);
           }
+        }
+      }
 
-          usage += `\`\n\`/${command.data.name}`;
+      embed.setFooter({ text: t('commands.help.commandFooter') });
+      return Promise.resolve(embed);
+    });
+  }
+
+  // ─── Embed field builders ─────────────────────────────────────────────────
+
+  private addSubcommandField(embed: EmbedBuilder, cmdName: string, sub: JsonOption): void {
+    const lines: string[] = [
+      sub.description || t('commands.help.noDescription'),
+      `**${t('commands.help.usage')}:** ${this.buildUsageLine(`${cmdName} ${sub.name}`, sub.options ?? [])}`,
+    ];
+
+    const optLines = this.renderOptions(sub.options ?? []);
+    if (optLines.length > 0) {
+      lines.push('', ...optLines);
+    }
+
+    const value = lines.join('\n');
+    embed.addFields({
+      name:   `\`/${cmdName} ${sub.name}\``,
+      value:  value.length > 1024 ? value.slice(0, 1021) + '…' : value,
+      inline: false,
+    });
+  }
+
+  private addGroupFields(embed: EmbedBuilder, cmdName: string, group: JsonOption): void {
+    for (const child of group.options ?? []) {
+      if (child.type !== OPT_SUB_COMMAND) continue;
+
+      const lines: string[] = [
+        child.description || t('commands.help.noDescription'),
+        `**${t('commands.help.usage')}:** ${this.buildUsageLine(`${cmdName} ${group.name} ${child.name}`, child.options ?? [])}`,
+      ];
+
+      const optLines = this.renderOptions(child.options ?? []);
+      if (optLines.length > 0) {
+        lines.push('', ...optLines);
+      }
+
+      const value = lines.join('\n');
+      embed.addFields({
+        name:   `\`/${cmdName} ${group.name} ${child.name}\``,
+        value:  value.length > 1024 ? value.slice(0, 1021) + '…' : value,
+        inline: false,
+      });
+    }
+  }
+
+  // ─── Formatting helpers ───────────────────────────────────────────────────
+
+  private renderOptions(options: JsonOption[]): string[] {
+    return options
+      .filter(o => o.type !== OPT_SUB_COMMAND && o.type !== OPT_SUB_COMMAND_GROUP)
+      .map(o => {
+        const req = o.required ? '`<required>`' : '`[optional]`';
+        return `• **${o.name}** ${req} — ${o.description || t('commands.help.noDescription')}`;
+      });
+  }
+
+  private buildUsageLine(fullName: string, options: JsonOption[]): string {
+    const args = options
+      .filter(o => o.type !== OPT_SUB_COMMAND && o.type !== OPT_SUB_COMMAND_GROUP)
+      .map(o => (o.required ? `<${o.name}>` : `[${o.name}]`));
+
+    return args.length > 0
+      ? `\`/${fullName} ${args.join(' ')}\``
+      : `\`/${fullName}\``;
+  }
+
+  private flattenToLeaves(options: JsonOption[]): Array<{ fullName: string; description: string }> {
+    const result: Array<{ fullName: string; description: string }> = [];
+
+    for (const opt of options) {
+      if (opt.type === OPT_SUB_COMMAND) {
+        result.push({
+          fullName:    opt.name,
+          description: opt.description || t('commands.help.noDescription'),
+        });
+      } else if (opt.type === OPT_SUB_COMMAND_GROUP) {
+        for (const child of opt.options ?? []) {
+          if (child.type === OPT_SUB_COMMAND) {
+            result.push({
+              fullName:    `${opt.name} ${child.name}`,
+              description: child.description || t('commands.help.noDescription'),
+            });
+          }
         }
       }
     }
 
-    usage = usage.replace(/\n`\/[^`]+$/, '');
-    usage += '`';
-
-    return usage;
+    return result;
   }
 
-  private getSubcommands(command: Command): string[] {
-    const subcommands: string[] = [];
-
-    if ('options' in command.data && command.data.options) {
-      const options = command.data.options as unknown as Array<{
-        type: number;
-        name: string;
-        description?: string;
-        required?: boolean;
-        options?: Array<{
-          type: number;
-          name: string;
-          description?: string;
-          required?: boolean;
-        }>;
-      }>;
-
-      for (const option of options) {
-        if (option.type === 1) {
-          // Subcommand
-          subcommands.push(
-            `• \`${option.name}\` - ${option.description || t('common.noDescription', { defaultValue: 'No description' })}`
-          );
-        } else if (option.type === 2) {
-          // Subcommand group
-          for (const subOption of option.options || []) {
-            if (subOption.type === 1) {
-              subcommands.push(
-                `• \`${option.name} ${subOption.name}\` - ${subOption.description || t('common.noDescription', { defaultValue: 'No description' })}`
-              );
-            }
-          }
-        }
-      }
-    }
-
-    return subcommands;
-  }
+  // ─── Public utilities ─────────────────────────────────────────────────────
 
   async getCommandList(): Promise<string[]> {
-    // Only reload if we don't have any commands loaded
-    if (this.commands.size === 0) {
-      await this.loadCommands();
-    }
     return Array.from(this.commands.keys()).sort();
   }
 
-  // Force reload commands (useful for development)
-  async reloadCommands(): Promise<void> {
-    this.commands.clear();
-    this.commandsByCategory.clear();
-    await this.loadCommands();
-  }
-
   getCategoryCommands(category: CommandCategory): Command[] {
-    return this.commandsByCategory.get(category) || [];
+    return this.commandsByCategory.get(category) ?? [];
   }
 
   getAllCategories(): CommandCategory[] {

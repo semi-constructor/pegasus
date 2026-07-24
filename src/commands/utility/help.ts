@@ -4,12 +4,11 @@ import {
   AutocompleteInteraction,
 } from 'discord.js';
 import { Command, CommandCategory } from '../../types/command';
-import { t, getGuildLocale } from '../../i18n';
+import { t, resolveLocale } from '../../i18n';
 import { HelpService } from '../../services/helpService';
 import { logger } from '../../utils/logger';
 import {
   createLocalizationMap,
-  subcommandDescriptions,
   optionDescriptions,
 } from '../../utils/localization';
 
@@ -17,8 +16,9 @@ const helpService = new HelpService();
 
 export const data = new SlashCommandBuilder()
   .setName('help')
-  .setDescription(t('commands.utils.subcommands.help.description', { defaultValue: 'Get help for commands' }))
-  .setDescriptionLocalizations(createLocalizationMap(subcommandDescriptions.utils.help))
+  .setDescription(
+    t('commands.help.description', { defaultValue: 'Get help for commands' })
+  )
   .addStringOption(option =>
     option
       .setName('command')
@@ -36,7 +36,13 @@ export const category = CommandCategory.Utility;
 export const cooldown = 3;
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
-  const locale = interaction.guildId ? getGuildLocale(interaction.guildId) : 'en';
+  // Wire the client into the HelpService on first use so it reads from
+  // client.commands (loaded after i18n was initialized) rather than
+  // re-importing command files when i18n is uninitialized.
+  helpService.setClient(interaction.client);
+
+  // Resolve locale: user preference first, then guild, then 'en'
+  const locale = await resolveLocale(interaction.user.id, interaction.guildId);
 
   try {
     const commandName = interaction.options.getString('command');
@@ -46,7 +52,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
       if (!commandHelp) {
         await interaction.reply({
-          content: t('commands.utils.help.commandNotFound', { lng: locale }),
+          content: t('commands.help.commandNotFound', { lng: locale }),
           ephemeral: true,
         });
         return;
@@ -70,6 +76,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 }
 
 export async function autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+  helpService.setClient(interaction.client);
+
   const focused = interaction.options.getFocused();
 
   const commands = await helpService.getCommandList();
