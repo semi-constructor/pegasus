@@ -15,6 +15,7 @@ import {
   TextChannel,
 } from 'discord.js';
 import { giveawayService } from '../../services/giveawayService';
+import { crossShardService } from '../../services/crossShardService';
 
 const router = Router();
 
@@ -41,6 +42,7 @@ const createGiveawaySchema = z.object({
   embedColor: z.string().or(z.number()).optional(),
   embedImage: z.string().url().max(500).optional(),
   embedThumbnail: z.string().url().max(500).optional(),
+  startTime: z.string().datetime().optional(),
 });
 
 const updateGiveawaySchema = z.object({
@@ -80,7 +82,7 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
     }
 
     const data = validation.data;
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
 
     if (!guild) {
       return res.status(404).json({
@@ -89,7 +91,7 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       });
     }
 
-    const channel = guild.channels.cache.get(data.channelId) as TextChannel;
+    const channel = await client.channels.fetch(data.channelId).catch(() => null) as TextChannel;
     if (!channel || !channel.isTextBased()) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -125,10 +127,16 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       embed.addFields({ name: 'Required Role', value: `<@&${data.requiredRole}>`, inline: false });
     }
 
-    // Send giveaway message initially
-    const message = await channel.send({
-      embeds: [embed],
-    });
+    const isScheduled = data.startTime && new Date(data.startTime) > new Date();
+
+    let messageId: string | null = null;
+    if (!isScheduled) {
+      // Send giveaway message initially
+      const message = await channel.send({
+        embeds: [embed],
+      });
+      messageId = message.id;
+    }
 
     // Create giveaway using giveawayService
     const giveaway = await giveawayService.createGiveaway({
@@ -138,6 +146,7 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       prize: data.prize,
       winnerCount: data.winnerCount,
       endTime,
+      startTime: data.startTime ? new Date(data.startTime) : null,
       description: data.description || null,
       requirements: data.requiredRole ? { roleIds: [data.requiredRole] } : {},
       bonusEntries: data.bonusEntries ? { roles: Object.fromEntries(data.bonusEntries.map(b => [b.roleId, b.entries])) } : {},
@@ -147,27 +156,34 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       embedThumbnail: data.embedThumbnail || null,
     });
 
-    // Update message ID in the database
-    await giveawayService.updateGiveawayMessage(giveaway.giveawayId, message.id);
+    // Update message ID in the database if sent immediately
+    if (messageId) {
+      await giveawayService.updateGiveawayMessage(giveaway.giveawayId, messageId);
+      
+      try {
+        const message = await channel.messages.fetch(messageId);
+        // Also update our button customId to use gw_enter
+        const button = new ButtonBuilder()
+          .setCustomId(`gw_enter:${giveaway.giveawayId}`)
+          .setLabel(t('commands.giveaway.buttons.enter', { defaultValue: 'Enter' }))
+          .setStyle(ButtonStyle.Primary)
+          .setEmoji('🎉');
 
-    // Also update our button customId to use gw_enter
-    const button = new ButtonBuilder()
-      .setCustomId(`gw_enter:${giveaway.giveawayId}`)
-      .setLabel(t('commands.giveaway.buttons.enter', { defaultValue: 'Enter' }))
-      .setStyle(ButtonStyle.Primary)
-      .setEmoji('🎉');
+        const infoButton = new ButtonBuilder()
+          .setCustomId(`gw_info:${giveaway.giveawayId}`)
+          .setLabel(t('commands.giveaway.buttons.info', { defaultValue: 'Info' }))
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('ℹ️');
 
-    const infoButton = new ButtonBuilder()
-      .setCustomId(`gw_info:${giveaway.giveawayId}`)
-      .setLabel(t('commands.giveaway.buttons.info', { defaultValue: 'Info' }))
-      .setStyle(ButtonStyle.Secondary)
-      .setEmoji('ℹ️');
-
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button, infoButton);
-    
-    embed.setFooter({ text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId, defaultValue: `Giveaway ID: ${giveaway.giveawayId}` }) });
-    
-    await message.edit({ embeds: [embed], components: [row] });
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button, infoButton);
+        
+        embed.setFooter({ text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId, defaultValue: `Giveaway ID: ${giveaway.giveawayId}` }) });
+        
+        await message.edit({ embeds: [embed], components: [row] });
+      } catch (error) {
+        logger.error('Error adding buttons to giveaway message:', error);
+      }
+    }
 
     logger.info(`Created giveaway ${giveaway.giveawayId} in guild ${guildId}`);
 
@@ -177,7 +193,8 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
         id: giveaway.giveawayId,
         prize: data.prize,
         channelId: data.channelId,
-        messageId: message.id,
+        messageId: messageId,
+        startTime: data.startTime,
         endTime: endTime.toISOString(),
         winnerCount: data.winnerCount,
       },
@@ -252,8 +269,7 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
       .where(and(eq(giveaways.giveawayId, giveawayId), eq(giveaways.guildId, guildId)));
 
     // Update the giveaway message
-    const guild = client.guilds.cache.get(guildId);
-    const channel = guild?.channels.cache.get(giveaway.channelId) as TextChannel;
+    const channel = (await client.channels.fetch(giveaway.channelId).catch(() => null)) as TextChannel;
 
     if (channel && giveaway.messageId) {
       try {
@@ -329,8 +345,7 @@ router.delete('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respo
     }
 
     // Delete giveaway message
-    const guild = client.guilds.cache.get(guildId);
-    const channel = guild?.channels.cache.get(giveaway.channelId) as TextChannel;
+    const channel = (await client.channels.fetch(giveaway.channelId).catch(() => null)) as TextChannel;
 
     if (channel && giveaway.messageId) {
       try {

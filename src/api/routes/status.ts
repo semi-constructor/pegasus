@@ -4,6 +4,7 @@ import { db } from '../../database/connection';
 import { sql } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
 import { getDetailedSystemInfo, getProcessInfo } from '../utils/systemInfo';
+import { crossShardService } from '../../services/crossShardService';
 
 const router = Router();
 
@@ -134,9 +135,17 @@ router.get('/', async (_req: Request, res: Response) => {
           percentage: 0,
         };
 
-    const guilds = client.guilds.cache;
-    const totalUsers = guilds.reduce((acc, guild) => acc + guild.memberCount, 0);
-    const totalChannels = guilds.reduce((acc, guild) => acc + guild.channels.cache.size, 0);
+    const [totalGuilds, totalUsers, totalChannels, shardStats] = await Promise.all([
+      crossShardService.getTotalGuildsCount(client),
+      crossShardService.getTotalUsersCount(client),
+      crossShardService.getTotalChannelsCount(client),
+      crossShardService.getShardStats(client),
+    ]);
+
+    const avgPing =
+      shardStats.length > 0
+        ? Math.round(shardStats.reduce((a, b) => a + (b.ping < 0 ? 0 : b.ping), 0) / shardStats.length)
+        : client.ws.ping;
 
     const status: SystemStatus = {
       bot: {
@@ -144,11 +153,11 @@ router.get('/', async (_req: Request, res: Response) => {
         id: client.user?.id || null,
         status: client.user ? 'online' : 'offline',
         uptime: client.uptime || 0,
-        guilds: guilds.size,
+        guilds: totalGuilds,
         users: totalUsers,
         channels: totalChannels,
         commands: client.commands?.size || 0,
-        ping: client.ws.ping,
+        ping: avgPing,
         memory: botMemory,
       },
       system: systemInfo.os,
@@ -162,21 +171,11 @@ router.get('/', async (_req: Request, res: Response) => {
       services: {
         discord: {
           connected: client.ws.status === 0,
-          latency: client.ws.ping,
-          shards: Array.from(client.ws.shards.values()).map(shard => ({
-            id: shard.id,
-            status: [
-              'READY',
-              'CONNECTING',
-              'RECONNECTING',
-              'IDLE',
-              'NEARLY',
-              'DISCONNECTED',
-              'WAITING_FOR_GUILDS',
-              'IDENTIFYING',
-              'RESUMING',
-            ][shard.status],
-            ping: shard.ping,
+          latency: avgPing,
+          shards: shardStats.map(s => ({
+            id: s.id,
+            status: s.statusText,
+            ping: s.ping,
           })),
         },
         database: {

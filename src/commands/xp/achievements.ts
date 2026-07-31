@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { engagementRepository } from '../../repositories/engagementRepository';
@@ -12,11 +12,11 @@ export const cooldown = 3;
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
   if (!interaction.guild) {
-    await interaction.reply({ content: t('common.guildOnly'), ephemeral: true });
+    await interaction.reply({ content: t('common.guildOnly'), flags: MessageFlags.Ephemeral });
     return;
   }
 
-  await interaction.deferReply({ ephemeral: false });
+  await interaction.deferReply();
 
   const guildId = interaction.guildId!;
   const userId = interaction.user.id;
@@ -39,7 +39,18 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       return `${emoji} **${a.title}**\n  ${a.description}\n  Rewards: ${a.rewardXp} XP | ${a.rewardCoins} Coins`;
     });
 
-    embed.setDescription(list.join('\n\n'));
+    let description = '';
+    let count = 0;
+    for (const item of list) {
+      if (description.length + item.length + 2 > 4000) {
+        description += `\n\n...and ${list.length - count} more achievements.`;
+        break;
+      }
+      description += (description.length > 0 ? '\n\n' : '') + item;
+      count++;
+    }
+
+    embed.setDescription(description);
   }
 
   await interaction.editReply({ embeds: [embed] });

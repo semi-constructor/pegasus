@@ -3,6 +3,7 @@ import { sql, eq, and, gte, desc } from 'drizzle-orm';
 import { statsAggregator } from '../services/statsAggregator';
 import { logger } from '../../utils/logger';
 import { client } from '../../index';
+import { crossShardService } from '../../services/crossShardService';
 import { getDatabase } from '../../database/connection';
 import {
   guilds as guildsTable,
@@ -111,8 +112,26 @@ router.get('/overview', async (_req: Request, res: Response) => {
         .limit(5),
     ]);
 
-    const topGuilds = client.guilds.cache
-      .map(guild => ({
+    let topGuilds: any[] = [];
+    if (crossShardService.isSharded(client)) {
+      const nestedGuilds = await crossShardService.broadcastEval(client, (c: any) => {
+        return c.guilds.cache.map((guild: any) => ({
+          id: guild.id,
+          name: guild.name,
+          icon: guild.iconURL({ size: 256 }) ?? null,
+          memberCount: guild.memberCount,
+          approximatePresence: guild.members.cache.filter(
+            (member: any) =>
+              !member.user.bot && member.presence?.status && member.presence.status !== 'offline'
+          ).size,
+          premiumTier: guild.premiumTier,
+          boosters: guild.premiumSubscriptionCount ?? 0,
+          large: guild.large,
+        }));
+      });
+      topGuilds = nestedGuilds.flat();
+    } else {
+      topGuilds = client.guilds.cache.map(guild => ({
         id: guild.id,
         name: guild.name,
         icon: guild.iconURL({ size: 256 }) ?? null,
@@ -124,8 +143,11 @@ router.get('/overview', async (_req: Request, res: Response) => {
         premiumTier: guild.premiumTier,
         boosters: guild.premiumSubscriptionCount ?? 0,
         large: guild.large,
-      }))
-      .sort((a, b) => (b.memberCount ?? 0) - (a.memberCount ?? 0))
+      }));
+    }
+
+    topGuilds = topGuilds
+      .sort((a: any, b: any) => (b.memberCount ?? 0) - (a.memberCount ?? 0))
       .slice(0, 5);
 
     res.json({
@@ -189,24 +211,50 @@ router.get('/guilds', async (req: Request, res: Response) => {
       .from(guildSettings);
     const configuredSet = new Set(configuredGuilds.map(entry => entry.guildId));
 
-    let guildsArray = client.guilds.cache.map(guild => ({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.iconURL({ size: 128 }) ?? null,
-      memberCount: guild.memberCount,
-      textChannelCount: guild.channels.cache.filter(channel => channel.isTextBased()).size,
-      voiceChannelCount: guild.channels.cache.filter(channel => channel.isVoiceBased()).size,
-      roleCount: guild.roles.cache.size,
-      large: guild.large,
-      premiumTier: guild.premiumTier,
-      boosters: guild.premiumSubscriptionCount ?? 0,
-      configured: configuredSet.has(guild.id),
-      onlineMembers: guild.members.cache.filter(
-        member =>
-          !member.user.bot && member.presence?.status && member.presence.status !== 'offline'
-      ).size,
-      botMembers: guild.members.cache.filter(member => member.user.bot).size,
-    }));
+    let guildsArray: any[] = [];
+    if (crossShardService.isSharded(client)) {
+      const nestedGuilds = await crossShardService.broadcastEval(client, (c: any, { confSet }) => {
+        const set = new Set(confSet);
+        return c.guilds.cache.map((guild: any) => ({
+          id: guild.id,
+          name: guild.name,
+          icon: guild.iconURL({ size: 128 }) ?? null,
+          memberCount: guild.memberCount,
+          textChannelCount: guild.channels.cache.filter((channel: any) => channel.isTextBased()).size,
+          voiceChannelCount: guild.channels.cache.filter((channel: any) => channel.isVoiceBased()).size,
+          roleCount: guild.roles.cache.size,
+          large: guild.large,
+          premiumTier: guild.premiumTier,
+          boosters: guild.premiumSubscriptionCount ?? 0,
+          configured: set.has(guild.id),
+          onlineMembers: guild.members.cache.filter(
+            (member: any) =>
+              !member.user.bot && member.presence?.status && member.presence.status !== 'offline'
+          ).size,
+          botMembers: guild.members.cache.filter((member: any) => member.user.bot).size,
+        }));
+      }, { confSet: Array.from(configuredSet) });
+      guildsArray = nestedGuilds.flat();
+    } else {
+      guildsArray = client.guilds.cache.map(guild => ({
+        id: guild.id,
+        name: guild.name,
+        icon: guild.iconURL({ size: 128 }) ?? null,
+        memberCount: guild.memberCount,
+        textChannelCount: guild.channels.cache.filter(channel => channel.isTextBased()).size,
+        voiceChannelCount: guild.channels.cache.filter(channel => channel.isVoiceBased()).size,
+        roleCount: guild.roles.cache.size,
+        large: guild.large,
+        premiumTier: guild.premiumTier,
+        boosters: guild.premiumSubscriptionCount ?? 0,
+        configured: configuredSet.has(guild.id),
+        onlineMembers: guild.members.cache.filter(
+          member =>
+            !member.user.bot && member.presence?.status && member.presence.status !== 'offline'
+        ).size,
+        botMembers: guild.members.cache.filter(member => member.user.bot).size,
+      }));
+    }
 
     if (search) {
       guildsArray = guildsArray.filter(
@@ -236,7 +284,10 @@ router.get('/guilds/:guildId/overview', async (req: Request, res: Response) => {
   const { guildId } = req.params;
 
   try {
-    const guild = client.guilds.cache.get(guildId);
+    let guild = client.guilds.cache.get(guildId) as any;
+    if (!guild) {
+      guild = await crossShardService.fetchGuild(client, guildId);
+    }
 
     if (!guild) {
       res.status(404).json({
@@ -401,10 +452,12 @@ router.get('/guilds/:guildId/overview', async (req: Request, res: Response) => {
         name: guild.name,
         icon: guild.iconURL({ size: 256 }) ?? null,
         memberCount: guild.memberCount,
-        approximatePresence: guild.members.cache.filter(
-          member =>
-            !member.user.bot && member.presence?.status && member.presence.status !== 'offline'
-        ).size,
+        approximatePresence: guild.members?.cache
+          ? guild.members.cache.filter(
+              (member: any) =>
+                !member.user?.bot && member.presence?.status && member.presence.status !== 'offline'
+            ).size
+          : 0,
         premiumTier: guild.premiumTier,
         boosters: guild.premiumSubscriptionCount ?? 0,
         shardId: guild.shardId,

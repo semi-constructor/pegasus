@@ -25,7 +25,8 @@ export const giveaways = pgTable('giveaways', {
   description: text('description'),
   winnerCount: integer('winner_count').default(1).notNull(),
   endTime: timestamp('end_time').notNull(),
-  status: varchar('status', { length: 20 }).default('active').notNull(), // active, ended, cancelled
+  startTime: timestamp('start_time'),
+  status: varchar('status', { length: 20 }).default('active').notNull(), // scheduled, active, ended, cancelled
   entries: integer('entries').default(0).notNull(),
   requirements: json('requirements').default({}).notNull(),
   bonusEntries: json('bonus_entries').default({}).notNull(),

@@ -95,10 +95,22 @@ class PegasusBot extends Client {
       logger.info(chalk.blue('Logging in to Discord...'));
       await this.login(config.DISCORD_TOKEN);
 
-      // Start API server if enabled
+      const shardId = this.shard?.ids[0] ?? 0;
+      const isPrimaryShard = !this.shard || this.shard.ids.includes(0);
+      logger.info(chalk.green(`Shard #${shardId} logged in successfully`));
+
+      // Start API server if enabled (only on primary shard to avoid port collision)
       if (config.ENABLE_API) {
-        logger.info(chalk.blue('Starting API server...'));
-        startApiServer();
+        if (isPrimaryShard) {
+          logger.info(chalk.blue('Starting API server on primary shard...'));
+          startApiServer();
+        } else {
+          logger.info(
+            chalk.yellow(
+              `API server skipped on Shard #${shardId} (running on Shard 0)`
+            )
+          );
+        }
       } else {
         logger.info(chalk.yellow('API server disabled - bot running in standalone mode'));
       }

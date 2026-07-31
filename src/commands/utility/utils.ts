@@ -13,6 +13,7 @@ import { SteamService as RealSteamService } from '../../services/steamService';
 import { logger } from '../../utils/logger';
 import * as os from 'os';
 import { version as djsVersion } from 'discord.js';
+import { crossShardService } from '../../services/crossShardService';
 import {
   createLocalizationMap,
   commandNames,
@@ -781,11 +782,16 @@ async function handleStats(
   try {
     const client = interaction.client;
 
-    // Calculate bot statistics
-    const guildCount = client.guilds.cache.size;
-    const userCount = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
-    const channelCount = client.channels.cache.size;
+    // Calculate cross-shard bot statistics
+    const [guildCount, userCount, channelCount, shardStats] = await Promise.all([
+      crossShardService.getTotalGuildsCount(client),
+      crossShardService.getTotalUsersCount(client),
+      crossShardService.getTotalChannelsCount(client),
+      crossShardService.getShardStats(client),
+    ]);
     const commandCount = client.application?.commands.cache.size || 0;
+    const shardId = client.shard?.ids[0] ?? 0;
+    const shardCount = client.shard?.count ?? 1;
 
     // System information
     const platform = os.platform();
@@ -873,6 +879,7 @@ async function handleStats(
             `**${t('commands.utils.stats.commands', { lng: locale })}:** ${commandCount}`,
             `**${t('commands.utils.stats.uptime', { lng: locale })}:** ${formatUptime(uptime)}`,
             `**${t('commands.utils.stats.ping', { lng: locale })}:** ${client.ws.ping}ms`,
+            `**Shard:** #${shardId + 1} of ${shardCount}`,
           ].join('\n'),
           inline: true,
         },

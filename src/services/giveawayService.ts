@@ -33,6 +33,7 @@ export interface CreateGiveawayData {
   prize: string;
   winnerCount: number;
   endTime: Date;
+  startTime?: Date | null;
   description: string | null;
   requirements: GiveawayRequirements;
   bonusEntries: GiveawayBonusEntries;
@@ -61,8 +62,9 @@ export interface GiveawayData {
   hostedBy: string;
   prize: string;
   winnerCount: number;
-  status: 'active' | 'ended';
+  status: 'active' | 'ended' | 'scheduled' | 'cancelled';
   endTime: Date;
+  startTime?: Date | null;
   description: string | null;
   requirements: GiveawayRequirements;
   bonusEntries: GiveawayBonusEntries;
@@ -79,19 +81,24 @@ export class GiveawayService {
   async createGiveaway(data: CreateGiveawayData) {
     const giveawayId = `GW${generateId(10)}`;
 
+    const isScheduled = data.startTime && data.startTime > new Date();
+
     const giveaway = await giveawayRepository.createGiveaway({
       giveawayId,
       ...data,
+      status: isScheduled ? 'scheduled' : 'active',
       requirements: data.requirements as Record<string, unknown>,
       bonusEntries: data.bonusEntries as Record<string, unknown>,
     });
 
-    // Schedule the giveaway end
-    this.scheduleGiveawayEnd({
-      giveawayId: giveaway.giveawayId,
-      endTime: giveaway.endTime,
-      status: giveaway.status,
-    });
+    if (!isScheduled) {
+      // Schedule the giveaway end
+      this.scheduleGiveawayEnd({
+        giveawayId: giveaway.giveawayId,
+        endTime: giveaway.endTime,
+        status: giveaway.status,
+      });
+    }
 
     // Log the action
     await auditLogger.logAction({
@@ -589,6 +596,7 @@ export class GiveawayService {
       void (async () => {
         try {
           await this.processExpiredGiveaways();
+          await this.processScheduledGiveaways();
         } catch (error) {
           logger.error('Error processing expired giveaways:', error);
         }
@@ -602,6 +610,81 @@ export class GiveawayService {
     for (const giveaway of expiredGiveaways) {
       logger.info(`Processing expired giveaway: ${giveaway.giveawayId}`);
       await this.endGiveaway(giveaway.giveawayId, { id: 'system' } as User);
+    }
+  }
+
+  private async processScheduledGiveaways() {
+    const scheduledGiveaways = await giveawayRepository.getScheduledGiveaways();
+
+    for (const giveaway of scheduledGiveaways) {
+      logger.info(`Processing scheduled giveaway: ${giveaway.giveawayId}`);
+      
+      // We update the embed first, this will send the message if messageId is null!
+      // But wait! updateGiveawayEmbed returns early if messageId is null! 
+      // I need to send the message here directly and then update DB.
+      
+      const client = (global as any).client;
+      if (!client) continue;
+      
+      try {
+        const channel = await client.channels.fetch(giveaway.channelId) as TextChannel;
+        if (!channel) continue;
+        
+        const embed = new EmbedBuilder()
+          .setTitle(giveaway.embedTitle || '🎉 GIVEAWAY 🎉')
+          .setDescription(
+            `**Prize:** ${giveaway.prize}\n${giveaway.description || ''}\n\nReact with 🎉 to enter!`
+          )
+          .addFields(
+            { name: 'Ends', value: `<t:${Math.floor(new Date(giveaway.endTime).getTime() / 1000)}:R>`, inline: true },
+            { name: 'Winners', value: giveaway.winnerCount.toString(), inline: true },
+            { name: 'Hosted By', value: `<@${giveaway.hostedBy}>`, inline: true }
+          )
+          .setColor(giveaway.embedColor || 0x5865f2)
+          .setFooter({ text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId, defaultValue: `Giveaway ID: ${giveaway.giveawayId}` }) })
+          .setTimestamp(new Date(giveaway.endTime));
+
+        if (giveaway.embedImage) embed.setImage(giveaway.embedImage);
+        if (giveaway.embedThumbnail) embed.setThumbnail(giveaway.embedThumbnail);
+        
+        // Add roles to embed if there are requirements
+        const reqs: any = giveaway.requirements || {};
+        if (reqs.roleIds && reqs.roleIds.length > 0) {
+           embed.addFields({ name: 'Required Role', value: `<@&${reqs.roleIds[0]}>`, inline: false });
+        }
+
+        const button = new ButtonBuilder()
+          .setCustomId(`gw_enter:${giveaway.giveawayId}`)
+          .setLabel(t('commands.giveaway.buttons.enter', { defaultValue: 'Enter' }))
+          .setStyle(ButtonStyle.Primary)
+          .setEmoji('🎉');
+
+        const infoButton = new ButtonBuilder()
+          .setCustomId(`gw_info:${giveaway.giveawayId}`)
+          .setLabel(t('commands.giveaway.buttons.info', { defaultValue: 'Info' }))
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('ℹ️');
+
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button, infoButton);
+
+        const message = await channel.send({ embeds: [embed], components: [row] });
+        
+        // Update DB
+        await giveawayRepository.updateGiveaway(giveaway.giveawayId, {
+          status: 'active',
+          messageId: message.id
+        });
+        
+        // Schedule end
+        this.scheduleGiveawayEnd({
+          giveawayId: giveaway.giveawayId,
+          endTime: giveaway.endTime,
+          status: 'active',
+        });
+        
+      } catch (error) {
+        logger.error(`Error sending scheduled giveaway ${giveaway.giveawayId}:`, error);
+      }
     }
   }
 

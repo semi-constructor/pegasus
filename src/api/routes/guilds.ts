@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { client } from '../../index';
+import { crossShardService } from '../../services/crossShardService';
 import { getDatabase } from '../../database/connection';
 import {
   guilds as guildsTable,
@@ -481,7 +482,10 @@ router.get('/:guildId/members', async (req: Request, res: Response): Promise<Res
   const { guildId } = req.params;
 
   try {
-    const guild = client.guilds.cache.get(guildId);
+    let guild = client.guilds.cache.get(guildId) as any;
+    if (!guild) {
+      guild = await crossShardService.fetchGuild(client, guildId);
+    }
 
     if (!guild) {
       return res.status(404).json({
@@ -490,27 +494,30 @@ router.get('/:guildId/members', async (req: Request, res: Response): Promise<Res
       });
     }
 
-    const members = guild.members.cache;
-    const onlineMembers = members.filter(m => m.presence?.status !== 'offline');
-    const bots = members.filter(m => m.user.bot);
-    const humans = members.filter(m => !m.user.bot);
+    const members = guild.members?.cache;
+    const onlineMembers = members ? members.filter((m: any) => m.presence?.status !== 'offline') : [];
+    const bots = members ? members.filter((m: any) => m.user?.bot) : [];
+    const humans = members ? members.filter((m: any) => !m.user?.bot) : [];
 
     const response = {
-      members:
-        members.first(20)?.map(m => ({
-          id: m.id,
-          username: m.user.username,
-          discriminator: m.user.discriminator,
-          nickname: m.nickname,
-          roles: m.roles.cache.map(r => r.id),
-          joinedAt: m.joinedAt?.toISOString() || null,
-          isBot: m.user.bot,
-        })) || [],
+      members: members
+        ? Array.from(members.values())
+            .slice(0, 20)
+            .map((m: any) => ({
+              id: m.id,
+              username: m.user?.username,
+              discriminator: m.user?.discriminator,
+              nickname: m.nickname,
+              roles: m.roles?.cache ? Array.from(m.roles.cache.keys()) : [],
+              joinedAt: m.joinedAt?.toISOString?.() || null,
+              isBot: Boolean(m.user?.bot),
+            }))
+        : [],
       stats: {
-        total: guild.memberCount,
-        online: onlineMembers.size,
-        bots: bots.size,
-        humans: humans.size,
+        total: guild.memberCount || 0,
+        online: typeof onlineMembers === 'number' ? onlineMembers : (onlineMembers as any)?.size || 0,
+        bots: typeof bots === 'number' ? bots : (bots as any)?.size || 0,
+        humans: typeof humans === 'number' ? humans : (humans as any)?.size || 0,
       },
     };
 
@@ -578,7 +585,10 @@ router.get(
     const db = getDatabase();
 
     try {
-      const guild = client.guilds.cache.get(guildId);
+      let guild = client.guilds.cache.get(guildId) as any;
+      if (!guild) {
+        guild = await crossShardService.fetchGuild(client, guildId);
+      }
 
       if (!guild) {
         return res.status(404).json({
@@ -596,12 +606,14 @@ router.get(
       const guildConfig = settings[0];
 
       const response = {
-        channels: guild.channels.cache
-          .filter(c => c.type === 0) // Text channels only
-          .map(c => ({
-            id: c.id,
-            name: c.name,
-          })),
+        channels: guild.channels?.cache
+          ? Array.from(guild.channels.cache.values())
+              .filter((c: any) => c.type === 0)
+              .map((c: any) => ({
+                id: c.id,
+                name: c.name,
+              }))
+          : [],
         settings: {
           welcome: {
             enabled: guildConfig?.welcomeEnabled || false,

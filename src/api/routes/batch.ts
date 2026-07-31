@@ -10,6 +10,7 @@ import {
 import { inArray, desc, eq, sql } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
 import { cacheManager, CacheTTL } from '../middleware/cache';
+import { crossShardService } from '../../services/crossShardService';
 
 const router = Router();
 
@@ -90,22 +91,40 @@ router.post('/guilds', async (req: Request, res: Response): Promise<void> => {
     // Fetch uncached guild data
     if (uncachedGuildIds.length > 0) {
       // Get Discord guild data
-      const discordGuilds = uncachedGuildIds
-        .map(id => {
-          const guild = client.guilds.cache.get(id);
-          if (!guild) return null;
-
-          const onlineMembers = guild.members.cache.filter(m => m.presence?.status !== 'offline');
-
-          return {
-            id: guild.id,
-            name: guild.name,
-            icon: guild.icon,
-            memberCount: guild.memberCount,
-            onlineCount: onlineMembers.size,
-          };
-        })
-        .filter(Boolean);
+      // Get Discord guild data
+      let discordGuilds: any[] = [];
+      if (crossShardService.isSharded(client)) {
+        const nestedGuilds = await crossShardService.broadcastEval(client, (c: any, { ids }) => {
+          return ids.map((id: string) => {
+            const guild = c.guilds.cache.get(id);
+            if (!guild) return null;
+            const onlineMembers = guild.members.cache.filter((m: any) => m.presence?.status !== 'offline');
+            return {
+              id: guild.id,
+              name: guild.name,
+              icon: guild.icon,
+              memberCount: guild.memberCount,
+              onlineCount: onlineMembers.size,
+            };
+          }).filter(Boolean);
+        }, { ids: uncachedGuildIds });
+        discordGuilds = nestedGuilds.flat();
+      } else {
+        discordGuilds = uncachedGuildIds
+          .map(id => {
+            const guild = client.guilds.cache.get(id);
+            if (!guild) return null;
+            const onlineMembers = guild.members.cache.filter(m => m.presence?.status !== 'offline');
+            return {
+              id: guild.id,
+              name: guild.name,
+              icon: guild.icon,
+              memberCount: guild.memberCount,
+              onlineCount: onlineMembers.size,
+            };
+          })
+          .filter(Boolean);
+      }
 
       // Get database data in parallel
       const [dbGuilds, dbSettings] = await Promise.all([
@@ -318,6 +337,8 @@ router.post('/stats', async (req: Request, res: Response): Promise<void> => {
 
     const results: Record<string, any> = {};
 
+    const uncachedGuildIds: string[] = [];
+
     // Check cache and Discord data
     for (const guildId of guildIds) {
       const cacheKey = `batch:stats:${guildId}`;
@@ -326,9 +347,35 @@ router.post('/stats', async (req: Request, res: Response): Promise<void> => {
       if (cached) {
         results[guildId] = cached;
       } else {
-        const guild = client.guilds.cache.get(guildId);
-        if (guild) {
-          const stats = {
+        uncachedGuildIds.push(guildId);
+      }
+    }
+
+    if (uncachedGuildIds.length > 0) {
+      let statsArray: any[] = [];
+      if (crossShardService.isSharded(client)) {
+        const nestedStats = await crossShardService.broadcastEval(client, (c: any, { ids }) => {
+          return ids.map((id: string) => {
+            const guild = c.guilds.cache.get(id);
+            if (!guild) return null;
+            return {
+              guildId: id,
+              memberCount: guild.memberCount,
+              onlineCount: guild.members.cache.filter((m: any) => m.presence?.status !== 'offline').size,
+              boostLevel: guild.premiumTier,
+              boostCount: guild.premiumSubscriptionCount || 0,
+              channelCount: guild.channels.cache.size,
+              roleCount: guild.roles.cache.size,
+            };
+          }).filter(Boolean);
+        }, { ids: uncachedGuildIds });
+        statsArray = nestedStats.flat();
+      } else {
+        statsArray = uncachedGuildIds.map(id => {
+          const guild = client.guilds.cache.get(id);
+          if (!guild) return null;
+          return {
+            guildId: id,
             memberCount: guild.memberCount,
             onlineCount: guild.members.cache.filter(m => m.presence?.status !== 'offline').size,
             boostLevel: guild.premiumTier,
@@ -336,10 +383,14 @@ router.post('/stats', async (req: Request, res: Response): Promise<void> => {
             channelCount: guild.channels.cache.size,
             roleCount: guild.roles.cache.size,
           };
+        }).filter(Boolean);
+      }
 
-          cacheManager.set(cacheKey, stats, CacheTTL.GUILD_DATA);
-          results[guildId] = stats;
-        }
+      for (const stat of statsArray) {
+        const guildId = stat.guildId;
+        delete stat.guildId;
+        cacheManager.set(`batch:stats:${guildId}`, stat, CacheTTL.GUILD_DATA);
+        results[guildId] = stat;
       }
     }
 

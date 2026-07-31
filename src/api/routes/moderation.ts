@@ -132,7 +132,7 @@ router.post('/:guildId/moderation/warn', async (req: Request, res: Response) => 
     const { userId, moderatorId, reason, level = 1 } = validation.data;
 
     // Get guild and users
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await client.guilds.fetch(guildId).catch(() => null);
     if (!guild) {
       return res.status(404).json({
         error: 'Not Found',
@@ -235,7 +235,7 @@ router.post('/:guildId/moderation/ban', async (req: Request, res: Response) => {
     const { userId, moderatorId, reason, duration, deleteMessageDays = 0 } = validation.data;
 
     // Get guild
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await client.guilds.fetch(guildId).catch(() => null);
     if (!guild) {
       return res.status(404).json({
         error: 'Not Found',
@@ -354,7 +354,7 @@ router.post('/:guildId/moderation/kick', async (req: Request, res: Response) => 
     const { userId, moderatorId, reason } = validation.data;
 
     // Get guild
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await client.guilds.fetch(guildId).catch(() => null);
     if (!guild) {
       return res.status(404).json({
         error: 'Not Found',
@@ -460,7 +460,7 @@ router.post('/:guildId/moderation/mute', async (req: Request, res: Response) => 
     const { userId, moderatorId, reason, duration } = validation.data;
 
     // Get guild
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await client.guilds.fetch(guildId).catch(() => null);
     if (!guild) {
       return res.status(404).json({
         error: 'Not Found',
@@ -498,6 +498,7 @@ router.post('/:guildId/moderation/mute', async (req: Request, res: Response) => 
     }
 
     // Get or create muted role
+    await guild.roles.fetch();
     let muteRole = guild.roles.cache.find(r => r.name === 'Muted');
 
     if (!muteRole) {
@@ -510,6 +511,7 @@ router.post('/:guildId/moderation/mute', async (req: Request, res: Response) => 
       });
 
       // Update all channels to deny send messages for muted role
+      await guild.channels.fetch();
       for (const channel of guild.channels.cache.values()) {
         if (channel.isTextBased() && 'permissionOverwrites' in channel) {
           await channel.permissionOverwrites

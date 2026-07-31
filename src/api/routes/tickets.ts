@@ -13,6 +13,7 @@ import {
   EmbedBuilder,
   TextChannel,
 } from 'discord.js';
+import { crossShardService } from '../../services/crossShardService';
 
 const router = Router();
 
@@ -47,7 +48,7 @@ router.post('/:guildId/tickets/panels', async (req: Request, res: Response) => {
     }
 
     const data = validation.data;
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
 
     if (!guild) {
       return res.status(404).json({
@@ -57,7 +58,7 @@ router.post('/:guildId/tickets/panels', async (req: Request, res: Response) => {
     }
 
     // Verify channel exists
-    const channel = guild.channels.cache.get(data.channelId);
+    const channel = await client.channels.fetch(data.channelId).catch(() => null);
     if (!channel || !channel.isTextBased()) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -66,7 +67,7 @@ router.post('/:guildId/tickets/panels', async (req: Request, res: Response) => {
     }
 
     // Verify category exists
-    const category = guild.channels.cache.get(data.categoryId);
+    const category = await client.channels.fetch(data.categoryId).catch(() => null);
     if (!category || category.type !== ChannelType.GuildCategory) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -205,8 +206,7 @@ router.patch('/:guildId/tickets/panels/:panelId', async (req: Request, res: Resp
       existingPanel.messageId &&
       existingPanel.channelId
     ) {
-      const guild = client.guilds.cache.get(guildId);
-      const channel = guild?.channels.cache.get(existingPanel.channelId) as TextChannel;
+      const channel = (await client.channels.fetch(existingPanel.channelId).catch(() => null)) as TextChannel;
 
       if (channel) {
         try {
@@ -269,8 +269,7 @@ router.delete('/:guildId/tickets/panels/:panelId', async (req: Request, res: Res
 
     // Delete the panel message if it exists
     if (existingPanel.messageId && existingPanel.channelId) {
-      const guild = client.guilds.cache.get(guildId);
-      const channel = guild?.channels.cache.get(existingPanel.channelId) as TextChannel;
+      const channel = (await client.channels.fetch(existingPanel.channelId).catch(() => null)) as TextChannel;
 
       if (channel) {
         try {
@@ -331,7 +330,7 @@ router.post('/:guildId/tickets/:ticketId/close', async (req: Request, res: Respo
       });
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
     if (!guild) {
       return res.status(404).json({
         error: 'Not Found',
@@ -351,7 +350,7 @@ router.post('/:guildId/tickets/:ticketId/close', async (req: Request, res: Respo
       .where(and(eq(tickets.id, ticketId), eq(tickets.guildId, guildId)));
 
     // Delete the ticket channel
-    const channel = guild.channels.cache.get(ticket.channelId);
+    const channel = await client.channels.fetch(ticket.channelId).catch(() => null);
     if (channel) {
       try {
         // Send closing message before deletion

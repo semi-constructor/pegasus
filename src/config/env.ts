@@ -58,6 +58,13 @@ const EnvSchema = z.object({
     .transform(val => val === 'true')
     .default('true'),
 
+  // Sharding Configuration
+  ENABLE_SHARDING: z
+    .enum(['true', 'false'])
+    .transform(val => val === 'true')
+    .default('false'),
+  TOTAL_SHARDS: z.string().default('auto'),
+
   // Logging & Monitoring
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   LOG_FILE_PATH: z.string().default('./logs'),

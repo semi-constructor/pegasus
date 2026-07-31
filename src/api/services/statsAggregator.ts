@@ -6,6 +6,7 @@ import { economyTransactions, members, modCases, tickets, giveaways } from '../.
 import { sql, gte } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
 import { cacheManager, CacheTTL } from '../middleware/cache';
+import { crossShardService } from '../../services/crossShardService';
 
 interface AggregatedStats {
   bot: {
@@ -150,12 +151,18 @@ class StatsAggregator {
    * Get bot statistics
    */
   private async getBotStats() {
+    const shardStats = await crossShardService.getShardStats(client);
+    const avgPing =
+      shardStats.length > 0
+        ? Math.round(shardStats.reduce((acc, s) => acc + (s.ping < 0 ? 0 : s.ping), 0) / shardStats.length)
+        : client.ws.ping;
+
     return {
       status: client.ws.status === 0 ? 'online' : 'connecting',
       uptime: Date.now() - this.botStartTime,
       startedAt: new Date(this.botStartTime).toISOString(),
-      latency: client.ws.ping,
-      shardCount: client.ws.shards.size,
+      latency: avgPing,
+      shardCount: client.shard?.count ?? client.ws.shards.size,
     };
   }
 
@@ -163,35 +170,106 @@ class StatsAggregator {
    * Get guild statistics
    */
   private async getGuildStats() {
-    const guilds = client.guilds.cache;
+    if (!crossShardService.isSharded(client)) {
+      const guilds = client.guilds.cache;
+      return {
+        total: guilds.size,
+        large: guilds.filter(g => g.large).size,
+        voiceActive: guilds.filter(g => g.members.cache.some(m => m.voice.channel)).size,
+      };
+    }
 
-    return {
-      total: guilds.size,
-      large: guilds.filter(g => g.large).size,
-      voiceActive: guilds.filter(g => g.members.cache.some(m => m.voice.channel)).size,
-    };
+    try {
+      interface GuildMetrics {
+        total: number;
+        large: number;
+        voiceActive: number;
+      }
+      const results = await crossShardService.broadcastEval<GuildMetrics>(client, (c: any) => {
+        const guilds = c.guilds.cache;
+        return {
+          total: guilds.size,
+          large: guilds.filter((g: any) => g.large).size,
+          voiceActive: guilds.filter((g: any) => g.members.cache.some((m: any) => m.voice?.channel)).size,
+        };
+      });
+
+      return results.reduce(
+        (acc, curr) => ({
+          total: acc.total + curr.total,
+          large: acc.large + curr.large,
+          voiceActive: acc.voiceActive + curr.voiceActive,
+        }),
+        { total: 0, large: 0, voiceActive: 0 }
+      );
+    } catch (error) {
+      logger.error('Failed to aggregate sharded guild stats:', error);
+      const guilds = client.guilds.cache;
+      return {
+        total: guilds.size,
+        large: guilds.filter(g => g.large).size,
+        voiceActive: guilds.filter(g => g.members.cache.some(m => m.voice.channel)).size,
+      };
+    }
   }
 
   /**
    * Get user statistics
    */
   private async getUserStats() {
-    const guilds = client.guilds.cache;
-    const totalUsers = guilds.reduce((acc, guild) => acc + guild.memberCount, 0);
+    const totalUsers = await crossShardService.getTotalUsersCount(client);
 
-    const uniqueUsers = new Set<string>();
+    let uniqueCount = 0;
     let onlineUsers = 0;
 
-    guilds.forEach(guild => {
-      guild.members.cache.forEach(member => {
-        if (!member.user.bot) {
-          uniqueUsers.add(member.user.id);
-          if (member.presence?.status !== 'offline') {
-            onlineUsers++;
+    if (!crossShardService.isSharded(client)) {
+      const guilds = client.guilds.cache;
+      const uniqueUsers = new Set<string>();
+      guilds.forEach(guild => {
+        guild.members.cache.forEach(member => {
+          if (!member.user.bot) {
+            uniqueUsers.add(member.user.id);
+            if (member.presence?.status !== 'offline') {
+              onlineUsers++;
+            }
+          }
+        });
+      });
+      uniqueCount = uniqueUsers.size;
+    } else {
+      try {
+        interface UserMetrics {
+          users: string[];
+          online: number;
+        }
+        const results = await crossShardService.broadcastEval<UserMetrics>(client, (c: any) => {
+          const userSet = new Set<string>();
+          let online = 0;
+          c.guilds.cache.forEach((guild: any) => {
+            guild.members.cache.forEach((member: any) => {
+              if (!member.user.bot) {
+                userSet.add(member.user.id);
+                if (member.presence?.status !== 'offline') {
+                  online++;
+                }
+              }
+            });
+          });
+          return { users: Array.from(userSet), online };
+        });
+
+        const globalUserSet = new Set<string>();
+        for (const res of results) {
+          onlineUsers += res.online;
+          for (const id of res.users) {
+            globalUserSet.add(id);
           }
         }
-      });
-    });
+        uniqueCount = globalUserSet.size;
+      } catch (error) {
+        logger.error('Failed to aggregate sharded user stats:', error);
+      }
+    }
 
     // Get active users from database (cached query)
     let activeToday = 0;
@@ -215,7 +293,7 @@ class StatsAggregator {
 
     return {
       total: totalUsers,
-      unique: uniqueUsers.size,
+      unique: uniqueCount,
       activeToday,
       online: onlineUsers,
     };

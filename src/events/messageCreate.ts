@@ -80,8 +80,20 @@ export async function execute(message: Message) {
             const expectedName = cmd.name?.toLowerCase() || '';
             
             if (commandName && (commandName === expectedName || `${prefix.toLowerCase()}${commandName}` === expectedName)) {
-              if (cmd.reply) {
-                await message.reply(cmd.reply);
+              if (cmd.responseType === 'embed') {
+                const embed = new EmbedBuilder()
+                  .setTitle(cmd.embedTitle || 'Custom Command')
+                  .setDescription(cmd.embedDescription || ' ')
+                  .setColor(cmd.embedColor || '#3498db');
+                  
+                if (cmd.embedFooter) embed.setFooter({ text: cmd.embedFooter });
+                if (cmd.embedThumbnail) embed.setThumbnail(cmd.embedThumbnail);
+                if (cmd.embedImage) embed.setImage(cmd.embedImage);
+                
+                await message.reply({ embeds: [embed] });
+                return;
+              } else if (cmd.response || cmd.reply) {
+                await message.reply(cmd.response || cmd.reply);
                 return;
               }
             }

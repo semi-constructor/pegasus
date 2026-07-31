@@ -12,6 +12,7 @@ import {
   TextChannel,
   VoiceChannel,
 } from 'discord.js';
+import { crossShardService } from '../../services/crossShardService';
 
 const router = Router();
 
@@ -90,13 +91,13 @@ const handlePostConfig = async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
 
     if (!guild) {
       return res.status(404).json({ error: 'Not Found', message: 'Guild not found in bot cache' });
     }
 
-    const panelChannel = guild.channels.cache.get(panelChannelId) as TextChannel;
+    const panelChannel = (await client.channels.fetch(panelChannelId).catch(() => null)) as TextChannel;
     if (!panelChannel || !panelChannel.isTextBased()) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -231,12 +232,12 @@ const handlePanelUpdate = async (req: Request, res: Response) => {
         .json({ error: 'Not Found', message: 'JTC panel configuration not found for this guild' });
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
     if (!guild) {
       return res.status(404).json({ error: 'Not Found', message: 'Guild not found in bot cache' });
     }
 
-    const panelChannel = guild.channels.cache.get(config.panelChannelId) as TextChannel;
+    const panelChannel = (await client.channels.fetch(config.panelChannelId).catch(() => null)) as TextChannel;
     if (panelChannel && panelChannel.isTextBased()) {
       const existingMsg = await panelChannel.messages.fetch(config.panelMessageId);
 
@@ -297,9 +298,9 @@ const handleChannelsLock = async (req: Request, res: Response) => {
         .json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
     if (guild) {
-      const voiceChannel = guild.channels.cache.get(channelId) as VoiceChannel;
+      const voiceChannel = (await client.channels.fetch(channelId).catch(() => null)) as VoiceChannel;
       if (voiceChannel && voiceChannel.isVoiceBased()) {
         await voiceChannel.permissionOverwrites.edit(guild.id, { Connect: false });
       }
@@ -350,9 +351,9 @@ const handleChannelsUnlock = async (req: Request, res: Response) => {
         .json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
     if (guild) {
-      const voiceChannel = guild.channels.cache.get(channelId) as VoiceChannel;
+      const voiceChannel = (await client.channels.fetch(channelId).catch(() => null)) as VoiceChannel;
       if (voiceChannel && voiceChannel.isVoiceBased()) {
         await voiceChannel.permissionOverwrites.edit(guild.id, { Connect: null });
       }
@@ -411,9 +412,9 @@ const handleChannelsLimit = async (req: Request, res: Response) => {
         .json({ error: 'Not Found', message: 'Active JTC channel not found in database' });
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = await crossShardService.fetchGuild(client, guildId);
     if (guild) {
-      const voiceChannel = guild.channels.cache.get(channelId) as VoiceChannel;
+      const voiceChannel = (await client.channels.fetch(channelId).catch(() => null)) as VoiceChannel;
       if (voiceChannel && voiceChannel.isVoiceBased()) {
         await voiceChannel.setUserLimit(limit);
       }

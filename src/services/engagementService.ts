@@ -17,7 +17,7 @@ export class EngagementService {
       // 1. Check active quests for messages
       const activeQuests = await engagementRepository.getActiveQuests(guildId);
       for (const quest of activeQuests) {
-        if (quest.targetType === 'messages') {
+        if (quest.targetType === 'messages_sent') {
           await this.progressQuest(
             guildId,
             userId,
@@ -29,15 +29,16 @@ export class EngagementService {
         }
       }
 
-      // 2. Check achievements (e.g., messages sent count)
-      // For simplicity and decoupling from message count queries every message, we can evaluate specific milestone checks or triggers
+      // 2. Increment message count in members table and check achievements
       if (member) {
+        const totalMessages = await engagementRepository.incrementMemberMetric(guildId, userId, 'messages', 1);
+        
         await this.checkAchievements(
           guildId,
           userId,
           member,
-          'messages',
-          1,
+          'messages_sent',
+          totalMessages,
           message.channel as TextChannel
         );
       }
@@ -58,13 +59,14 @@ export class EngagementService {
       // 1. Check active quests for voice
       const activeQuests = await engagementRepository.getActiveQuests(guildId);
       for (const quest of activeQuests) {
-        if (quest.targetType === 'voiceMinutes') {
+        if (quest.targetType === 'voice_minutes') {
           await this.progressQuest(guildId, userId, member, quest, minutes);
         }
       }
 
-      // 2. Check voice achievements
-      await this.checkAchievements(guildId, userId, member, 'voiceMinutes', minutes);
+      // 2. Increment voice minutes and check voice achievements
+      const totalVoiceMinutes = await engagementRepository.incrementMemberMetric(guildId, userId, 'voiceMinutes', minutes);
+      await this.checkAchievements(guildId, userId, member, 'voice_minutes', totalVoiceMinutes);
     } catch (error) {
       logger.error(`Error tracking voice activity for user ${userId}:`, error);
     }
@@ -131,11 +133,13 @@ export class EngagementService {
 
         if (achievement.requirementType === metricType) {
           // Here we check if metric meets requirement value
-          // E.g., if metric is 'reputation', we can check user reputation count
           let currentMetric = incrementValue;
           if (metricType === 'reputation') {
             const reps = await engagementRepository.getUserReputation(guildId, userId);
             currentMetric = reps.length;
+          } else if (metricType === 'messages_sent' || metricType === 'voice_minutes') {
+            // currentMetric is already the total updated metric passed from the tracker
+            currentMetric = incrementValue;
           }
 
           if (currentMetric >= achievement.requirementValue) {

@@ -5,6 +5,7 @@ import { tickets } from '../../database/schema';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
 import { EmbedBuilder, TextChannel } from 'discord.js';
+import { crossShardService } from '../../services/crossShardService';
 
 const router = Router();
 
@@ -63,28 +64,26 @@ const handleClose = async (req: Request, res: Response) => {
       .where(eq(tickets.id, ticket.id))
       .returning();
 
-    const guild = client.guilds.cache.get(ticket.guildId);
+    const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
-      const channel = guild.channels.cache.get(ticket.channelId);
-      if (channel) {
-        try {
-          if (channel.isTextBased()) {
-            const embed = new EmbedBuilder()
-              .setTitle('🔒 Ticket Closed')
-              .setDescription(
-                reason ? `Reason: ${reason}` : 'This ticket has been closed via the dashboard.'
-              )
-              .setColor(0xff0000)
-              .setTimestamp();
+      try {
+        const channel = await client.channels.fetch(ticket.channelId).catch(() => null);
+        if (channel && channel.isTextBased()) {
+          const embed = new EmbedBuilder()
+            .setTitle('🔒 Ticket Closed')
+            .setDescription(
+              reason ? `Reason: ${reason}` : 'This ticket has been closed via the dashboard.'
+            )
+            .setColor(0xff0000)
+            .setTimestamp();
 
-            await (channel as TextChannel).send({ embeds: [embed] });
-            // Wait a moment before deleting
-            await new Promise(resolve => setTimeout(resolve, 3000));
-          }
+          await (channel as TextChannel).send({ embeds: [embed] });
+          // Wait a moment before deleting
+          await new Promise(resolve => setTimeout(resolve, 3000));
           await channel.delete('Ticket closed via dashboard');
-        } catch (error) {
-          logger.warn(`Could not delete ticket channel: ${error}`);
         }
+      } catch (error) {
+        logger.warn(`Could not delete ticket channel: ${error}`);
       }
 
       // Try to DM the ticket creator
@@ -163,11 +162,11 @@ const handleLock = async (req: Request, res: Response) => {
       .where(eq(tickets.id, ticket.id))
       .returning();
 
-    const guild = client.guilds.cache.get(ticket.guildId);
+    const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
-      const channel = guild.channels.cache.get(ticket.channelId) as TextChannel;
-      if (channel && channel.isTextBased()) {
-        try {
+      try {
+        const channel = (await client.channels.fetch(ticket.channelId).catch(() => null)) as TextChannel;
+        if (channel && channel.isTextBased()) {
           // Update channel permissions to prevent user from sending messages
           await channel.permissionOverwrites.edit(ticket.userId, { SendMessages: false });
 
@@ -182,9 +181,9 @@ const handleLock = async (req: Request, res: Response) => {
             .setTimestamp();
 
           await channel.send({ embeds: [embed] });
-        } catch (error) {
-          logger.warn(`Could not lock ticket channel permissions: ${error}`);
         }
+      } catch (error) {
+        logger.warn(`Could not lock ticket channel permissions: ${error}`);
       }
     }
 
@@ -247,11 +246,11 @@ const handleFreeze = async (req: Request, res: Response) => {
       .where(eq(tickets.id, ticket.id))
       .returning();
 
-    const guild = client.guilds.cache.get(ticket.guildId);
+    const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
-      const channel = guild.channels.cache.get(ticket.channelId) as TextChannel;
-      if (channel && channel.isTextBased()) {
-        try {
+      try {
+        const channel = (await client.channels.fetch(ticket.channelId).catch(() => null)) as TextChannel;
+        if (channel && channel.isTextBased()) {
           // Update channel permissions to freeze user interactions
           await channel.permissionOverwrites.edit(ticket.userId, {
             SendMessages: false,
@@ -269,9 +268,9 @@ const handleFreeze = async (req: Request, res: Response) => {
             .setTimestamp();
 
           await channel.send({ embeds: [embed] });
-        } catch (error) {
-          logger.warn(`Could not freeze ticket channel permissions: ${error}`);
         }
+      } catch (error) {
+        logger.warn(`Could not freeze ticket channel permissions: ${error}`);
       }
     }
 
@@ -339,11 +338,11 @@ const handleClaim = async (req: Request, res: Response) => {
       .where(eq(tickets.id, ticket.id))
       .returning();
 
-    const guild = client.guilds.cache.get(ticket.guildId);
+    const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
-      const channel = guild.channels.cache.get(ticket.channelId) as TextChannel;
-      if (channel && channel.isTextBased()) {
-        try {
+      try {
+        const channel = (await client.channels.fetch(ticket.channelId).catch(() => null)) as TextChannel;
+        if (channel && channel.isTextBased()) {
           const embed = new EmbedBuilder()
             .setTitle('👋 Ticket Claimed')
             .setDescription(
@@ -353,9 +352,9 @@ const handleClaim = async (req: Request, res: Response) => {
             .setTimestamp();
 
           await channel.send({ embeds: [embed] });
-        } catch (error) {
-          logger.warn(`Could not send claim message to ticket channel: ${error}`);
         }
+      } catch (error) {
+        logger.warn(`Could not send claim message to ticket channel: ${error}`);
       }
     }
 

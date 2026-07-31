@@ -11,6 +11,8 @@ export interface CreateGiveawayData {
   prize: string;
   winnerCount: number;
   endTime: Date;
+  startTime?: Date | null;
+  status?: string;
   description: string | null;
   requirements: Record<string, unknown>;
   bonusEntries: Record<string, unknown>;
@@ -29,7 +31,8 @@ export class GiveawayRepository {
         ...data,
         requirements: data.requirements, // Already handled by Drizzle json() type
         bonusEntries: data.bonusEntries, // Already handled by Drizzle json() type
-        status: 'active',
+        status: data.status || 'active',
+        startTime: data.startTime,
         entries: 0,
       })
       .returning();
@@ -152,6 +155,14 @@ export class GiveawayRepository {
       .select()
       .from(giveaways)
       .where(and(eq(giveaways.status, 'active'), lt(giveaways.endTime, new Date())));
+  }
+
+  async getScheduledGiveaways() {
+    const db = getDatabase();
+    return db
+      .select()
+      .from(giveaways)
+      .where(and(eq(giveaways.status, 'scheduled'), lt(giveaways.startTime, new Date())));
   }
 
   async getEndedGiveawaysPendingAnnouncement() {

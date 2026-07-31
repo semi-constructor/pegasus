@@ -8,6 +8,7 @@ import {
   userReputation,
 } from '../database/schema/engagement';
 import { userXp } from '../database/schema/xp';
+import { members } from '../database/schema/members';
 import type {
   Achievement,
   UserAchievement,
@@ -268,6 +269,43 @@ export class EngagementRepository extends BaseRepository {
           },
         });
       return true;
+    });
+  }
+
+  async incrementMemberMetric(guildId: string, userId: string, metric: 'messages' | 'voiceMinutes', amount: number): Promise<number> {
+    return this.executeQuery('incrementMemberMetric', async () => {
+      const field = metric === 'messages' ? members.messages : members.voiceMinutes;
+      const [record] = await this.db
+        .insert(members)
+        .values({
+          guildId,
+          userId,
+          joinedAt: new Date(),
+          [metric]: amount,
+        })
+        .onConflictDoUpdate({
+          target: [members.userId, members.guildId],
+          set: {
+            [metric]: sql`${field} + ${amount}`,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
+        
+      return record[metric];
+    });
+  }
+
+  async getMemberMetric(guildId: string, userId: string, metric: 'messages' | 'voiceMinutes'): Promise<number> {
+    return this.executeQuery('getMemberMetric', async () => {
+      const [record] = await this.db
+        .select()
+        .from(members)
+        .where(and(eq(members.guildId, guildId), eq(members.userId, userId)))
+        .limit(1);
+        
+      if (!record) return 0;
+      return record[metric] || 0;
     });
   }
 }
