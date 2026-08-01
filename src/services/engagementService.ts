@@ -4,6 +4,7 @@ import { economyRepository } from '../repositories/economyRepository';
 import { xpService } from './xpService';
 import { logger } from '../utils/logger';
 import type { EngagementQuest, UserReputation } from '../types';
+import { guildService } from './guildService';
 
 export class EngagementService {
   async trackMessageActivity(message: Message): Promise<void> {
@@ -18,6 +19,9 @@ export class EngagementService {
       const activeQuests = await engagementRepository.getActiveQuests(guildId);
       for (const quest of activeQuests) {
         if (quest.targetType === 'messages_sent') {
+          if (quest.requirementChannelId && message.channel.id !== quest.requirementChannelId) {
+            continue;
+          }
           await this.progressQuest(
             guildId,
             userId,
@@ -104,8 +108,12 @@ export class EngagementService {
           await xpService.addXP(userId, guildId, member, quest.rewardXp);
         }
 
-        if (channel) {
-          await channel.send(
+        const notifyChannel = quest.channelId 
+          ? (channel?.guild?.channels.cache.get(quest.channelId) as TextChannel) 
+          : channel;
+
+        if (notifyChannel) {
+          await notifyChannel.send(
             `🎉 <@${userId}> has completed the quest **${quest.title}**! Earned ${quest.rewardXp} XP and ${quest.rewardCoins} coins.`
           );
         }
@@ -127,9 +135,14 @@ export class EngagementService {
       const achievements = await engagementRepository.listAchievements(guildId);
       const userUnlocked = await engagementRepository.getUserAchievements(guildId, userId);
       const unlockedIds = new Set(userUnlocked.map(a => a.achievementId));
+      const guildSettings = await guildService.getGuildSettings(guildId);
 
       for (const achievement of achievements) {
         if (unlockedIds.has(achievement.id)) continue;
+
+        if (achievement.requirementChannelId && channel && channel.id !== achievement.requirementChannelId) {
+          continue;
+        }
 
         if (achievement.requirementType === metricType) {
           // Here we check if metric meets requirement value
@@ -153,8 +166,15 @@ export class EngagementService {
               await xpService.addXP(userId, guildId, member, achievement.rewardXp);
             }
 
-            if (channel) {
-              await channel.send(
+            let notifyChannel = channel;
+            if (achievement.channelId) {
+              notifyChannel = channel?.guild?.channels.cache.get(achievement.channelId) as TextChannel | undefined;
+            } else if (guildSettings.achievementsChannel) {
+              notifyChannel = channel?.guild?.channels.cache.get(guildSettings.achievementsChannel) as TextChannel | undefined;
+            }
+
+            if (notifyChannel) {
+              await notifyChannel.send(
                 `🏆 <@${userId}> unlocked the achievement **${achievement.title}**! (${achievement.description})`
               );
             }

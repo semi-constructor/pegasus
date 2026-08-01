@@ -17,7 +17,7 @@ export const guildSettings = pgTable('guild_settings', {
   welcomeChannel: varchar('welcome_channel', { length: 20 }),
   welcomeMessage: text('welcome_message'),
   welcomeEmbedEnabled: boolean('welcome_embed_enabled').default(false).notNull(),
-  welcomeEmbedColor: varchar('welcome_embed_color', { length: 7 }).default('#0099FF'),
+  welcomeEmbedColor: varchar('welcome_embed_color', { length: 7 }).default('#8B5CF6'),
   welcomeEmbedTitle: varchar('welcome_embed_title', { length: 255 }),
   welcomeEmbedImage: varchar('welcome_embed_image', { length: 500 }),
   welcomeEmbedThumbnail: varchar('welcome_embed_thumbnail', { length: 500 }),
@@ -28,7 +28,7 @@ export const guildSettings = pgTable('guild_settings', {
   goodbyeChannel: varchar('goodbye_channel', { length: 20 }),
   goodbyeMessage: text('goodbye_message'),
   goodbyeEmbedEnabled: boolean('goodbye_embed_enabled').default(false).notNull(),
-  goodbyeEmbedColor: varchar('goodbye_embed_color', { length: 7 }).default('#FF0000'),
+  goodbyeEmbedColor: varchar('goodbye_embed_color', { length: 7 }).default('#F43F5E'),
   goodbyeEmbedTitle: varchar('goodbye_embed_title', { length: 255 }),
   goodbyeEmbedImage: varchar('goodbye_embed_image', { length: 500 }),
   goodbyeEmbedThumbnail: varchar('goodbye_embed_thumbnail', { length: 500 }),
@@ -46,8 +46,10 @@ export const guildSettings = pgTable('guild_settings', {
   xpBoosterMultiplier: integer('xp_booster_multiplier').default(200).notNull(),
   levelUpMessage: text('level_up_message'),
   levelUpChannel: varchar('level_up_channel', { length: 20 }),
+  achievementsChannel: varchar('achievements_channel', { length: 20 }),
   // Custom commands
   customCommands: text('custom_commands').default('[]').notNull(),
+  customCommandsChannel: varchar('custom_commands_channel', { length: 20 }),
   // Autorole configuration
   autoroleEnabled: boolean('autorole_enabled').default(false).notNull(),
   autoroleRoles: text('autorole_roles').default('[]').notNull(), // JSON array of role IDs

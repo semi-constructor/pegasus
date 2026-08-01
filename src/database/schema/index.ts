@@ -12,3 +12,4 @@ export * from './automod';
 export * from './engagement';
 export * from './ticket_workflows';
 export * from './auth';
+export * from './bug_reports';

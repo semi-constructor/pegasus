@@ -47,7 +47,9 @@ export interface GuildSettings {
   xpRate: number;
   levelUpMessage?: string;
   levelUpChannel?: string;
+  achievementsChannel?: string;
   customCommands: string;
+  customCommandsChannel?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -235,6 +237,8 @@ export interface Achievement {
   requirementValue: number;
   rewardXp: number;
   rewardCoins: number;
+  channelId?: string | null;
+  requirementChannelId?: string | null;
   customIcon?: string | null;
   createdAt: Date;
 }
@@ -258,6 +262,8 @@ export interface EngagementQuest {
   targetValue: number;
   rewardXp: number;
   rewardCoins: number;
+  channelId?: string | null;
+  requirementChannelId?: string | null;
   activeUntil: Date;
   createdAt: Date;
 }

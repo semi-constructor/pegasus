@@ -80,6 +80,12 @@ export async function execute(message: Message) {
             const expectedName = cmd.name?.toLowerCase() || '';
             
             if (commandName && (commandName === expectedName || `${prefix.toLowerCase()}${commandName}` === expectedName)) {
+              // Enforce channel restrictions
+              const restrictChannel = cmd.channelId || guildSettings.customCommandsChannel;
+              if (restrictChannel && message.channel.id !== restrictChannel) {
+                continue;
+              }
+
               if (cmd.responseType === 'embed') {
                 const embed = new EmbedBuilder()
                   .setTitle(cmd.embedTitle || 'Custom Command')
