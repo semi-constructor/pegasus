@@ -110,7 +110,7 @@ async function handleRankCommand(interaction: ChatInputCommandInteraction, local
 
     // Ensure avatar and username are up to date
     rankData.avatarUrl = targetUser.displayAvatarURL({ extension: 'png', size: 256 });
-    rankData.username = targetUser.username;
+    rankData.username = targetUser.displayName || targetUser.username;
 
     // Get customization
     const customization = await xpService.getRankCardCustomization(targetUser.id);
