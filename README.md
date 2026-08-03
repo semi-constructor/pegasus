@@ -95,6 +95,8 @@ Complete staff moderation toolkit with audit trails and automated penalty escala
 - XP and economy per-guild configuration
 - Mod-log channel routing by category (messages, members, moderation, word filter)
 - Custom rich embeds and reaction roles
+- **Birthdays** — Automatic member birthday announcements
+- **Social Feeds** — YouTube and RSS integrations
 
 ### 🔧 Utility
 - User / role / server info lookups
@@ -105,7 +107,9 @@ Complete staff moderation toolkit with audit trails and automated penalty escala
 
 ### 🌐 REST API & Monitoring Dashboard
 - Secure Express REST API with Bearer token authentication
+- Fully featured Next.js Web Dashboard for module management, analytics, and server configuration
 - Endpoints for live guild analytics, database query profiling, cache metrics, and module management
+- Public Leaderboards for XP and Economy integrated seamlessly into the web UI
 - Multi-tier rate limiting, in-memory caching, and batch query aggregation
 
 ---

@@ -11,36 +11,16 @@ import { wordFilterService } from '../../services/wordFilterService';
 import type { WordFilterRule, WordFilterSeverity, WordFilterMatchType } from '../../types';
 import { logger } from '../../utils/logger';
 
-const SEVERITY_CHOICES: Array<{
-  name: string;
-  value: WordFilterSeverity;
-  name_localizations?: Record<string, string>;
-}> = [
-  { name: 'Low', value: 'low', name_localizations: { es: 'Bajo', fr: 'Faible', de: 'Niedrig' } },
-  {
-    name: 'Medium',
-    value: 'medium',
-    name_localizations: { es: 'Medio', fr: 'Moyen', de: 'Mittel' },
-  },
-  { name: 'High', value: 'high', name_localizations: { es: 'Alto', fr: 'Élevé', de: 'Hoch' } },
-  {
-    name: 'Critical',
-    value: 'critical',
-    name_localizations: { es: 'Crítico', fr: 'Critique', de: 'Kritisch' },
-  },
+const SEVERITY_CHOICES = [
+  { name: 'Low', value: 'low' },
+  { name: 'Medium', value: 'medium' },
+  { name: 'High', value: 'high' },
+  { name: 'Critical', value: 'critical' },
 ];
 
-const MATCH_TYPE_CHOICES: Array<{
-  name: string;
-  value: WordFilterMatchType;
-  name_localizations?: Record<string, string>;
-}> = [
-  {
-    name: 'Literal',
-    value: 'literal',
-    name_localizations: { es: 'Literal', fr: 'Littéral', de: 'Literal' },
-  },
-  { name: 'Regex', value: 'regex', name_localizations: { es: 'Regex', fr: 'Regex', de: 'Regex' } },
+const MATCH_TYPE_CHOICES = [
+  { name: 'Literal', value: 'literal' },
+  { name: 'Regex', value: 'regex' },
 ];
 
 export const data = new SlashCommandBuilder()

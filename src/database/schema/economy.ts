@@ -181,6 +181,7 @@ export const economySettings = pgTable('economy_settings', {
   robProtectionDuration: integer('rob_protection_duration').notNull().default(86400), // 24 hours
   maxBet: bigint('max_bet', { mode: 'number' }).notNull().default(10000),
   minBet: bigint('min_bet', { mode: 'number' }).notNull().default(10),
+  isPublic: boolean('is_public').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -199,6 +200,29 @@ export const economyTransactionsRelations = relations(economyTransactions, ({ on
     references: [economyBalances.userId, economyBalances.guildId],
   }),
 }));
+
+export const economyTrades = pgTable(
+  'economy_trades',
+  {
+    id: varchar('id', { length: 255 })
+      .primaryKey()
+      .notNull()
+      .$defaultFn(() => crypto.randomUUID()),
+    guildId: varchar('guild_id', { length: 255 }).notNull(),
+    initiatorId: varchar('initiator_id', { length: 255 }).notNull(),
+    receiverId: varchar('receiver_id', { length: 255 }).notNull(),
+    initiatorOffer: jsonb('initiator_offer').notNull(),
+    receiverOffer: jsonb('receiver_offer').notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('pending'),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  table => ({
+    guildIdIdx: index('economy_trades_guild_id_idx').on(table.guildId),
+    statusIdx: index('economy_trades_status_idx').on(table.status),
+  })
+);
 
 export const economyShopItemsRelations = relations(economyShopItems, ({ many }) => ({
   userItems: many(economyUserItems),

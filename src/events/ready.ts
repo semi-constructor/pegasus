@@ -5,6 +5,7 @@ import { registerCommands } from '../handlers/commandHandler';
 import chalk from 'chalk';
 import { moderationScheduler } from '../services/moderationScheduler';
 import { crossShardService } from '../services/crossShardService';
+import { CronService } from '../services/cronService';
 
 export const name = Events.ClientReady;
 export const once = true;
@@ -35,6 +36,10 @@ export async function execute(client: Client<true>) {
   moderationScheduler.attachClient(client);
   await moderationScheduler.initialize();
   logger.info(chalk.blue(`Moderation scheduler initialized on Shard #${shardId}`));
+
+  // Start Background Cron Jobs
+  const cronService = new CronService(client);
+  cronService.startAll();
 
   // Initial bot presence setup
   const totalGuilds = await crossShardService.getTotalGuildsCount(client);

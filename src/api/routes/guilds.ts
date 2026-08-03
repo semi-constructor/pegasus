@@ -20,8 +20,10 @@ import {
 } from '../../database/schema';
 import { eq, desc, and, sql, gte } from 'drizzle-orm';
 import { logger } from '../../utils/logger';
+import { triviaRouter } from './trivia';
 
 const router = Router();
+router.use('/', triviaRouter);
 
 // GET /guilds/{guildId}/economy
 router.get('/:guildId/economy', async (req: Request, res: Response) => {

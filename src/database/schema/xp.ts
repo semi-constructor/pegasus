@@ -62,6 +62,7 @@ export const xpSettings = pgTable('xp_settings', {
   roleMultipliers: text('role_multipliers').default('{}').notNull(), // JSON object
   levelUpRewardsEnabled: boolean('level_up_rewards_enabled').default(true).notNull(),
   stackRoleRewards: boolean('stack_role_rewards').default(false).notNull(),
+  isPublic: boolean('is_public').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

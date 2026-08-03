@@ -46,6 +46,7 @@ interface SystemStatus {
     database: {
       connected: boolean;
       latency: number;
+      size: number;
       pool: {
         total: number;
         idle: number;
@@ -82,6 +83,17 @@ async function getDatabaseLatency(): Promise<number> {
   }
 }
 
+async function getDatabaseSize(): Promise<number> {
+  try {
+    const database = db();
+    const result = await database.execute(sql`SELECT pg_database_size(current_database()) as size`);
+    return Number(result[0].size);
+  } catch (error) {
+    logger.error('Database size query failed:', error);
+    return 0;
+  }
+}
+
 async function getApiLatency(url: string): Promise<number | null> {
   if (!url) return null;
 
@@ -108,6 +120,7 @@ router.get('/', async (_req: Request, res: Response) => {
     const botProcess = await getProcessInfo(process.pid);
 
     const dbLatency = await getDatabaseLatency();
+    const dbSize = await getDatabaseSize();
 
     const steamLatency = process.env.STEAM_API_KEY
       ? await getApiLatency('https://api.steampowered.com/ISteamWebAPIUtil/GetServerInfo/v1/')
@@ -181,6 +194,7 @@ router.get('/', async (_req: Request, res: Response) => {
         database: {
           connected: dbLatency >= 0,
           latency: dbLatency,
+          size: dbSize,
           pool: {
             total: 20,
             idle: 0,
