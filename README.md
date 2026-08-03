@@ -141,7 +141,26 @@ Complete staff moderation toolkit with audit trails and automated penalty escala
 
 ## Installation
 
-### 1. Clone the repository
+### 🚀 Quick Install (Recommended)
+
+You can install the Pegasus Bot, the Dashboard, or the complete stack using our interactive installer script. This one-command script will automatically clone the latest code, guide you through `.env` setup, and launch the services using Docker (or PM2).
+
+**Supported OS:** Linux (Ubuntu, Debian, CentOS, Fedora, etc.)  
+**System Requirements:** 
+- **Minimum:** 2 CPU Cores, 2GB RAM
+- **Recommended:** 4 CPU Cores, 4GB RAM (if running the complete stack alongside PostgreSQL and Redis)
+
+Run the following command in an empty directory to start the installation:
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/semi-constructor/pegasus/main/install.sh)
+```
+
+---
+
+### 🛠️ Manual Installation (Advanced)
+
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/cptcr/pegasus.git

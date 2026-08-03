@@ -10,19 +10,15 @@ RUN apk add --no-cache \
     jpeg-dev \
     pango-dev \
     giflib-dev \
-    pixman-dev
+    pixman-dev \
+    git
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies
-RUN npm install
-
-# Copy source code
-COPY . .
+# Clone repository and install dependencies
+RUN git clone https://github.com/semi-constructor/pegasus.git . && \
+    npm install
 
 # Build the application
 RUN npm run build
@@ -74,7 +70,7 @@ ENV XP_COOLDOWN=60000
 ENV XP_BOOSTER_MULTIPLIER=1.5
 
 # Copy package files
-COPY package*.json ./
+COPY --from=builder /app/package*.json ./
 
 # Install production dependencies only
 RUN npm ci --omit=dev && \
@@ -84,9 +80,9 @@ RUN npm ci --omit=dev && \
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
 # Copy other necessary files
-COPY --chown=nodejs:nodejs drizzle.config.ts ./
-COPY --chown=nodejs:nodejs src/database ./src/database
-COPY --chown=nodejs:nodejs src/i18n/locales ./src/i18n/locales
+COPY --from=builder --chown=nodejs:nodejs /app/drizzle.config.ts ./
+COPY --from=builder --chown=nodejs:nodejs /app/src/database ./src/database
+COPY --from=builder --chown=nodejs:nodejs /app/src/i18n/locales ./src/i18n/locales
 
 # Switch to non-root user
 USER nodejs
