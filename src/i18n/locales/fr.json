@@ -747,5 +747,1521 @@
         "channelCleared": "Salon d'annonces de montée de niveau réinitialisé"
       }
     }
+  },
+  "trivia": {
+    "presets": {
+      "general": [
+        {
+          "question": "Quelle est la capitale de la France ?",
+          "options": [
+            "Paris",
+            "Londres",
+            "Berlin",
+            "Madrid"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Combien font 2 + 2 ?",
+          "options": [
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a écrit Hamlet ?",
+          "options": [
+            "Dickens",
+            "Shakespeare",
+            "Austen",
+            "Tolkien"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle planète est connue sous le nom de planète rouge ?",
+          "options": [
+            "Vénus",
+            "Mars",
+            "Jupiter",
+            "Saturne"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel est le plus grand océan de la Terre ?",
+          "options": [
+            "Océan Atlantique",
+            "Océan Indien",
+            "Océan Arctique",
+            "Océan Pacifique"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Combien y a-t-il de continents ?",
+          "options": [
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle est la substance naturelle la plus dure ?",
+          "options": [
+            "Or",
+            "Fer",
+            "Diamant",
+            "Quartz"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel élément a le symbole chimique O ?",
+          "options": [
+            "Or",
+            "Oxygène",
+            "Argent",
+            "Osmium"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a peint la Joconde ?",
+          "options": [
+            "Van Gogh",
+            "Picasso",
+            "De Vinci",
+            "Rembrandt"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle est la capitale du Japon ?",
+          "options": [
+            "Séoul",
+            "Pékin",
+            "Tokyo",
+            "Osaka"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel animal est le plus grand mammifère ?",
+          "options": [
+            "Éléphant",
+            "Baleine bleue",
+            "Girafe",
+            "Requin"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "En quelle année le Titanic a-t-il coulé ?",
+          "options": [
+            "1905",
+            "1912",
+            "1920",
+            "1918"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle est la plus haute montagne du monde ?",
+          "options": [
+            "K2",
+            "Kangchenjunga",
+            "Mont Everest",
+            "Makalu"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle langue a le plus de locuteurs natifs ?",
+          "options": [
+            "Anglais",
+            "Espagnol",
+            "Hindi",
+            "Chinois Mandarin"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Quelle est la monnaie du Royaume-Uni ?",
+          "options": [
+            "Euro",
+            "Livre Sterling",
+            "Dollar",
+            "Yen"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui est l'auteur de Harry Potter ?",
+          "options": [
+            "Tolkien",
+            "Rowling",
+            "Martin",
+            "King"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel est le plus petit pays du monde ?",
+          "options": [
+            "Monaco",
+            "Vatican",
+            "Saint-Marin",
+            "Liechtenstein"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel gaz est le plus abondant dans l'atmosphère ?",
+          "options": [
+            "Oxygène",
+            "Dioxyde de carbone",
+            "Azote",
+            "Hydrogène"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle est la vitesse de la lumière ?",
+          "options": [
+            "300 000 km/s",
+            "150 000 km/s",
+            "1 000 000 km/s",
+            "30 000 km/s"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Qui a été le premier à marcher sur la lune ?",
+          "options": [
+            "Gagarine",
+            "Aldrin",
+            "Armstrong",
+            "Collins"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel fruit est connu pour éloigner le médecin ?",
+          "options": [
+            "Banane",
+            "Orange",
+            "Pomme",
+            "Raisin"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Combien de jours y a-t-il dans une année bissextile ?",
+          "options": [
+            "364",
+            "365",
+            "366",
+            "367"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel est le point d'ébullition de l'eau ?",
+          "options": [
+            "50°C",
+            "90°C",
+            "100°C",
+            "120°C"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Qui a découvert la pénicilline ?",
+          "options": [
+            "Curie",
+            "Fleming",
+            "Pasteur",
+            "Newton"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel est l'ingrédient principal du guacamole ?",
+          "options": [
+            "Tomate",
+            "Oignon",
+            "Avocat",
+            "Poivron"
+          ],
+          "correctIndex": 2
+        }
+      ],
+      "gaming": [
+        {
+          "question": "Quelle entreprise a créé Mario ?",
+          "options": [
+            "Sega",
+            "Nintendo",
+            "Sony",
+            "Microsoft"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle est la console la plus vendue de tous les temps ?",
+          "options": [
+            "PS2",
+            "DS",
+            "Game Boy",
+            "PS4"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Dans Minecraft, quelle ressource fabrique une pioche en fer ?",
+          "options": [
+            "Minerai de fer",
+            "Lingot de fer",
+            "Bloc de fer",
+            "Pépite de fer"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui est le protagoniste principal de Zelda ?",
+          "options": [
+            "Zelda",
+            "Link",
+            "Ganondorf",
+            "Mario"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel jeu propose un mode Warzone ?",
+          "options": [
+            "Fortnite",
+            "PUBG",
+            "Apex Legends",
+            "Call of Duty"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "En quelle année est sortie la PlayStation ?",
+          "options": [
+            "1992",
+            "1994",
+            "1996",
+            "1998"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel est le jeu vidéo le plus vendu ?",
+          "options": [
+            "Tetris",
+            "Minecraft",
+            "GTA V",
+            "Wii Sports"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Comment s'appelle le personnage principal de Halo ?",
+          "options": [
+            "Doomguy",
+            "Master Chief",
+            "Marcus Fenix",
+            "Kratos"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Dans quel jeu saute-t-on d'un Bus de Combat ?",
+          "options": [
+            "Apex",
+            "PUBG",
+            "Fortnite",
+            "Warzone"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Comment s'appelle la ville de GTA V ?",
+          "options": [
+            "Liberty City",
+            "Vice City",
+            "San Andreas",
+            "Los Santos"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Quel studio a développé The Witcher 3 ?",
+          "options": [
+            "Bethesda",
+            "BioWare",
+            "CD Projekt Red",
+            "Ubisoft"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel est le plus haut rang dans CS:GO ?",
+          "options": [
+            "Global Elite",
+            "Supreme Master",
+            "Radiant",
+            "Grandmaster"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quel jeu met en vedette les Creepers ?",
+          "options": [
+            "Terraria",
+            "Roblox",
+            "Minecraft",
+            "Rust"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel est le niveau max dans WoW Classic ?",
+          "options": [
+            "50",
+            "60",
+            "70",
+            "80"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel Pokémon est la mascotte de la franchise ?",
+          "options": [
+            "Dracaufeu",
+            "Pikachu",
+            "Bulbizarre",
+            "Carapuce"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Dans Smash Bros, qui est connu pour le Falcon Punch ?",
+          "options": [
+            "Mario",
+            "Donkey Kong",
+            "Captain Falcon",
+            "Fox"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle monnaie est utilisée dans Roblox ?",
+          "options": [
+            "V-Bucks",
+            "Robux",
+            "Minecoins",
+            "Credits"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel jeu a popularisé le genre MOBA ?",
+          "options": [
+            "League of Legends",
+            "Dota 2",
+            "Smite",
+            "Heroes of Newerth"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Que signifie RPG ?",
+          "options": [
+            "Rocket Propelled Grenade",
+            "Role Playing Game",
+            "Real Playing Game",
+            "Retro Play Game"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a créé Death Stranding ?",
+          "options": [
+            "Hideo Kojima",
+            "Shigeru Miyamoto",
+            "Todd Howard",
+            "Gabe Newell"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Comment s'appelle la princesse dans Mario ?",
+          "options": [
+            "Daisy",
+            "Rosalina",
+            "Zelda",
+            "Peach"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Quelle console a connu le 'Red Ring of Death' ?",
+          "options": [
+            "PS3",
+            "Xbox 360",
+            "Wii",
+            "Dreamcast"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel jeu met en scène Geralt de Riv ?",
+          "options": [
+            "Skyrim",
+            "The Witcher",
+            "Dragon Age",
+            "Dark Souls"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Dans Pac-Man, qui sont les ennemis ?",
+          "options": [
+            "Zombies",
+            "Aliens",
+            "Fantômes",
+            "Robots"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Qui possède la marque Xbox ?",
+          "options": [
+            "Sony",
+            "Nintendo",
+            "Sega",
+            "Microsoft"
+          ],
+          "correctIndex": 3
+        }
+      ],
+      "programming": [
+        {
+          "question": "Que signifie HTML ?",
+          "options": [
+            "Hyper Text Markup Language",
+            "High Tech Modern Language",
+            "Hyperlink Text Markup Language",
+            "Home Tool Markup Language"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Lequel de ces éléments est un framework JavaScript ?",
+          "options": [
+            "Django",
+            "Laravel",
+            "React",
+            "Flask"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel langage est principalement utilisé pour Android ?",
+          "options": [
+            "Swift",
+            "Kotlin",
+            "Objective-C",
+            "Ruby"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Que fait le CSS ?",
+          "options": [
+            "Définit la structure",
+            "Stylise les pages",
+            "Gère la base de données",
+            "Exécute le serveur"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel symbole sert aux commentaires en Python ?",
+          "options": [
+            "//",
+            "/* */",
+            "#",
+            "--"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Que signifie API ?",
+          "options": [
+            "Application Programming Interface",
+            "Apple Programming Interface",
+            "Application Process Integration",
+            "Automated Program Interface"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quel langage est utilisé pour iOS ?",
+          "options": [
+            "Java",
+            "C++",
+            "Swift",
+            "Kotlin"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Que signifie SQL ?",
+          "options": [
+            "Structured Query Language",
+            "Simple Question Language",
+            "Standard Query Logic",
+            "System Query Language"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quel est un système de contrôle de version populaire ?",
+          "options": [
+            "Git",
+            "Subversion",
+            "Mercurial",
+            "CVS"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Lequel n'est PAS un langage de programmation ?",
+          "options": [
+            "Python",
+            "HTML",
+            "Java",
+            "C++"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Que signifie JSON ?",
+          "options": [
+            "JavaScript Object Notation",
+            "Java Standard Output Network",
+            "JavaScript Online Node",
+            "Java Syntax Object Notation"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Qui a inventé le langage Python ?",
+          "options": [
+            "Brendan Eich",
+            "Guido van Rossum",
+            "James Gosling",
+            "Dennis Ritchie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel mot-clé déclare une constante en JS ?",
+          "options": [
+            "var",
+            "let",
+            "const",
+            "static"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Que signifie DOM en web ?",
+          "options": [
+            "Document Object Model",
+            "Data Object Model",
+            "Document Oriented Model",
+            "Data Output Mechanism"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Qu'est-ce qu'un booléen ?",
+          "options": [
+            "Une chaîne",
+            "Un nombre",
+            "Vrai ou Faux",
+            "Un tableau"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle commande pousse le code vers Git ?",
+          "options": [
+            "git commit",
+            "git add",
+            "git pull",
+            "git push"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Que signifie CSS ?",
+          "options": [
+            "Cascading Style Sheets",
+            "Colorful Style Sheets",
+            "Computer Style Sheets",
+            "Creative Style Sheets"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Lequel est un framework backend Node.js ?",
+          "options": [
+            "React",
+            "Angular",
+            "Express",
+            "Vue"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "En Python, comment créer une fonction ?",
+          "options": [
+            "function myFunc()",
+            "def myFunc():",
+            "create myFunc()",
+            "func myFunc():"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Que signifie HTTP ?",
+          "options": [
+            "HyperText Transfer Protocol",
+            "HyperText Transmission Process",
+            "HyperTransfer Text Protocol",
+            "HyperText Transfer Program"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Que signifie npm ?",
+          "options": [
+            "Node Package Manager",
+            "New Programming Module",
+            "Node Program Maker",
+            "Network Package Manager"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quelle entreprise a créé React ?",
+          "options": [
+            "Google",
+            "Microsoft",
+            "Facebook (Meta)",
+            "Twitter"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel est le résultat de 3 + '3' en JavaScript ?",
+          "options": [
+            "6",
+            "33",
+            "NaN",
+            "Erreur"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle base de données est NoSQL ?",
+          "options": [
+            "MySQL",
+            "PostgreSQL",
+            "MongoDB",
+            "SQLite"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Que signifie URL ?",
+          "options": [
+            "Uniform Resource Locator",
+            "Universal Resource Link",
+            "Uniform Reference Locator",
+            "Universal Reference Link"
+          ],
+          "correctIndex": 0
+        }
+      ],
+      "science": [
+        {
+          "question": "Quel est le symbole chimique de l'or ?",
+          "options": [
+            "Go",
+            "Au",
+            "Ag",
+            "Gd"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle planète est la plus proche du soleil ?",
+          "options": [
+            "Vénus",
+            "Terre",
+            "Mercure",
+            "Mars"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle est la centrale énergétique de la cellule ?",
+          "options": [
+            "Noyau",
+            "Mitochondrie",
+            "Ribosome",
+            "Réticulum Endoplasmique"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Combien d'os y a-t-il dans le corps humain adulte ?",
+          "options": [
+            "206",
+            "208",
+            "210",
+            "212"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quel gaz est le plus abondant dans l'atmosphère terrestre ?",
+          "options": [
+            "Oxygène",
+            "Dioxyde de carbone",
+            "Azote",
+            "Hydrogène"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Qui a développé la relativité générale ?",
+          "options": [
+            "Isaac Newton",
+            "Albert Einstein",
+            "Galilée",
+            "Nikola Tesla"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle force maintient les planètes en orbite ?",
+          "options": [
+            "Magnétisme",
+            "Gravité",
+            "Friction",
+            "Tension"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle est la formule chimique de l'eau ?",
+          "options": [
+            "CO2",
+            "O2",
+            "H2O",
+            "NaCl"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel organe pompe le sang ?",
+          "options": [
+            "Cerveau",
+            "Foie",
+            "Poumons",
+            "Cœur"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Quel processus permet aux plantes de créer leur nourriture ?",
+          "options": [
+            "Respiration",
+            "Digestion",
+            "Photosynthèse",
+            "Fermentation"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel est le point de congélation de l'eau en Celsius ?",
+          "options": [
+            "0",
+            "32",
+            "100",
+            "-10"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quel groupe sanguin est donneur universel ?",
+          "options": [
+            "A",
+            "B",
+            "AB",
+            "O"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Quelle partie du cerveau contrôle l'équilibre ?",
+          "options": [
+            "Cerveau",
+            "Cervelet",
+            "Tronc cérébral",
+            "Hypothalamus"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle est la vitesse de la lumière ?",
+          "options": [
+            "300 000 km/s",
+            "150 000 km/s",
+            "1 000 000 km/s",
+            "30 000 km/s"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Quel élément est liquide à température ambiante ?",
+          "options": [
+            "Fer",
+            "Mercure",
+            "Or",
+            "Argent"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel type d'animal est une grenouille ?",
+          "options": [
+            "Reptile",
+            "Amphibien",
+            "Mammifère",
+            "Poisson"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel est le plus grand organe du corps humain ?",
+          "options": [
+            "Foie",
+            "Cœur",
+            "Cerveau",
+            "Peau"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Qui a proposé les lois du mouvement ?",
+          "options": [
+            "Albert Einstein",
+            "Isaac Newton",
+            "Stephen Hawking",
+            "Marie Curie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Comment s'appelle le centre d'un atome ?",
+          "options": [
+            "Électron",
+            "Proton",
+            "Noyau",
+            "Neutron"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel gaz les plantes absorbent-elles ?",
+          "options": [
+            "Oxygène",
+            "Dioxyde de carbone",
+            "Azote",
+            "Argon"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle est l'unité standard de la force ?",
+          "options": [
+            "Joule",
+            "Watt",
+            "Newton",
+            "Pascal"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle planète est connue pour ses anneaux ?",
+          "options": [
+            "Jupiter",
+            "Saturne",
+            "Uranus",
+            "Neptune"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Comment s'appelle l'étude des étoiles ?",
+          "options": [
+            "Astrologie",
+            "Astronomie",
+            "Biologie",
+            "Géologie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Que signifie ADN ?",
+          "options": [
+            "Acide Désoxyribonucléique",
+            "Acide Nucléique Dynamique",
+            "Acide Désoxynitrique",
+            "Acide Azoté Double"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Laquelle est une source d'énergie renouvelable ?",
+          "options": [
+            "Charbon",
+            "Pétrole",
+            "Solaire",
+            "Gaz naturel"
+          ],
+          "correctIndex": 2
+        }
+      ],
+      "history": [
+        {
+          "question": "Qui fut le premier président des États-Unis ?",
+          "options": [
+            "Thomas Jefferson",
+            "John Adams",
+            "George Washington",
+            "Abraham Lincoln"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "En quelle année la Seconde Guerre mondiale a-t-elle pris fin ?",
+          "options": [
+            "1943",
+            "1945",
+            "1947",
+            "1950"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui fut le premier empereur de Rome ?",
+          "options": [
+            "Jules César",
+            "Auguste",
+            "Néron",
+            "Caligula"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle ancienne civilisation a construit les pyramides ?",
+          "options": [
+            "Romains",
+            "Grecs",
+            "Mayas",
+            "Égyptiens"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "En quelle année le Titanic a-t-il coulé ?",
+          "options": [
+            "1910",
+            "1912",
+            "1914",
+            "1916"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a découvert l'Amérique en 1492 ?",
+          "options": [
+            "Christophe Colomb",
+            "Fernand de Magellan",
+            "Vasco de Gama",
+            "James Cook"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Comment s'appelait le navire des Pèlerins ?",
+          "options": [
+            "Santa Maria",
+            "Mayflower",
+            "Endeavour",
+            "Beagle"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui était Premier Ministre britannique durant la Seconde Guerre mondiale ?",
+          "options": [
+            "Neville Chamberlain",
+            "Winston Churchill",
+            "Clement Attlee",
+            "Margaret Thatcher"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "En quelle année a commencé la Révolution française ?",
+          "options": [
+            "1776",
+            "1789",
+            "1804",
+            "1812"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui était connue sous le nom de Pucelle d'Orléans ?",
+          "options": [
+            "Marie-Antoinette",
+            "Jeanne d'Arc",
+            "Catherine de Médicis",
+            "Aliénor d'Aquitaine"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel empire a été dirigé par Gengis Khan ?",
+          "options": [
+            "Empire Romain",
+            "Empire Ottoman",
+            "Empire Mongol",
+            "Empire Perse"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel mur a divisé une ville allemande de 1961 à 1989 ?",
+          "options": [
+            "Grande Muraille",
+            "Mur de Berlin",
+            "Mur d'Hadrien",
+            "Mur des Lamentations"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle reine égyptienne s'est alliée à Jules César ?",
+          "options": [
+            "Néfertiti",
+            "Hatchepsout",
+            "Cléopâtre",
+            "Sobekneferou"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "La Guerre froide opposait les États-Unis et quelle autre nation ?",
+          "options": [
+            "Chine",
+            "Allemagne",
+            "Union Soviétique",
+            "Japon"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel pays a offert la Statue de la Liberté aux USA ?",
+          "options": [
+            "Espagne",
+            "France",
+            "Grande-Bretagne",
+            "Italie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Comment s'appelait l'ancien système d'écriture égyptien ?",
+          "options": [
+            "Cunéiforme",
+            "Hiéroglyphes",
+            "Runes",
+            "Sanskrit"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a peint le plafond de la chapelle Sixtine ?",
+          "options": [
+            "Léonard de Vinci",
+            "Michel-Ange",
+            "Raphaël",
+            "Donatello"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "En quelle année Apollo 11 a-t-elle atterri sur la lune ?",
+          "options": [
+            "1965",
+            "1969",
+            "1972",
+            "1975"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui est connu pour la phrase 'I have a dream' ?",
+          "options": [
+            "Malcolm X",
+            "Martin Luther King Jr.",
+            "Nelson Mandela",
+            "Frederick Douglass"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui fut le deuxième président des États-Unis ?",
+          "options": [
+            "Thomas Jefferson",
+            "John Adams",
+            "James Madison",
+            "Alexander Hamilton"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle maladie a causé la peste noire ?",
+          "options": [
+            "Variole",
+            "Choléra",
+            "Peste bubonique",
+            "Typhus"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "L'ancienne ville de Troie était située dans l'actuelle...",
+          "options": [
+            "Grèce",
+            "Italie",
+            "Turquie",
+            "Égypte"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Qui a été la première femme Premier Ministre du R-U ?",
+          "options": [
+            "Theresa May",
+            "Margaret Thatcher",
+            "Reine Elizabeth II",
+            "Angela Merkel"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel célèbre document a été signé en 1215 en Angleterre ?",
+          "options": [
+            "Déclaration d'Indépendance",
+            "Magna Carta",
+            "Déclaration des Droits",
+            "Traité de Versailles"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quelle guerre opposa le Nord et le Sud des USA ?",
+          "options": [
+            "Révolution Américaine",
+            "Guerre de 1812",
+            "Guerre de Sécession",
+            "Première Guerre Mondiale"
+          ],
+          "correctIndex": 2
+        }
+      ],
+      "movies": [
+        {
+          "question": "Qui a réalisé Jurassic Park ?",
+          "options": [
+            "James Cameron",
+            "Steven Spielberg",
+            "George Lucas",
+            "Christopher Nolan"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel est le film le plus rentable de tous les temps ?",
+          "options": [
+            "Titanic",
+            "Avatar",
+            "Avengers: Endgame",
+            "Star Wars"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a joué Jack dans Titanic ?",
+          "options": [
+            "Brad Pitt",
+            "Tom Cruise",
+            "Leonardo DiCaprio",
+            "Johnny Depp"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel film contient la citation 'I'll be back' ?",
+          "options": [
+            "Rambo",
+            "Terminator",
+            "Die Hard",
+            "RoboCop"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Dans Matrix, quelle pilule prend Neo ?",
+          "options": [
+            "Bleue",
+            "Verte",
+            "Rouge",
+            "Jaune"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle franchise présente Luke Skywalker ?",
+          "options": [
+            "Star Trek",
+            "Star Wars",
+            "Doctor Who",
+            "Battlestar Galactica"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui a joué le Joker dans The Dark Knight ?",
+          "options": [
+            "Jack Nicholson",
+            "Heath Ledger",
+            "Jared Leto",
+            "Joaquin Phoenix"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Comment s'appelle le hobbit joué par Elijah Wood ?",
+          "options": [
+            "Sam",
+            "Merry",
+            "Pippin",
+            "Frodo"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Quel film Disney contient la chanson 'Libérée, Délivrée' ?",
+          "options": [
+            "Vaiana",
+            "Raiponce",
+            "La Reine des neiges",
+            "Rebelle"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Comment s'appelle le pays africain fictif dans Black Panther ?",
+          "options": [
+            "Zamunda",
+            "Genovia",
+            "Wakanda",
+            "Krakoa"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Qui a réalisé Pulp Fiction ?",
+          "options": [
+            "Martin Scorsese",
+            "Quentin Tarantino",
+            "Francis Ford Coppola",
+            "Stanley Kubrick"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel acteur joue Iron Man dans le MCU ?",
+          "options": [
+            "Chris Evans",
+            "Chris Hemsworth",
+            "Robert Downey Jr.",
+            "Mark Ruffalo"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quelle est la première règle du Fight Club ?",
+          "options": [
+            "Ne pas en parler",
+            "Se battre à mort",
+            "Pas de chemise",
+            "Amener un ami"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Dans quel film Tom Hanks dit-il 'La vie c'est comme une boîte de chocolats' ?",
+          "options": [
+            "Seul au monde",
+            "Il faut sauver le soldat Ryan",
+            "Forrest Gump",
+            "La Ligne verte"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Quel objet magique utilise Harry Potter pour voler ?",
+          "options": [
+            "Tapis magique",
+            "Balai",
+            "Cape",
+            "Baguette"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Qui double Woody dans Toy Story (anglais) ?",
+          "options": [
+            "Tim Allen",
+            "Tom Hanks",
+            "Robin Williams",
+            "Billy Crystal"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel film a remporté le premier Oscar du meilleur film d'animation ?",
+          "options": [
+            "Shrek",
+            "Toy Story",
+            "Le Monde de Nemo",
+            "Le Roi Lion"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Comment s'appelle le tueur dans Halloween ?",
+          "options": [
+            "Jason Voorhees",
+            "Freddy Krueger",
+            "Michael Myers",
+            "Leatherface"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Dans Avatar, comment s'appellent les indigènes ?",
+          "options": [
+            "Klingons",
+            "Na'vi",
+            "Ewoks",
+            "Wookiees"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Quel acteur a joué Jack Sparrow ?",
+          "options": [
+            "Orlando Bloom",
+            "Johnny Depp",
+            "Geoffrey Rush",
+            "Brad Pitt"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Comment s'appelle l'IA dans 2001, l'Odyssée de l'espace ?",
+          "options": [
+            "HAL 9000",
+            "Skynet",
+            "JARVIS",
+            "Mother"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Qui joue le rôle principal dans Forrest Gump ?",
+          "options": [
+            "Robin Williams",
+            "Bill Murray",
+            "Tom Hanks",
+            "Harrison Ford"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Dans quel film un requin géant terrorise une ville ?",
+          "options": [
+            "Les Dents de la mer",
+            "En eaux troubles",
+            "Peur bleue",
+            "Sharknado"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Comment s'appelle l'école des sorciers dans Harry Potter ?",
+          "options": [
+            "Beauxbâtons",
+            "Durmstrang",
+            "Poudlard",
+            "Ilvermorny"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Qui a joué Neo dans Matrix ?",
+          "options": [
+            "Keanu Reeves",
+            "Tom Cruise",
+            "Will Smith",
+            "Brad Pitt"
+          ],
+          "correctIndex": 0
+        }
+      ]
+    }
   }
 }

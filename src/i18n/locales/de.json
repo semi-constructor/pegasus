@@ -747,5 +747,1521 @@
         "channelCleared": "Level-Up-Benachrichtigungskanal zurückgesetzt"
       }
     }
+  },
+  "trivia": {
+    "presets": {
+      "general": [
+        {
+          "question": "Was ist die Hauptstadt von Frankreich?",
+          "options": [
+            "Paris",
+            "London",
+            "Berlin",
+            "Madrid"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Was ist 2 + 2?",
+          "options": [
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer schrieb Hamlet?",
+          "options": [
+            "Dickens",
+            "Shakespeare",
+            "Austen",
+            "Tolkien"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welcher Planet ist als Roter Planet bekannt?",
+          "options": [
+            "Venus",
+            "Mars",
+            "Jupiter",
+            "Saturn"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist der größte Ozean der Erde?",
+          "options": [
+            "Atlantik",
+            "Indik",
+            "Arktik",
+            "Pazifik"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Wie viele Kontinente gibt es?",
+          "options": [
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist die härteste natürliche Substanz?",
+          "options": [
+            "Gold",
+            "Eisen",
+            "Diamant",
+            "Quarz"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welches Element hat das Symbol O?",
+          "options": [
+            "Gold",
+            "Sauerstoff",
+            "Silber",
+            "Osmium"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer malte die Mona Lisa?",
+          "options": [
+            "Van Gogh",
+            "Picasso",
+            "Da Vinci",
+            "Rembrandt"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist die Hauptstadt von Japan?",
+          "options": [
+            "Seoul",
+            "Peking",
+            "Tokio",
+            "Osaka"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welches Tier ist das größte Säugetier?",
+          "options": [
+            "Elefant",
+            "Blauwal",
+            "Giraffe",
+            "Hai"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "In welchem Jahr sank die Titanic?",
+          "options": [
+            "1905",
+            "1912",
+            "1920",
+            "1918"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist der höchste Berg der Welt?",
+          "options": [
+            "K2",
+            "Kangchendzönga",
+            "Mount Everest",
+            "Makalu"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welche Sprache hat die meisten Muttersprachler?",
+          "options": [
+            "Englisch",
+            "Spanisch",
+            "Hindi",
+            "Mandarin"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Was ist die Währung im Vereinigten Königreich?",
+          "options": [
+            "Euro",
+            "Pfund Sterling",
+            "Dollar",
+            "Yen"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer schrieb Harry Potter?",
+          "options": [
+            "Tolkien",
+            "Rowling",
+            "Martin",
+            "King"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist das kleinste Land der Welt?",
+          "options": [
+            "Monaco",
+            "Vatikanstadt",
+            "San Marino",
+            "Liechtenstein"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Gas ist am häufigsten in der Atmosphäre?",
+          "options": [
+            "Sauerstoff",
+            "Kohlendioxid",
+            "Stickstoff",
+            "Wasserstoff"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wie schnell ist das Licht?",
+          "options": [
+            "300.000 km/s",
+            "150.000 km/s",
+            "1.000.000 km/s",
+            "30.000 km/s"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wer war der erste Mensch auf dem Mond?",
+          "options": [
+            "Gagarin",
+            "Aldrin",
+            "Armstrong",
+            "Collins"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welche Frucht hält den Doktor fern?",
+          "options": [
+            "Banane",
+            "Orange",
+            "Apfel",
+            "Trauben"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wie viele Tage hat ein Schaltjahr?",
+          "options": [
+            "364",
+            "365",
+            "366",
+            "367"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist der Siedepunkt von Wasser?",
+          "options": [
+            "50°C",
+            "90°C",
+            "100°C",
+            "120°C"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wer entdeckte Penicillin?",
+          "options": [
+            "Curie",
+            "Fleming",
+            "Pasteur",
+            "Newton"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist die Hauptzutat in Guacamole?",
+          "options": [
+            "Tomate",
+            "Zwiebel",
+            "Avocado",
+            "Paprika"
+          ],
+          "correctIndex": 2
+        }
+      ],
+      "gaming": [
+        {
+          "question": "Welche Firma hat Mario erschaffen?",
+          "options": [
+            "Sega",
+            "Nintendo",
+            "Sony",
+            "Microsoft"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist die meistverkaufte Konsole?",
+          "options": [
+            "PS2",
+            "DS",
+            "Game Boy",
+            "PS4"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Woraus wird in Minecraft eine Eisenspitzhacke gemacht?",
+          "options": [
+            "Eisenerz",
+            "Eisenbarren",
+            "Eisenblock",
+            "Eisennugget"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer ist der Protagonist in Zelda?",
+          "options": [
+            "Zelda",
+            "Link",
+            "Ganondorf",
+            "Mario"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Spiel hat den Modus Warzone?",
+          "options": [
+            "Fortnite",
+            "PUBG",
+            "Apex",
+            "Call of Duty"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Wann erschien die erste PlayStation?",
+          "options": [
+            "1992",
+            "1994",
+            "1996",
+            "1998"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist das meistverkaufte Videospiel?",
+          "options": [
+            "Tetris",
+            "Minecraft",
+            "GTA V",
+            "Wii Sports"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie heißt der Hauptcharakter in Halo?",
+          "options": [
+            "Doomguy",
+            "Master Chief",
+            "Marcus",
+            "Kratos"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "In welchem Spiel springt man aus einem Battle Bus?",
+          "options": [
+            "Apex",
+            "PUBG",
+            "Fortnite",
+            "Warzone"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wie heißt die Stadt in GTA V?",
+          "options": [
+            "Liberty City",
+            "Vice City",
+            "San Andreas",
+            "Los Santos"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Wer entwickelte The Witcher 3?",
+          "options": [
+            "Bethesda",
+            "BioWare",
+            "CD Projekt Red",
+            "Ubisoft"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist der höchste Rang in CS:GO?",
+          "options": [
+            "Global Elite",
+            "Supreme",
+            "Radiant",
+            "Grandmaster"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "In welchem Spiel gibt es Creeper?",
+          "options": [
+            "Terraria",
+            "Roblox",
+            "Minecraft",
+            "Rust"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was war das Max-Level in WoW Classic?",
+          "options": [
+            "50",
+            "60",
+            "70",
+            "80"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Pokemon ist das Maskottchen?",
+          "options": [
+            "Glurak",
+            "Pikachu",
+            "Bisasam",
+            "Schiggy"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer ist für den Falcon Punch bekannt?",
+          "options": [
+            "Mario",
+            "Donkey Kong",
+            "Captain Falcon",
+            "Fox"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welche Währung gibt es in Roblox?",
+          "options": [
+            "V-Bucks",
+            "Robux",
+            "Minecoins",
+            "Credits"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Spiel prägte das MOBA-Genre?",
+          "options": [
+            "LoL",
+            "Dota 2",
+            "Smite",
+            "HoN"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wofür steht RPG?",
+          "options": [
+            "Rocket Propelled",
+            "Role Playing Game",
+            "Real Playing",
+            "Retro Play"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer erschuf Death Stranding?",
+          "options": [
+            "Kojima",
+            "Miyamoto",
+            "Howard",
+            "Newell"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wie heißt die Prinzessin in Mario?",
+          "options": [
+            "Daisy",
+            "Rosalina",
+            "Zelda",
+            "Peach"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Welche Konsole hatte den Red Ring of Death?",
+          "options": [
+            "PS3",
+            "Xbox 360",
+            "Wii",
+            "Dreamcast"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "In welchem Spiel kommt Geralt von Riva vor?",
+          "options": [
+            "Skyrim",
+            "The Witcher",
+            "Dragon Age",
+            "Dark Souls"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer sind die Feinde in Pac-Man?",
+          "options": [
+            "Zombies",
+            "Aliens",
+            "Geister",
+            "Roboter"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wem gehört die Marke Xbox?",
+          "options": [
+            "Sony",
+            "Nintendo",
+            "Sega",
+            "Microsoft"
+          ],
+          "correctIndex": 3
+        }
+      ],
+      "programming": [
+        {
+          "question": "Wofür steht HTML?",
+          "options": [
+            "Hyper Text Markup Language",
+            "High Tech Modern Language",
+            "Hyperlink Text Markup Language",
+            "Home Tool Markup Language"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Was ist ein JavaScript-Framework?",
+          "options": [
+            "Django",
+            "Laravel",
+            "React",
+            "Flask"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welche Sprache wird oft für Android genutzt?",
+          "options": [
+            "Swift",
+            "Kotlin",
+            "Objective-C",
+            "Ruby"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was macht CSS?",
+          "options": [
+            "Struktur definieren",
+            "Webseiten stylen",
+            "Datenbank",
+            "Servercode"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Symbol ist in Python ein Kommentar?",
+          "options": [
+            "//",
+            "/* */",
+            "#",
+            "--"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wofür steht API?",
+          "options": [
+            "Application Programming Interface",
+            "Apple Programming",
+            "Application Process",
+            "Automated Program"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Welche Sprache nutzt man oft für iOS?",
+          "options": [
+            "Java",
+            "C++",
+            "Swift",
+            "Kotlin"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wofür steht SQL?",
+          "options": [
+            "Structured Query Language",
+            "Simple Question",
+            "Standard Query",
+            "System Query"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Was ist ein bekanntes Versionskontrollsystem?",
+          "options": [
+            "Git",
+            "SVN",
+            "Mercurial",
+            "CVS"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Was ist KEINE Programmiersprache?",
+          "options": [
+            "Python",
+            "HTML",
+            "Java",
+            "C++"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wofür steht JSON?",
+          "options": [
+            "JavaScript Object Notation",
+            "Java Standard Output",
+            "JavaScript Online",
+            "Java Syntax"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wer hat Python erfunden?",
+          "options": [
+            "Eich",
+            "Rossum",
+            "Gosling",
+            "Ritchie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Keyword deklariert eine Konstante in JS?",
+          "options": [
+            "var",
+            "let",
+            "const",
+            "static"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wofür steht DOM?",
+          "options": [
+            "Document Object Model",
+            "Data Object",
+            "Document Oriented",
+            "Data Output"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Was ist ein Boolean?",
+          "options": [
+            "Text",
+            "Zahl",
+            "Wahr/Falsch",
+            "Array"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welcher Befehl lädt Code in ein Git-Repo hoch?",
+          "options": [
+            "commit",
+            "add",
+            "pull",
+            "push"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Wofür steht CSS?",
+          "options": [
+            "Cascading Style Sheets",
+            "Colorful Style",
+            "Computer Style",
+            "Creative Style"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Was ist ein Backend-Framework für Node.js?",
+          "options": [
+            "React",
+            "Angular",
+            "Express",
+            "Vue"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wie erstellt man eine Funktion in Python?",
+          "options": [
+            "function()",
+            "def myFunc():",
+            "create()",
+            "func()"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wofür steht HTTP?",
+          "options": [
+            "HyperText Transfer Protocol",
+            "HyperText Transmission",
+            "HyperTransfer",
+            "HyperText Transfer Program"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wofür steht npm?",
+          "options": [
+            "Node Package Manager",
+            "New Programming",
+            "Node Program",
+            "Network Package"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wer hat React entwickelt?",
+          "options": [
+            "Google",
+            "Microsoft",
+            "Facebook",
+            "Twitter"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ergibt 3 + '3' in JavaScript?",
+          "options": [
+            "6",
+            "33",
+            "NaN",
+            "Error"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welche Datenbank ist NoSQL?",
+          "options": [
+            "MySQL",
+            "PostgreSQL",
+            "MongoDB",
+            "SQLite"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wofür steht URL?",
+          "options": [
+            "Uniform Resource Locator",
+            "Universal Resource",
+            "Uniform Reference",
+            "Universal Reference"
+          ],
+          "correctIndex": 0
+        }
+      ],
+      "science": [
+        {
+          "question": "Was ist das chemische Symbol für Gold?",
+          "options": [
+            "Go",
+            "Au",
+            "Ag",
+            "Gd"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welcher Planet ist der Sonne am nächsten?",
+          "options": [
+            "Venus",
+            "Erde",
+            "Merkur",
+            "Mars"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist das Kraftwerk der Zelle?",
+          "options": [
+            "Zellkern",
+            "Mitochondrien",
+            "Ribosom",
+            "Endoplasmatisches Retikulum"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie viele Knochen hat ein erwachsener Mensch?",
+          "options": [
+            "206",
+            "208",
+            "210",
+            "212"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Welches Gas ist am häufigsten in der Atmosphäre?",
+          "options": [
+            "Sauerstoff",
+            "Kohlendioxid",
+            "Stickstoff",
+            "Wasserstoff"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wer entwickelte die Relativitätstheorie?",
+          "options": [
+            "Newton",
+            "Einstein",
+            "Galilei",
+            "Tesla"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welche Kraft hält Planeten auf ihrer Umlaufbahn?",
+          "options": [
+            "Magnetismus",
+            "Schwerkraft",
+            "Reibung",
+            "Spannung"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist die chemische Formel für Wasser?",
+          "options": [
+            "CO2",
+            "O2",
+            "H2O",
+            "NaCl"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welches Organ pumpt Blut durch den Körper?",
+          "options": [
+            "Gehirn",
+            "Leber",
+            "Lunge",
+            "Herz"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Wie stellen Pflanzen ihre Nahrung her?",
+          "options": [
+            "Atmung",
+            "Verdauung",
+            "Photosynthese",
+            "Gärung"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist der Gefrierpunkt von Wasser in Celsius?",
+          "options": [
+            "0",
+            "32",
+            "100",
+            "-10"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Welche Blutgruppe ist der Universalspender?",
+          "options": [
+            "A",
+            "B",
+            "AB",
+            "O"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Welcher Teil des Gehirns kontrolliert das Gleichgewicht?",
+          "options": [
+            "Großhirn",
+            "Kleinhirn",
+            "Hirnstamm",
+            "Hypothalamus"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist die Lichtgeschwindigkeit?",
+          "options": [
+            "300.000 km/s",
+            "150.000 km/s",
+            "1.000.000 km/s",
+            "30.000 km/s"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Welches Element ist bei Raumtemperatur flüssig?",
+          "options": [
+            "Eisen",
+            "Quecksilber",
+            "Gold",
+            "Silber"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was für ein Tier ist ein Frosch?",
+          "options": [
+            "Reptil",
+            "Amphibie",
+            "Säugetier",
+            "Fisch"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist das größte Organ des menschlichen Körpers?",
+          "options": [
+            "Leber",
+            "Herz",
+            "Gehirn",
+            "Haut"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "Wer stellte die Bewegungsgesetze auf?",
+          "options": [
+            "Einstein",
+            "Newton",
+            "Hawking",
+            "Curie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie nennt man das Zentrum eines Atoms?",
+          "options": [
+            "Elektron",
+            "Proton",
+            "Atomkern",
+            "Neutron"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welches Gas nehmen Pflanzen auf?",
+          "options": [
+            "Sauerstoff",
+            "Kohlendioxid",
+            "Stickstoff",
+            "Argon"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist die Einheit für Kraft?",
+          "options": [
+            "Joule",
+            "Watt",
+            "Newton",
+            "Pascal"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welcher Planet ist für seine Ringe bekannt?",
+          "options": [
+            "Jupiter",
+            "Saturn",
+            "Uranus",
+            "Neptun"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie nennt man die Erforschung der Sterne?",
+          "options": [
+            "Astrologie",
+            "Astronomie",
+            "Biologie",
+            "Geologie"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wofür steht DNS?",
+          "options": [
+            "Desoxyribonukleinsäure",
+            "Dynamische Nukleinsäure",
+            "Desoxynitronsäure",
+            "Duale Stickstoffsäure"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Welches ist eine erneuerbare Energiequelle?",
+          "options": [
+            "Kohle",
+            "Öl",
+            "Solar",
+            "Erdgas"
+          ],
+          "correctIndex": 2
+        }
+      ],
+      "history": [
+        {
+          "question": "Wer war der erste Präsident der USA?",
+          "options": [
+            "Jefferson",
+            "Adams",
+            "Washington",
+            "Lincoln"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wann endete der Zweite Weltkrieg?",
+          "options": [
+            "1943",
+            "1945",
+            "1947",
+            "1950"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer war der erste Kaiser von Rom?",
+          "options": [
+            "Caesar",
+            "Augustus",
+            "Nero",
+            "Caligula"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Volk baute die Pyramiden?",
+          "options": [
+            "Römer",
+            "Griechen",
+            "Maya",
+            "Ägypter"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "In welchem Jahr sank die Titanic?",
+          "options": [
+            "1910",
+            "1912",
+            "1914",
+            "1916"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer entdeckte 1492 Amerika?",
+          "options": [
+            "Kolumbus",
+            "Magellan",
+            "Da Gama",
+            "Cook"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wie hieß das Schiff der Pilgerväter?",
+          "options": [
+            "Santa Maria",
+            "Mayflower",
+            "Endeavour",
+            "Beagle"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer war britischer Premierminister im 2. Weltkrieg?",
+          "options": [
+            "Chamberlain",
+            "Churchill",
+            "Attlee",
+            "Thatcher"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wann begann die Französische Revolution?",
+          "options": [
+            "1776",
+            "1789",
+            "1804",
+            "1812"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer war als die Jungfrau von Orléans bekannt?",
+          "options": [
+            "Marie Antoinette",
+            "Jeanne d'Arc",
+            "Katharina de Medici",
+            "Eleonore"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Reich wurde von Dschingis Khan regiert?",
+          "options": [
+            "Römisches",
+            "Osmanisches",
+            "Mongolisches",
+            "Persisches"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welche Mauer teilte eine Stadt von 1961 bis 1989?",
+          "options": [
+            "Chinesische",
+            "Berliner Mauer",
+            "Hadrianswall",
+            "Klagemauer"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welche ägyptische Königin war mit Caesar verbündet?",
+          "options": [
+            "Nofretete",
+            "Hatschepsut",
+            "Kleopatra",
+            "Sobekneferu"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Zwischen wem fand der Kalte Krieg hauptsächlich statt?",
+          "options": [
+            "China",
+            "Deutschland",
+            "Sowjetunion",
+            "Japan"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welches Land schenkte den USA die Freiheitsstatue?",
+          "options": [
+            "Spanien",
+            "Frankreich",
+            "Großbritannien",
+            "Italien"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie hieß die alte Schrift der Ägypter?",
+          "options": [
+            "Keilschrift",
+            "Hieroglyphen",
+            "Runen",
+            "Sanskrit"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer bemalte die Decke der Sixtinischen Kapelle?",
+          "options": [
+            "Da Vinci",
+            "Michelangelo",
+            "Raffael",
+            "Donatello"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "In welchem Jahr landete Apollo 11 auf dem Mond?",
+          "options": [
+            "1965",
+            "1969",
+            "1972",
+            "1975"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer ist für den Satz 'I have a dream' bekannt?",
+          "options": [
+            "Malcolm X",
+            "Martin Luther King Jr.",
+            "Nelson Mandela",
+            "Frederick Douglass"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer war der zweite Präsident der USA?",
+          "options": [
+            "Jefferson",
+            "Adams",
+            "Madison",
+            "Hamilton"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welche Krankheit verursachte den Schwarzen Tod?",
+          "options": [
+            "Pocken",
+            "Cholera",
+            "Beulenpest",
+            "Typhus"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wo lag die antike Stadt Troja?",
+          "options": [
+            "Griechenland",
+            "Italien",
+            "Türkei",
+            "Ägypten"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wer war die erste Premierministerin Großbritanniens?",
+          "options": [
+            "Theresa May",
+            "Margaret Thatcher",
+            "Queen Elizabeth",
+            "Angela Merkel"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welches Dokument wurde 1215 in England unterzeichnet?",
+          "options": [
+            "Unabhängigkeitserklärung",
+            "Magna Carta",
+            "Bill of Rights",
+            "Versailler Vertrag"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welcher Krieg wurde zwischen Nord- und Südstaaten der USA geführt?",
+          "options": [
+            "Revolution",
+            "Krieg von 1812",
+            "Bürgerkrieg",
+            "1. Weltkrieg"
+          ],
+          "correctIndex": 2
+        }
+      ],
+      "movies": [
+        {
+          "question": "Wer führte Regie bei Jurassic Park?",
+          "options": [
+            "Cameron",
+            "Spielberg",
+            "Lucas",
+            "Nolan"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Was ist der erfolgreichste Film aller Zeiten?",
+          "options": [
+            "Titanic",
+            "Avatar",
+            "Endgame",
+            "Star Wars"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer spielte Jack in Titanic?",
+          "options": [
+            "Pitt",
+            "Cruise",
+            "DiCaprio",
+            "Depp"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "In welchem Film fällt der Satz 'I'll be back'?",
+          "options": [
+            "Rambo",
+            "Terminator",
+            "Die Hard",
+            "RoboCop"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welche Pille nimmt Neo in Matrix?",
+          "options": [
+            "Blau",
+            "Grün",
+            "Rot",
+            "Gelb"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "In welchem Franchise kommt Luke Skywalker vor?",
+          "options": [
+            "Star Trek",
+            "Star Wars",
+            "Doctor Who",
+            "Battlestar"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer spielte den Joker in The Dark Knight?",
+          "options": [
+            "Nicholson",
+            "Ledger",
+            "Leto",
+            "Phoenix"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie heißt der Hobbit, der von Elijah Wood gespielt wird?",
+          "options": [
+            "Sam",
+            "Merry",
+            "Pippin",
+            "Frodo"
+          ],
+          "correctIndex": 3
+        },
+        {
+          "question": "In welchem Film kommt das Lied 'Let It Go' vor?",
+          "options": [
+            "Moana",
+            "Tangled",
+            "Die Eiskönigin",
+            "Brave"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wie heißt das fiktive afrikanische Land in Black Panther?",
+          "options": [
+            "Zamunda",
+            "Genovia",
+            "Wakanda",
+            "Krakoa"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wer führte Regie bei Pulp Fiction?",
+          "options": [
+            "Scorsese",
+            "Tarantino",
+            "Coppola",
+            "Kubrick"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer spielt Iron Man im MCU?",
+          "options": [
+            "Evans",
+            "Hemsworth",
+            "Downey Jr.",
+            "Ruffalo"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Was ist die erste Regel des Fight Club?",
+          "options": [
+            "Nicht darüber reden",
+            "Bis zum Tod kämpfen",
+            "Keine Hemden",
+            "Freund mitbringen"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "In welchem Film sagt Tom Hanks 'Das Leben ist wie eine Schachtel Pralinen'?",
+          "options": [
+            "Cast Away",
+            "Soldat James Ryan",
+            "Forrest Gump",
+            "Green Mile"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Welchen magischen Gegenstand nutzt Harry Potter zum Fliegen?",
+          "options": [
+            "Teppich",
+            "Besen",
+            "Umhang",
+            "Zauberstab"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer sprach Woody in Toy Story (Englisch)?",
+          "options": [
+            "Allen",
+            "Hanks",
+            "Williams",
+            "Crystal"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Welcher Film gewann den ersten Oscar für den besten Animationsfilm?",
+          "options": [
+            "Shrek",
+            "Toy Story",
+            "Findet Nemo",
+            "König der Löwen"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wie heißt der Killer im Film Halloween?",
+          "options": [
+            "Jason Voorhees",
+            "Freddy Krueger",
+            "Michael Myers",
+            "Leatherface"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wie heißt das indigene Volk in Avatar?",
+          "options": [
+            "Klingonen",
+            "Na'vi",
+            "Ewoks",
+            "Wookiees"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wer spielte Captain Jack Sparrow?",
+          "options": [
+            "Bloom",
+            "Depp",
+            "Rush",
+            "Pitt"
+          ],
+          "correctIndex": 1
+        },
+        {
+          "question": "Wie heißt die KI in '2001: Odyssee im Weltraum'?",
+          "options": [
+            "HAL 9000",
+            "Skynet",
+            "JARVIS",
+            "Mother"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wer spielt die Hauptrolle in Forrest Gump?",
+          "options": [
+            "Williams",
+            "Murray",
+            "Hanks",
+            "Ford"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "In welchem Film terrorisiert ein weißer Hai eine Küstenstadt?",
+          "options": [
+            "Der weiße Hai",
+            "The Meg",
+            "Deep Blue Sea",
+            "Sharknado"
+          ],
+          "correctIndex": 0
+        },
+        {
+          "question": "Wie heißt die Zauberschule bei Harry Potter?",
+          "options": [
+            "Beauxbatons",
+            "Durmstrang",
+            "Hogwarts",
+            "Ilvermorny"
+          ],
+          "correctIndex": 2
+        },
+        {
+          "question": "Wer spielte Neo in Matrix?",
+          "options": [
+            "Reeves",
+            "Cruise",
+            "Smith",
+            "Pitt"
+          ],
+          "correctIndex": 0
+        }
+      ]
+    }
   }
 }

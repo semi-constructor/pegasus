@@ -61,100 +61,132 @@ class TriviaService {
         return;
       }
 
-      // Handle the first question (assuming 1 question for simplicity in this implementation)
       const questions = game.questions as Array<{ question: string; options: string[]; correctIndex: number }>;
-      if (!questions || questions.length === 0) return;
+      if (!questions || questions.length === 0) {
+        await db.update(triviaGames).set({ status: 'cancelled' }).where(eq(triviaGames.id, gameId));
+        return;
+      }
       
-      const q = questions[0];
+      const scores: Record<string, number> = {};
 
-      const embed = new EmbedBuilder()
-        .setTitle('🧠 Trivia Time!')
-        .setDescription(`**${q.question}**\n\nYou have 30 seconds to answer!`)
-        .setColor(0x9333ea)
-        .addFields(
-          { name: 'Rewards', value: `⭐ ${game.rewardXp} XP | 💰 ${game.rewardCoins} Coins` }
-        );
+      const askQuestion = async (qIndex: number) => {
+        if (qIndex >= questions.length) {
+          let topWinnerId: string | null = null;
+          let maxScore = 0;
+          for (const [uid, score] of Object.entries(scores)) {
+            if (score > maxScore) {
+              maxScore = score;
+              topWinnerId = uid;
+            }
+          }
+          await db
+            .update(triviaGames)
+            .set({ 
+              status: 'completed',
+              winnerId: topWinnerId
+            })
+            .where(eq(triviaGames.id, gameId));
 
-      const row = new ActionRowBuilder<ButtonBuilder>();
-      q.options.forEach((opt, idx) => {
-        row.addComponents(
-          new ButtonBuilder()
-            .setCustomId(`trivia_${game.id}_${idx}`)
-            .setLabel(opt)
-            .setStyle(ButtonStyle.Primary)
-        );
-      });
-
-      const message = await channel.send({ embeds: [embed], components: [row] });
-
-      const collector = message.createMessageComponentCollector({
-        componentType: ComponentType.Button,
-        time: 30000,
-        filter: i => i.customId.startsWith(`trivia_${game.id}`)
-      });
-
-      let winnerId: string | null = null;
-
-      collector.on('collect', async i => {
-        if (winnerId) {
-          await i.reply({ content: 'Someone already answered correctly!', ephemeral: true });
+          const overEmbed = new EmbedBuilder().setTitle('🧠 Trivia Game Over!').setColor(0x9333ea);
+          if (topWinnerId) {
+            overEmbed.setDescription(`The overall winner is <@${topWinnerId}> with ${maxScore} correct answer(s)!\nThey received all the rewards accumulated!`);
+            // Reward user for overall win (e.g. multiplied by maxScore if desired, but we'll just give base rewards or total rewards)
+            const totalXp = game.rewardXp * maxScore;
+            const totalCoins = game.rewardCoins * maxScore;
+            const guildMember = await channel.guild.members.fetch(topWinnerId).catch(() => null);
+            if (guildMember) {
+              if (totalXp > 0) {
+                await xpService.addXP(topWinnerId, game.guildId, guildMember as any, totalXp, channel.id);
+              }
+              if (totalCoins > 0) {
+                await economyService.addMoney(topWinnerId, game.guildId, totalCoins, 'wallet', 'Trivia Win');
+              }
+            }
+          } else {
+            overEmbed.setDescription('Nobody scored any points!');
+          }
+          await channel.send({ embeds: [overEmbed] });
           return;
         }
 
-        const answerIdx = parseInt(i.customId.split('_')[2]);
-        if (answerIdx === q.correctIndex) {
-          winnerId = i.user.id;
-          
-          // Reward user
-          if (game.rewardXp > 0) {
-            await xpService.addXP(i.user.id, game.guildId, i.member as any, game.rewardXp, channel.id);
-          }
-          if (game.rewardCoins > 0) {
-            await economyService.addMoney(i.user.id, game.guildId, game.rewardCoins, 'wallet', 'Trivia Win');
-          }
+        const q = questions[qIndex];
 
-          await i.reply({ content: `🎉 Correct! You won the trivia and received your rewards!` });
-          collector.stop('winner');
-        } else {
-          await i.reply({ content: '❌ Incorrect answer!', ephemeral: true });
-        }
-      });
+        const embed = new EmbedBuilder()
+          .setTitle(`🧠 Trivia Time! (Question ${qIndex + 1} of ${questions.length})`)
+          .setDescription(`**${q.question}**\n\nYou have 30 seconds to answer!`)
+          .setColor(0x9333ea)
+          .addFields(
+            { name: 'Rewards Per Question', value: `⭐ ${game.rewardXp} XP | 💰 ${game.rewardCoins} Coins` }
+          );
 
-      collector.on('end', async (collected, reason) => {
-        // Update game status
-        await db
-          .update(triviaGames)
-          .set({ 
-            status: 'completed',
-            winnerId: winnerId
-          })
-          .where(eq(triviaGames.id, gameId));
-
-        // Disable buttons
-        const disabledRow = new ActionRowBuilder<ButtonBuilder>();
+        const row = new ActionRowBuilder<ButtonBuilder>();
         q.options.forEach((opt, idx) => {
-          disabledRow.addComponents(
+          row.addComponents(
             new ButtonBuilder()
-              .setCustomId(`trivia_${game.id}_${idx}_disabled`)
+              .setCustomId(`trivia_${game.id}_${qIndex}_${idx}`)
               .setLabel(opt)
-              .setStyle(winnerId !== null && idx === q.correctIndex ? ButtonStyle.Success : ButtonStyle.Secondary)
-              .setDisabled(true)
+              .setStyle(ButtonStyle.Primary)
           );
         });
 
-        const endEmbed = new EmbedBuilder()
-          .setTitle('🧠 Trivia Ended')
-          .setDescription(`**${q.question}**\n\nThe correct answer was: **${q.options[q.correctIndex]}**`)
-          .setColor(winnerId ? 0x22c55e : 0xef4444);
+        const message = await channel.send({ embeds: [embed], components: [row] });
 
-        if (winnerId) {
-          endEmbed.addFields({ name: 'Winner', value: `<@${winnerId}>` });
-        } else {
-          endEmbed.addFields({ name: 'Result', value: 'Nobody answered correctly in time!' });
-        }
+        const collector = message.createMessageComponentCollector({
+          componentType: ComponentType.Button,
+          time: 30000,
+          filter: i => i.customId.startsWith(`trivia_${game.id}_${qIndex}`)
+        });
 
-        await message.edit({ embeds: [endEmbed], components: [disabledRow] });
-      });
+        let winnerId: string | null = null;
+
+        collector.on('collect', async i => {
+          if (winnerId) {
+            await i.reply({ content: 'Someone already answered correctly!', ephemeral: true });
+            return;
+          }
+
+          const answerIdx = parseInt(i.customId.split('_')[3]);
+          if (answerIdx === q.correctIndex) {
+            winnerId = i.user.id;
+            scores[winnerId] = (scores[winnerId] || 0) + 1;
+
+            await i.reply({ content: `🎉 Correct! You scored a point!` });
+            collector.stop('winner');
+          } else {
+            await i.reply({ content: '❌ Incorrect answer!', ephemeral: true });
+          }
+        });
+
+        collector.on('end', async (collected, reason) => {
+          const disabledRow = new ActionRowBuilder<ButtonBuilder>();
+          q.options.forEach((opt, idx) => {
+            disabledRow.addComponents(
+              new ButtonBuilder()
+                .setCustomId(`trivia_${game.id}_${qIndex}_${idx}_disabled`)
+                .setLabel(opt)
+                .setStyle(winnerId !== null && idx === q.correctIndex ? ButtonStyle.Success : ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+          });
+
+          const endEmbed = new EmbedBuilder()
+            .setTitle(`🧠 Trivia (Question ${qIndex + 1}) Ended`)
+            .setDescription(`**${q.question}**\n\nThe correct answer was: **${q.options[q.correctIndex]}**`)
+            .setColor(winnerId ? 0x22c55e : 0xef4444);
+
+          if (winnerId) {
+            endEmbed.addFields({ name: 'Winner', value: `<@${winnerId}>` });
+          } else {
+            endEmbed.addFields({ name: 'Result', value: 'Nobody answered correctly in time!' });
+          }
+
+          await message.edit({ embeds: [endEmbed], components: [disabledRow] });
+
+          setTimeout(() => askQuestion(qIndex + 1), 3000);
+        });
+      };
+
+      await askQuestion(0);
 
     } catch (error) {
       logger.error(`Error starting trivia game ${gameId}:`, error);
