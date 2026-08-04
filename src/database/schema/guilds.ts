@@ -66,6 +66,9 @@ export const guildSettings = pgTable('guild_settings', {
   antiSpamEnabled: boolean('anti_spam_enabled').default(true).notNull(),
   maxMentions: integer('max_mentions').default(5).notNull(),
   maxDuplicates: integer('max_duplicates').default(3).notNull(),
+  // Public configuration
+  publicLevels: boolean('public_levels').default(false).notNull(),
+  publicEco: boolean('public_eco').default(false).notNull(),
   // Timestamps
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
