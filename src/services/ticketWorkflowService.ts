@@ -84,7 +84,11 @@ export class TicketWorkflowService {
     departmentId: string
   ): Promise<void> {
     const guild = interaction.guild!;
-    const department = await ticketWorkflowRepository.getDepartment(guild.id, panelDbId, departmentId);
+    const department = await ticketWorkflowRepository.getDepartment(
+      guild.id,
+      panelDbId,
+      departmentId
+    );
     if (!department) {
       await interaction.reply({ content: t('tickets.departmentNotFound'), ephemeral: true });
       return;
@@ -138,7 +142,11 @@ export class TicketWorkflowService {
     const panel = await ticketRepository.getPanelById(panelDbId);
     if (!panel) throw new Error(t('tickets.panelNotFound'));
 
-    const department = await ticketWorkflowRepository.getDepartment(guild.id, panel.id, departmentId);
+    const department = await ticketWorkflowRepository.getDepartment(
+      guild.id,
+      panel.id,
+      departmentId
+    );
     if (!department) throw new Error(t('tickets.departmentNotFound'));
 
     const lockKey = `${panel.id}:${member.id}`;
@@ -153,151 +161,150 @@ export class TicketWorkflowService {
         throw new Error(t('tickets.maxTicketsReached', { max: panel.maxTicketsPerUser }));
       }
 
-    const ticketNumber = await ticketRepository.getNextTicketNumber(guild.id);
-    const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace(
-      '{number}',
-      ticketNumber.toString()
-    );
+      const ticketNumber = await ticketRepository.getNextTicketNumber(guild.id);
+      const ticketName = (panel.ticketNameFormat ?? 'ticket-{number}').replace(
+        '{number}',
+        ticketNumber.toString()
+      );
 
-    let category: CategoryChannel | null = null;
-    const categoryId = department.categoryId || panel.categoryId;
-    if (categoryId) {
-      try {
-        category = (await guild.channels.fetch(categoryId)) as CategoryChannel;
-      } catch (error) {}
-    }
+      let category: CategoryChannel | null = null;
+      const categoryId = department.categoryId || panel.categoryId;
+      if (categoryId) {
+        try {
+          category = (await guild.channels.fetch(categoryId)) as CategoryChannel;
+        } catch (error) {}
+      }
 
-    const supportRoles = Array.from(new Set([
-      ...(department.supportRoles ?? []),
-      ...((panel.supportRoles as string[]) ?? []),
-    ])).filter(roleId => guild.roles.cache.has(roleId));
+      const supportRoles = Array.from(
+        new Set([...(department.supportRoles ?? []), ...((panel.supportRoles as string[]) ?? [])])
+      ).filter(roleId => guild.roles.cache.has(roleId));
 
-    const ticketChannel = await guild.channels.create({
-      name: ticketName,
-      type: ChannelType.GuildText,
-      parent: category?.id,
-      permissionOverwrites: [
-        {
-          id: guild.id,
-          deny: [PermissionFlagsBits.ViewChannel],
-          type: OverwriteType.Role,
-        },
-        {
-          id: member.id,
-          allow: [
-            PermissionFlagsBits.ViewChannel,
-            PermissionFlagsBits.SendMessages,
-            PermissionFlagsBits.ReadMessageHistory,
-            PermissionFlagsBits.AttachFiles,
-            PermissionFlagsBits.EmbedLinks,
-          ],
-          type: OverwriteType.Member,
-        },
-        ...supportRoles.map((roleId: string) => ({
-          id: roleId,
-          allow: [
-            PermissionFlagsBits.ViewChannel,
-            PermissionFlagsBits.SendMessages,
-            PermissionFlagsBits.ReadMessageHistory,
-            PermissionFlagsBits.AttachFiles,
-            PermissionFlagsBits.EmbedLinks,
-            PermissionFlagsBits.ManageMessages,
-          ],
-          type: OverwriteType.Role,
-        })),
-      ],
-    });
+      const ticketChannel = await guild.channels.create({
+        name: ticketName,
+        type: ChannelType.GuildText,
+        parent: category?.id,
+        permissionOverwrites: [
+          {
+            id: guild.id,
+            deny: [PermissionFlagsBits.ViewChannel],
+            type: OverwriteType.Role,
+          },
+          {
+            id: member.id,
+            allow: [
+              PermissionFlagsBits.ViewChannel,
+              PermissionFlagsBits.SendMessages,
+              PermissionFlagsBits.ReadMessageHistory,
+              PermissionFlagsBits.AttachFiles,
+              PermissionFlagsBits.EmbedLinks,
+            ],
+            type: OverwriteType.Member,
+          },
+          ...supportRoles.map((roleId: string) => ({
+            id: roleId,
+            allow: [
+              PermissionFlagsBits.ViewChannel,
+              PermissionFlagsBits.SendMessages,
+              PermissionFlagsBits.ReadMessageHistory,
+              PermissionFlagsBits.AttachFiles,
+              PermissionFlagsBits.EmbedLinks,
+              PermissionFlagsBits.ManageMessages,
+            ],
+            type: OverwriteType.Role,
+          })),
+        ],
+      });
 
-    const ticket = await ticketRepository.createTicket({
-      guildId: guild.id,
-      panelId: panel.id,
-      userId: member.id,
-      channelId: ticketChannel.id,
-      reason,
-      ticketNumber,
-    });
+      const ticket = await ticketRepository.createTicket({
+        guildId: guild.id,
+        panelId: panel.id,
+        userId: member.id,
+        channelId: ticketChannel.id,
+        reason,
+        ticketNumber,
+      });
 
-    // Update ticket with departmentId
-    await ticketWorkflowRepository.updateTicketDepartment(ticket.id, department.id);
+      // Update ticket with departmentId
+      await ticketWorkflowRepository.updateTicketDepartment(ticket.id, department.id);
 
-    const ticketEmbed = new EmbedBuilder()
-      .setTitle(t('tickets.ticketCreatedDept', { number: ticketNumber, dept: department.name }))
-      .setDescription(
-        department.welcomeMessage || panel.welcomeMessage || t('tickets.welcomeMessage')
-      )
-      .addFields([
-        { name: t('tickets.createdBy'), value: `<@${member.id}>`, inline: true },
-        { name: t('tickets.department'), value: department.name, inline: true },
-        { name: t('tickets.reason'), value: reason || t('tickets.noReason'), inline: false },
-      ])
-      .setColor(0x00ff00)
-      .setTimestamp();
+      const ticketEmbed = new EmbedBuilder()
+        .setTitle(t('tickets.ticketCreatedDept', { number: ticketNumber, dept: department.name }))
+        .setDescription(
+          department.welcomeMessage || panel.welcomeMessage || t('tickets.welcomeMessage')
+        )
+        .addFields([
+          { name: t('tickets.createdBy'), value: `<@${member.id}>`, inline: true },
+          { name: t('tickets.department'), value: department.name, inline: true },
+          { name: t('tickets.reason'), value: reason || t('tickets.noReason'), inline: false },
+        ])
+        .setColor(0x00ff00)
+        .setTimestamp();
 
-    const controlButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`ticket_close:${ticket.id}`)
-        .setLabel(t('tickets.close'))
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('🔒'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_close_reason:${ticket.id}`)
-        .setLabel(t('tickets.closeWithReason'))
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('📝'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_lock:${ticket.id}`)
-        .setLabel(t('tickets.lock'))
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('🔐'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_freeze:${ticket.id}`)
-        .setLabel(t('tickets.freeze'))
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('❄️'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_claim:${ticket.id}`)
-        .setLabel(t('tickets.claim'))
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji('🙋')
-    );
+      const controlButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`ticket_close:${ticket.id}`)
+          .setLabel(t('tickets.close'))
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('🔒'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_close_reason:${ticket.id}`)
+          .setLabel(t('tickets.closeWithReason'))
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('📝'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_lock:${ticket.id}`)
+          .setLabel(t('tickets.lock'))
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('🔐'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_freeze:${ticket.id}`)
+          .setLabel(t('tickets.freeze'))
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('❄️'),
+        new ButtonBuilder()
+          .setCustomId(`ticket_claim:${ticket.id}`)
+          .setLabel(t('tickets.claim'))
+          .setStyle(ButtonStyle.Primary)
+          .setEmoji('🙋')
+      );
 
-    const ratingButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`ticket_rate:${ticket.id}:5`)
-        .setLabel('⭐⭐⭐⭐⭐')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId(`ticket_rate:${ticket.id}:4`)
-        .setLabel('⭐⭐⭐⭐')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId(`ticket_rate:${ticket.id}:3`)
-        .setLabel('⭐⭐⭐')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId(`ticket_rate:${ticket.id}:2`)
-        .setLabel('⭐⭐')
-        .setStyle(ButtonStyle.Danger),
-      new ButtonBuilder()
-        .setCustomId(`ticket_rate:${ticket.id}:1`)
-        .setLabel('⭐')
-        .setStyle(ButtonStyle.Danger)
-    );
+      const ratingButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`ticket_rate:${ticket.id}:5`)
+          .setLabel('⭐⭐⭐⭐⭐')
+          .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+          .setCustomId(`ticket_rate:${ticket.id}:4`)
+          .setLabel('⭐⭐⭐⭐')
+          .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+          .setCustomId(`ticket_rate:${ticket.id}:3`)
+          .setLabel('⭐⭐⭐')
+          .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+          .setCustomId(`ticket_rate:${ticket.id}:2`)
+          .setLabel('⭐⭐')
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId(`ticket_rate:${ticket.id}:1`)
+          .setLabel('⭐')
+          .setStyle(ButtonStyle.Danger)
+      );
 
-    const supportPings = supportRoles.map((roleId: string) => `<@&${roleId}>`).join(' ');
-    await ticketChannel.send({
-      content: supportPings,
-      embeds: [ticketEmbed],
-      components: [controlButtons, ratingButtons],
-    });
+      const supportPings = supportRoles.map((roleId: string) => `<@&${roleId}>`).join(' ');
+      await ticketChannel.send({
+        content: supportPings,
+        embeds: [ticketEmbed],
+        components: [controlButtons, ratingButtons],
+      });
 
-    await ticketRepository.addTicketMessage(
-      ticket.id,
-      member.id,
-      t('tickets.ticketCreatedLog', { user: member.user.tag, reason })
-    );
+      await ticketRepository.addTicketMessage(
+        ticket.id,
+        member.id,
+        t('tickets.ticketCreatedLog', { user: member.user.tag, reason })
+      );
 
-    return { ticket, channel: ticketChannel };
+      return { ticket, channel: ticketChannel };
     } finally {
       this.creationLocks.delete(lockKey);
     }

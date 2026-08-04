@@ -5,7 +5,10 @@ import path from 'path';
 // You would typically load a custom font here
 // registerFont(path.join(__dirname, '../../assets/fonts/Inter-Bold.ttf'), { family: 'Inter' });
 
-export async function generateWelcomeImage(member: GuildMember, backgroundUrl?: string): Promise<Buffer> {
+export async function generateWelcomeImage(
+  member: GuildMember,
+  backgroundUrl?: string
+): Promise<Buffer> {
   const canvas = createCanvas(800, 300);
   const ctx = canvas.getContext('2d');
 
@@ -46,7 +49,7 @@ export async function generateWelcomeImage(member: GuildMember, backgroundUrl?: 
   const avatarUrl = member.user.displayAvatarURL({ extension: 'png', size: 256 });
   const avatar = await loadImage(avatarUrl);
   ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize);
-  
+
   ctx.restore();
 
   // Draw avatar border
@@ -58,7 +61,7 @@ export async function generateWelcomeImage(member: GuildMember, backgroundUrl?: 
 
   // Text setup
   ctx.fillStyle = '#ffffff';
-  
+
   // Welcome Text
   ctx.font = 'bold 42px sans-serif';
   ctx.fillText('WELCOME', 230, 110);
@@ -76,7 +79,10 @@ export async function generateWelcomeImage(member: GuildMember, backgroundUrl?: 
   return canvas.toBuffer();
 }
 
-export async function generateGoodbyeImage(member: GuildMember, backgroundUrl?: string): Promise<Buffer> {
+export async function generateGoodbyeImage(
+  member: GuildMember,
+  backgroundUrl?: string
+): Promise<Buffer> {
   const canvas = createCanvas(800, 300);
   const ctx = canvas.getContext('2d');
 
@@ -116,10 +122,10 @@ export async function generateGoodbyeImage(member: GuildMember, backgroundUrl?: 
 
   const avatarUrl = member.user.displayAvatarURL({ extension: 'png', size: 256 });
   const avatar = await loadImage(avatarUrl);
-  
+
   // Make avatar grayscale for goodbye
   ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize);
-  
+
   ctx.restore();
 
   // Draw avatar border
@@ -131,7 +137,7 @@ export async function generateGoodbyeImage(member: GuildMember, backgroundUrl?: 
 
   // Text setup
   ctx.fillStyle = '#ffffff';
-  
+
   // Goodbye Text
   ctx.font = 'bold 42px sans-serif';
   ctx.fillText('GOODBYE', 230, 110);

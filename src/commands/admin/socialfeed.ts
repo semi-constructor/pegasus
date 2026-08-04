@@ -11,10 +11,11 @@ export const data = new SlashCommandBuilder()
       .setName('add')
       .setDescription('Add a new social feed')
       .addStringOption(option =>
-        option.setName('type').setDescription('Feed Type').setRequired(true).addChoices(
-          { name: 'RSS', value: 'rss' },
-          { name: 'YouTube', value: 'youtube' }
-        )
+        option
+          .setName('type')
+          .setDescription('Feed Type')
+          .setRequired(true)
+          .addChoices({ name: 'RSS', value: 'rss' }, { name: 'YouTube', value: 'youtube' })
       )
       .addStringOption(option =>
         option.setName('url').setDescription('Feed URL or YouTube Channel ID').setRequired(true)
@@ -30,9 +31,7 @@ export const data = new SlashCommandBuilder()
       )
   )
   .addSubcommand(subcommand =>
-    subcommand
-      .setName('list')
-      .setDescription('List all configured social feeds')
+    subcommand.setName('list').setDescription('List all configured social feeds')
   )
   .addSubcommand(subcommand =>
     subcommand
@@ -48,7 +47,10 @@ export async function execute(interaction: CommandInteraction) {
 
   // Check for administrator permissions
   if (!interaction.memberPermissions?.has('Administrator')) {
-    await interaction.reply({ content: 'You need Administrator permissions to use this command.', ephemeral: true });
+    await interaction.reply({
+      content: 'You need Administrator permissions to use this command.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -77,36 +79,53 @@ export async function execute(interaction: CommandInteraction) {
         customMessage: message,
       });
 
-      await interaction.reply({ 
-        content: `✅ Successfully added ${type.toUpperCase()} feed!\n**URL:** ${url}\n**Channel:** <#${channel.id}>`, 
-        ephemeral: true 
+      await interaction.reply({
+        content: `✅ Successfully added ${type.toUpperCase()} feed!\n**URL:** ${url}\n**Channel:** <#${channel.id}>`,
+        ephemeral: true,
       });
     } catch (error) {
       console.error(error);
-      await interaction.reply({ content: 'An error occurred while adding the feed. Ensure the URL is not already added.', ephemeral: true });
+      await interaction.reply({
+        content: 'An error occurred while adding the feed. Ensure the URL is not already added.',
+        ephemeral: true,
+      });
     }
   } else if (subcommand === 'list') {
-    const feeds = await db.select().from(socialFeeds).where(eq(socialFeeds.guildId, interaction.guildId));
+    const feeds = await db
+      .select()
+      .from(socialFeeds)
+      .where(eq(socialFeeds.guildId, interaction.guildId));
 
     if (feeds.length === 0) {
-      await interaction.reply({ content: 'There are no social feeds configured for this server.', ephemeral: true });
+      await interaction.reply({
+        content: 'There are no social feeds configured for this server.',
+        ephemeral: true,
+      });
       return;
     }
 
-    const feedList = feeds.map((f, i) => `${i + 1}. **${f.feedType.toUpperCase()}**: ${f.feedUrl} -> <#${f.channelId}>`).join('\n');
-    await interaction.reply({ content: `**Configured Social Feeds:**\n${feedList}`, ephemeral: true });
+    const feedList = feeds
+      .map((f, i) => `${i + 1}. **${f.feedType.toUpperCase()}**: ${f.feedUrl} -> <#${f.channelId}>`)
+      .join('\n');
+    await interaction.reply({
+      content: `**Configured Social Feeds:**\n${feedList}`,
+      ephemeral: true,
+    });
   } else if (subcommand === 'remove') {
     const url = (interaction as any).options.getString('url', true);
 
     try {
-      const result = await db.delete(socialFeeds).where(
-        and(eq(socialFeeds.guildId, interaction.guildId), eq(socialFeeds.feedUrl, url))
-      );
+      const result = await db
+        .delete(socialFeeds)
+        .where(and(eq(socialFeeds.guildId, interaction.guildId), eq(socialFeeds.feedUrl, url)));
 
       await interaction.reply({ content: `✅ Removed feed with URL: ${url}`, ephemeral: true });
     } catch (error) {
       console.error(error);
-      await interaction.reply({ content: 'An error occurred while removing the feed.', ephemeral: true });
+      await interaction.reply({
+        content: 'An error occurred while removing the feed.',
+        ephemeral: true,
+      });
     }
   }
 }

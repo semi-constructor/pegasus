@@ -27,31 +27,30 @@ import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 import { moderationScheduler } from '../../services/moderationScheduler';
 
-
 export const data = new SlashCommandBuilder()
   .setName('ban')
-      .setDescription(t('commands.moderation.subcommands.ban.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.ban.options.user'))
-          .setRequired(true)
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.ban.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
-      .addIntegerOption(option =>
-        option
-          .setName('delete_days')
-          .setDescription(t('commands.moderation.subcommands.ban.options.deleteDays'))
-          .setRequired(false)
-          .setMinValue(0)
-          .setMaxValue(7)
-      )
+  .setDescription(t('commands.moderation.subcommands.ban.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.ban.options.user'))
+      .setRequired(true)
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.ban.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
+  .addIntegerOption(option =>
+    option
+      .setName('delete_days')
+      .setDescription(t('commands.moderation.subcommands.ban.options.deleteDays'))
+      .setRequired(false)
+      .setMinValue(0)
+      .setMaxValue(7)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 export const category = CommandCategory.Moderation;
@@ -177,8 +176,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -307,4 +304,3 @@ async function recordModCase(
     return null;
   }
 }
-

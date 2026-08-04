@@ -45,7 +45,7 @@ class AIService {
 
       // Ensure there's actual content to respond to
       if (!content) {
-        content = "Hello!";
+        content = 'Hello!';
       }
 
       const response = await this.ai.models.generateContent({
@@ -53,19 +53,20 @@ class AIService {
         contents: [
           {
             role: 'user',
-            parts: [{ text: content }]
-          }
+            parts: [{ text: content }],
+          },
         ],
         config: {
           systemInstruction: guildSettings.aiPersona || 'You are a helpful Discord bot assistant.',
-        }
+        },
       });
 
       const replyContent = response.text;
-      
+
       if (replyContent) {
         // Send reply but slice it if it exceeds Discord's 2000 char limit
-        const chunk = replyContent.length > 2000 ? replyContent.slice(0, 1997) + '...' : replyContent;
+        const chunk =
+          replyContent.length > 2000 ? replyContent.slice(0, 1997) + '...' : replyContent;
         await message.reply(chunk);
       } else {
         await message.reply("I'm not sure how to respond to that.");

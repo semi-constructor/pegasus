@@ -26,24 +26,22 @@ import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 
-
-
 export const data = new SlashCommandBuilder()
   .setName('unmute')
-      .setDescription(t('commands.moderation.subcommands.unmute.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.unmute.options.user'))
-          .setRequired(true)
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.unmute.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
+  .setDescription(t('commands.moderation.subcommands.unmute.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.unmute.options.user'))
+      .setRequired(true)
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.unmute.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export const category = CommandCategory.Moderation;
@@ -127,8 +125,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -257,4 +253,3 @@ async function recordModCase(
     return null;
   }
 }
-

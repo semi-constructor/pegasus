@@ -1,8 +1,4 @@
-import {
-  ChatInputCommandInteraction,
-  SlashCommandBuilder,
-  EmbedBuilder,
-} from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import ms from 'ms';
 import { reminderService } from '../../services/reminderService';
 import { logger } from '../../utils/logger';
@@ -17,10 +13,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(true)
   )
   .addStringOption(option =>
-    option
-      .setName('message')
-      .setDescription('What to remind you about')
-      .setRequired(true)
+    option.setName('message').setDescription('What to remind you about').setRequired(true)
   );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -49,7 +42,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setTitle('⏰ Reminder Set')
-      .setDescription(`I will remind you about **"${message}"** in ${ms(durationMs, { long: true })}.`)
+      .setDescription(
+        `I will remind you about **"${message}"** in ${ms(durationMs, { long: true })}.`
+      )
       .setColor('#2ecc71')
       .setTimestamp(fireAt);
 

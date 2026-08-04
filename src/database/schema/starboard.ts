@@ -15,7 +15,8 @@ export const starboardSettings = pgTable('starboard_settings', {
 
 export const starboardMessages = pgTable('starboard_messages', {
   messageId: varchar('message_id', { length: 20 }).primaryKey(),
-  guildId: varchar('guild_id', { length: 20 }).notNull()
+  guildId: varchar('guild_id', { length: 20 })
+    .notNull()
     .references(() => guilds.id, { onDelete: 'cascade' }),
   channelId: varchar('channel_id', { length: 20 }).notNull(),
   authorId: varchar('author_id', { length: 20 }).notNull(),

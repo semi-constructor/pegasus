@@ -21,11 +21,13 @@ export async function execute(member: GuildMember) {
   try {
     // Goodbye message logic
     const goodbyeConfig = await configurationService.getGoodbyeConfig(member.guild.id);
-    
+
     if (goodbyeConfig.enabled && goodbyeConfig.channel) {
       const channel = member.guild.channels.cache.get(goodbyeConfig.channel);
       if (channel && channel.isTextBased()) {
-        const content = goodbyeConfig.message ? formatMessage(goodbyeConfig.message, member) : undefined;
+        const content = goodbyeConfig.message
+          ? formatMessage(goodbyeConfig.message, member)
+          : undefined;
         let attachment: AttachmentBuilder | undefined;
         if (goodbyeConfig.imageEnabled) {
           try {
@@ -37,9 +39,8 @@ export async function execute(member: GuildMember) {
         }
 
         if (goodbyeConfig.embedEnabled) {
-          const embed = new EmbedBuilder()
-            .setColor((goodbyeConfig.embedColor as any) || 0xff0000);
-            
+          const embed = new EmbedBuilder().setColor((goodbyeConfig.embedColor as any) || 0xff0000);
+
           if (goodbyeConfig.embedTitle) {
             embed.setTitle(formatMessage(goodbyeConfig.embedTitle, member));
           }
@@ -56,17 +57,21 @@ export async function execute(member: GuildMember) {
           } else {
             embed.setThumbnail(member.user.displayAvatarURL());
           }
-          
-          await (channel as TextChannel).send({ 
-            content: !goodbyeConfig.embedEnabled ? content : undefined,
-            embeds: [embed],
-            files: attachment ? [attachment] : undefined
-          }).catch(() => null);
+
+          await (channel as TextChannel)
+            .send({
+              content: !goodbyeConfig.embedEnabled ? content : undefined,
+              embeds: [embed],
+              files: attachment ? [attachment] : undefined,
+            })
+            .catch(() => null);
         } else if (content || attachment) {
-          await (channel as TextChannel).send({ 
-            content, 
-            files: attachment ? [attachment] : undefined 
-          }).catch(() => null);
+          await (channel as TextChannel)
+            .send({
+              content,
+              files: attachment ? [attachment] : undefined,
+            })
+            .catch(() => null);
         }
       }
     }

@@ -7,18 +7,13 @@ import { Command, CommandCategory } from '../../types/command';
 import { t, resolveLocale } from '../../i18n';
 import { HelpService } from '../../services/helpService';
 import { logger } from '../../utils/logger';
-import {
-  createLocalizationMap,
-  optionDescriptions,
-} from '../../utils/localization';
+import { createLocalizationMap, optionDescriptions } from '../../utils/localization';
 
 const helpService = new HelpService();
 
 export const data = new SlashCommandBuilder()
   .setName('help')
-  .setDescription(
-    t('commands.help.description', { defaultValue: 'Get help for commands' })
-  )
+  .setDescription(t('commands.help.description', { defaultValue: 'Get help for commands' }))
   .addStringOption(option =>
     option
       .setName('command')

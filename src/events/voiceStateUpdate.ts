@@ -31,7 +31,7 @@ export async function execute(oldState: VoiceState, newState: VoiceState) {
     else if (oldState.channel && newState.channel && oldState.channel.id === newState.channel.id) {
       const wasMuted = oldState.mute || oldState.deaf || oldState.selfMute || oldState.selfDeaf;
       const isMuted = newState.mute || newState.deaf || newState.selfMute || newState.selfDeaf;
-      
+
       if (!wasMuted && isMuted) {
         await handleVoiceLeave(newState);
       } else if (wasMuted && !isMuted) {
@@ -110,7 +110,7 @@ async function handleVoiceLeave(state: VoiceState) {
           }
         }
       }
-      
+
       // Remove old roles
       if (result.rolesToRemove && result.rolesToRemove.length > 0) {
         for (const roleId of result.rolesToRemove) {

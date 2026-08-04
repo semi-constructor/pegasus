@@ -7,8 +7,7 @@ export const reminders = pgTable('reminders', {
   userId: varchar('user_id', { length: 20 })
     .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
-  guildId: varchar('guild_id', { length: 20 })
-    .references(() => guilds.id, { onDelete: 'cascade' }),
+  guildId: varchar('guild_id', { length: 20 }).references(() => guilds.id, { onDelete: 'cascade' }),
   channelId: varchar('channel_id', { length: 20 }).notNull(),
   message: text('message').notNull(),
   fireAt: timestamp('fire_at').notNull(),

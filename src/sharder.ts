@@ -35,9 +35,7 @@ manager.on('shardCreate', shard => {
 
   shard.on('death', proc => {
     const code = (proc as any).exitCode ?? 'unknown';
-    logger.error(
-      chalk.red(`[ShardingManager] Shard #${shard.id} died with exit code ${code}`)
-    );
+    logger.error(chalk.red(`[ShardingManager] Shard #${shard.id} died with exit code ${code}`));
   });
 });
 
@@ -46,9 +44,7 @@ export async function spawnShards(): Promise<void> {
   try {
     const spawnedShards = await manager.spawn();
     logger.info(
-      chalk.bold.green(
-        `[ShardingManager] Successfully spawned ${spawnedShards.size} shard(s)`
-      )
+      chalk.bold.green(`[ShardingManager] Successfully spawned ${spawnedShards.size} shard(s)`)
     );
   } catch (error) {
     logger.error(chalk.red(`[ShardingManager] Failed to spawn shards:`), error);

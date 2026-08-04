@@ -35,8 +35,13 @@ export class EngagementService {
 
       // 2. Increment message count in members table and check achievements
       if (member) {
-        const totalMessages = await engagementRepository.incrementMemberMetric(guildId, userId, 'messages', 1);
-        
+        const totalMessages = await engagementRepository.incrementMemberMetric(
+          guildId,
+          userId,
+          'messages',
+          1
+        );
+
         await this.checkAchievements(
           guildId,
           userId,
@@ -69,7 +74,12 @@ export class EngagementService {
       }
 
       // 2. Increment voice minutes and check voice achievements
-      const totalVoiceMinutes = await engagementRepository.incrementMemberMetric(guildId, userId, 'voiceMinutes', minutes);
+      const totalVoiceMinutes = await engagementRepository.incrementMemberMetric(
+        guildId,
+        userId,
+        'voiceMinutes',
+        minutes
+      );
       await this.checkAchievements(guildId, userId, member, 'voice_minutes', totalVoiceMinutes);
     } catch (error) {
       logger.error(`Error tracking voice activity for user ${userId}:`, error);
@@ -85,7 +95,11 @@ export class EngagementService {
     channel?: TextChannel
   ): Promise<void> {
     try {
-      const progressObj = await engagementRepository.getUserQuestProgress(guildId, userId, quest.id);
+      const progressObj = await engagementRepository.getUserQuestProgress(
+        guildId,
+        userId,
+        quest.id
+      );
       if (progressObj?.completed) return; // Already completed
 
       const newProgress = (progressObj?.progress || 0) + amount;
@@ -108,8 +122,8 @@ export class EngagementService {
           await xpService.addXP(userId, guildId, member, quest.rewardXp);
         }
 
-        const notifyChannel = quest.channelId 
-          ? (channel?.guild?.channels.cache.get(quest.channelId) as TextChannel) 
+        const notifyChannel = quest.channelId
+          ? (channel?.guild?.channels.cache.get(quest.channelId) as TextChannel)
           : channel;
 
         if (notifyChannel) {
@@ -140,7 +154,11 @@ export class EngagementService {
       for (const achievement of achievements) {
         if (unlockedIds.has(achievement.id)) continue;
 
-        if (achievement.requirementChannelId && channel && channel.id !== achievement.requirementChannelId) {
+        if (
+          achievement.requirementChannelId &&
+          channel &&
+          channel.id !== achievement.requirementChannelId
+        ) {
           continue;
         }
 
@@ -168,9 +186,13 @@ export class EngagementService {
 
             let notifyChannel = channel;
             if (achievement.channelId) {
-              notifyChannel = channel?.guild?.channels.cache.get(achievement.channelId) as TextChannel | undefined;
+              notifyChannel = channel?.guild?.channels.cache.get(achievement.channelId) as
+                | TextChannel
+                | undefined;
             } else if (guildSettings.achievementsChannel) {
-              notifyChannel = channel?.guild?.channels.cache.get(guildSettings.achievementsChannel) as TextChannel | undefined;
+              notifyChannel = channel?.guild?.channels.cache.get(
+                guildSettings.achievementsChannel
+              ) as TextChannel | undefined;
             }
 
             if (notifyChannel) {

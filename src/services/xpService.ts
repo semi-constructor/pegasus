@@ -198,7 +198,7 @@ export class XPService {
             lastXpGain: new Date(),
             lastVoiceActivity: isVoiceActivity ? new Date() : sql`${userXp.lastVoiceActivity}`,
             updatedAt: new Date(),
-          }
+          },
         })
         .returning();
 
@@ -450,7 +450,7 @@ export class XPService {
             set: {
               rankCardData: JSON.stringify(customization),
               updatedAt: new Date(),
-            }
+            },
           });
       }
 

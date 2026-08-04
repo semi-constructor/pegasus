@@ -1,4 +1,9 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+} from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { engagementRepository } from '../../repositories/engagementRepository';

@@ -154,7 +154,9 @@ class StatsAggregator {
     const shardStats = await crossShardService.getShardStats(client);
     const avgPing =
       shardStats.length > 0
-        ? Math.round(shardStats.reduce((acc, s) => acc + (s.ping < 0 ? 0 : s.ping), 0) / shardStats.length)
+        ? Math.round(
+            shardStats.reduce((acc, s) => acc + (s.ping < 0 ? 0 : s.ping), 0) / shardStats.length
+          )
         : client.ws.ping;
 
     return {
@@ -190,7 +192,8 @@ class StatsAggregator {
         return {
           total: guilds.size,
           large: guilds.filter((g: any) => g.large).size,
-          voiceActive: guilds.filter((g: any) => g.members.cache.some((m: any) => m.voice?.channel)).size,
+          voiceActive: guilds.filter((g: any) => g.members.cache.some((m: any) => m.voice?.channel))
+            .size,
         };
       });
 

@@ -9,9 +9,7 @@ describe('CrossShardService', () => {
       ws: {
         status: 0,
         ping: 35,
-        shards: new Map([
-          [0, { id: 0, status: 0, ping: 35 }],
-        ]),
+        shards: new Map([[0, { id: 0, status: 0, ping: 35 }]]),
       },
       uptime: 123456,
       guilds: {
@@ -32,7 +30,10 @@ describe('CrossShardService', () => {
               vanityURLCode: null,
               members: {
                 cache: new Map([
-                  ['999999', { id: '999999', user: { bot: false }, presence: { status: 'online' } }],
+                  [
+                    '999999',
+                    { id: '999999', user: { bot: false }, presence: { status: 'online' } },
+                  ],
                 ]),
               },
               channels: { cache: new Map([['channel1', { size: 1 }]]) },
@@ -172,8 +173,24 @@ describe('CrossShardService', () => {
         count: 2,
         ids: [0],
         broadcastEval: jest.fn().mockResolvedValue([
-          { id: 0, status: 0, ping: 30, guildCount: 5, userCount: 500, uptime: 1000, memoryUsage: 5000 },
-          { id: 1, status: 0, ping: 40, guildCount: 8, userCount: 800, uptime: 1000, memoryUsage: 6000 },
+          {
+            id: 0,
+            status: 0,
+            ping: 30,
+            guildCount: 5,
+            userCount: 500,
+            uptime: 1000,
+            memoryUsage: 5000,
+          },
+          {
+            id: 1,
+            status: 0,
+            ping: 40,
+            guildCount: 8,
+            userCount: 800,
+            uptime: 1000,
+            memoryUsage: 6000,
+          },
         ] as never),
       };
 

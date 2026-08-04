@@ -492,10 +492,10 @@ export const ticket: Command = {
         }
       } catch (error: any) {
         await interaction.reply({
-          content:
-            `${t('common.error', { lng: locale }) 
-            }: ${ 
-            t(error.message, { defaultValue: error.message, lng: locale })}`,
+          content: `${t('common.error', { lng: locale })}: ${t(error.message, {
+            defaultValue: error.message,
+            lng: locale,
+          })}`,
           ephemeral: true,
         });
       }
@@ -612,7 +612,7 @@ async function handlePanelCreate(
           collector.stop();
         } catch (error: any) {
           await buttonInteraction.reply({
-            content: `${t('common.error')  }: ${  t(error.message, { defaultValue: error.message })}`,
+            content: `${t('common.error')}: ${t(error.message, { defaultValue: error.message })}`,
             ephemeral: true,
           });
         }

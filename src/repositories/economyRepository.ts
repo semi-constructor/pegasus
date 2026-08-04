@@ -64,11 +64,8 @@ export class EconomyRepository {
     guildId: string,
     amount: number
   ): Promise<EconomyBalance | null> {
-    const conditions = [
-      eq(economyBalances.userId, userId),
-      eq(economyBalances.guildId, guildId)
-    ];
-    
+    const conditions = [eq(economyBalances.userId, userId), eq(economyBalances.guildId, guildId)];
+
     if (amount < 0) {
       conditions.push(gte(economyBalances.balance, Math.abs(amount)));
     }
@@ -351,7 +348,9 @@ export class EconomyRepository {
           biggestWin: sql`GREATEST(${economyGamblingStats.biggestWin}, ${isWin ? netAmount : 0})`,
           biggestLoss: sql`GREATEST(${economyGamblingStats.biggestLoss}, ${!isWin ? netAbs : 0})`,
           currentStreak: won ? sql`${economyGamblingStats.currentStreak} + 1` : 0,
-          bestStreak: won ? sql`GREATEST(${economyGamblingStats.bestStreak}, ${economyGamblingStats.currentStreak} + 1)` : economyGamblingStats.bestStreak,
+          bestStreak: won
+            ? sql`GREATEST(${economyGamblingStats.bestStreak}, ${economyGamblingStats.currentStreak} + 1)`
+            : economyGamblingStats.bestStreak,
           updatedAt: new Date(),
         },
       })

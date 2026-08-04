@@ -26,17 +26,12 @@ export class ReminderService {
       const pendingReminders = await db
         .select()
         .from(reminders)
-        .where(
-          and(
-            eq(reminders.completed, false),
-            lt(reminders.fireAt, now)
-          )
-        );
+        .where(and(eq(reminders.completed, false), lt(reminders.fireAt, now)));
 
       for (const reminder of pendingReminders) {
         try {
           if (reminder.guildId && !this.client.guilds.cache.has(reminder.guildId)) continue;
-          
+
           const channel = await this.client.channels.fetch(reminder.channelId).catch(() => null);
           if (channel && channel.isTextBased()) {
             const embed = new EmbedBuilder()
@@ -44,18 +39,15 @@ export class ReminderService {
               .setDescription(reminder.message)
               .setColor('#3498db')
               .setTimestamp(reminder.createdAt);
-            
+
             await (channel as TextChannel).send({
               content: `<@${reminder.userId}>, here is your reminder!`,
-              embeds: [embed]
+              embeds: [embed],
             });
           }
 
           // Mark as completed
-          await db
-            .update(reminders)
-            .set({ completed: true })
-            .where(eq(reminders.id, reminder.id));
+          await db.update(reminders).set({ completed: true }).where(eq(reminders.id, reminder.id));
         } catch (err) {
           logger.error(`Failed to process reminder ${reminder.id}:`, err);
         }
@@ -65,14 +57,20 @@ export class ReminderService {
     }
   }
 
-  public async createReminder(userId: string, guildId: string | null, channelId: string, message: string, fireAt: Date) {
+  public async createReminder(
+    userId: string,
+    guildId: string | null,
+    channelId: string,
+    message: string,
+    fireAt: Date
+  ) {
     const db = getDatabase();
     await db.insert(reminders).values({
       userId,
       guildId,
       channelId,
       message,
-      fireAt
+      fireAt,
     });
   }
 

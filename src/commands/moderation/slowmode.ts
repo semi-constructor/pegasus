@@ -26,32 +26,30 @@ import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 
-
-
 export const data = new SlashCommandBuilder()
   .setName('slowmode')
-      .setDescription(t('commands.moderation.subcommands.slowmode.description'))
-      .addIntegerOption(option =>
-        option
-          .setName('duration')
-          .setDescription(t('commands.moderation.subcommands.slowmode.options.duration'))
-          .setRequired(true)
-          .setMinValue(0)
-          .setMaxValue(21600)
-      )
-      .addChannelOption(option =>
-        option
-          .setName('channel')
-          .setDescription(t('commands.moderation.subcommands.slowmode.options.channel'))
-          .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.slowmode.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
+  .setDescription(t('commands.moderation.subcommands.slowmode.description'))
+  .addIntegerOption(option =>
+    option
+      .setName('duration')
+      .setDescription(t('commands.moderation.subcommands.slowmode.options.duration'))
+      .setRequired(true)
+      .setMinValue(0)
+      .setMaxValue(21600)
+  )
+  .addChannelOption(option =>
+    option
+      .setName('channel')
+      .setDescription(t('commands.moderation.subcommands.slowmode.options.channel'))
+      .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.slowmode.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
 
 export const category = CommandCategory.Moderation;
@@ -127,8 +125,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -257,4 +253,3 @@ async function recordModCase(
     return null;
   }
 }
-

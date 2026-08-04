@@ -20,15 +20,22 @@ export class SocialFeedService {
 
           // Check newest item
           const newestItem = parsed.items[0];
-          
-          if (newestItem.guid === feed.lastEntryId || newestItem.id === feed.lastEntryId || newestItem.link === feed.lastEntryId) {
+
+          if (
+            newestItem.guid === feed.lastEntryId ||
+            newestItem.id === feed.lastEntryId ||
+            newestItem.link === feed.lastEntryId
+          ) {
             continue; // Already posted
           }
 
-          const channel = await client.channels.fetch(feed.channelId).catch(() => null) as TextChannel;
+          const channel = (await client.channels
+            .fetch(feed.channelId)
+            .catch(() => null)) as TextChannel;
           if (!channel || !channel.isTextBased()) continue;
 
-          let messageContent = feed.customMessage || `New post from ${parsed.title || 'Feed'}: ${newestItem.link}`;
+          let messageContent =
+            feed.customMessage || `New post from ${parsed.title || 'Feed'}: ${newestItem.link}`;
           if (feed.mentionRole) {
             messageContent = `<@&${feed.mentionRole}> ${messageContent}`;
           }
@@ -36,10 +43,10 @@ export class SocialFeedService {
           await channel.send({ content: messageContent });
 
           // Update lastEntryId
-          await db.update(socialFeeds)
+          await db
+            .update(socialFeeds)
             .set({ lastEntryId: newestItem.guid || newestItem.id || newestItem.link })
             .where(eq(socialFeeds.id, feed.id));
-
         } catch (error) {
           logger.error(`Error processing feed ${feed.feedUrl}:`, error);
         }

@@ -27,10 +27,9 @@ import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 import { moderationScheduler } from '../../services/moderationScheduler';
 
-
 export const data = new SlashCommandBuilder()
   .setName('case')
-      .setDescription(t('commands.moderation.subcommands.case.description'))
+  .setDescription(t('commands.moderation.subcommands.case.description'))
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export const category = CommandCategory.Moderation;
@@ -106,8 +105,6 @@ async function handleCaseView(interaction: ChatInputCommandInteraction): Promise
   await interaction.editReply({ embeds: [embed] });
 }
 
-
-
 async function handleCaseDelete(interaction: ChatInputCommandInteraction): Promise<any> {
   await interaction.deferReply({ ephemeral: true });
 
@@ -147,8 +144,6 @@ async function handleCaseDelete(interaction: ChatInputCommandInteraction): Promi
     content: t('commands.moderation.subcommands.case.delete.success', { id: caseId }),
   });
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -277,5 +272,3 @@ async function recordModCase(
     return null;
   }
 }
-
-

@@ -25,7 +25,6 @@ import {
 const realSteamService =
   process.env.STEAM_API_KEY && process.env.STEAM_API_KEY !== '' ? new RealSteamService() : null;
 
-
 export const data = new SlashCommandBuilder()
   .setName('utils')
   .setDescription(
@@ -602,7 +601,7 @@ async function handleRoleInfo(
       },
       {
         name: t('commands.utils.roleinfo.permissions', { lng: locale }),
-        value: permissions.length > 1024 ? `${permissions.substring(0, 1021)  }...` : permissions,
+        value: permissions.length > 1024 ? `${permissions.substring(0, 1021)}...` : permissions,
         inline: false,
       },
     ])
@@ -719,8 +718,6 @@ async function handleServerInfo(
   await interaction.reply({ embeds: [embed] });
 }
 
-
-
 async function handleSupport(
   interaction: ChatInputCommandInteraction,
   locale: string
@@ -770,8 +767,6 @@ function getUserBadges(user: User): string[] {
 
   return badges;
 }
-
-
 
 async function handleStats(
   interaction: ChatInputCommandInteraction,
@@ -959,5 +954,4 @@ export default {
   category,
   cooldown,
   execute,
-
 } as Command;

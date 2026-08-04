@@ -1,5 +1,5 @@
-import "next-auth/adapters";
+import 'next-auth/adapters';
 
-declare module "next-auth/adapters" {
-  export type AdapterAccountType = "oauth" | "email" | "credentials" | "oidc" | "webauthn";
+declare module 'next-auth/adapters' {
+  export type AdapterAccountType = 'oauth' | 'email' | 'credentials' | 'oidc' | 'webauthn';
 }

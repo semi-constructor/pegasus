@@ -24,7 +24,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand();
   const player = useMainPlayer();
-  
+
   if (!player) {
     await interaction.reply({ content: 'Music player is not initialized.', ephemeral: true });
     return;
@@ -39,7 +39,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (subcommand === 'play') {
     await interaction.deferReply();
     const query = interaction.options.getString('query', true);
-    
+
     try {
       const { track } = await player.play(member.voice.channel, query, {
         nodeOptions: {
@@ -79,12 +79,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       await interaction.reply({ content: 'Nothing is currently playing.', ephemeral: true });
       return;
     }
-    
+
     const currentTrack = queue.currentTrack;
     const tracks = queue.tracks.toArray();
-    
+
     let description = `**Currently Playing:**\n[${currentTrack?.title}](${currentTrack?.url})\n\n**Next Up:**\n`;
-    
+
     if (tracks.length === 0) {
       description += 'The queue is empty.';
     } else {

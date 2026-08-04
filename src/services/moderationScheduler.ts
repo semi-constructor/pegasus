@@ -92,7 +92,8 @@ class ModerationScheduler {
           if (member) {
             const muteRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'muted');
             if (muteRole && member.roles.cache.has(muteRole.id)) {
-              await member.roles.remove(muteRole.id, 'Temporary mute expired')
+              await member.roles
+                .remove(muteRole.id, 'Temporary mute expired')
                 .catch(error => logger.warn(`Failed to auto-unmute ${payload.userId}`, error));
             }
           }

@@ -272,7 +272,12 @@ export class EngagementRepository extends BaseRepository {
     });
   }
 
-  async incrementMemberMetric(guildId: string, userId: string, metric: 'messages' | 'voiceMinutes', amount: number): Promise<number> {
+  async incrementMemberMetric(
+    guildId: string,
+    userId: string,
+    metric: 'messages' | 'voiceMinutes',
+    amount: number
+  ): Promise<number> {
     return this.executeQuery('incrementMemberMetric', async () => {
       const field = metric === 'messages' ? members.messages : members.voiceMinutes;
       const [record] = await this.db
@@ -291,19 +296,23 @@ export class EngagementRepository extends BaseRepository {
           },
         })
         .returning();
-        
+
       return record[metric];
     });
   }
 
-  async getMemberMetric(guildId: string, userId: string, metric: 'messages' | 'voiceMinutes'): Promise<number> {
+  async getMemberMetric(
+    guildId: string,
+    userId: string,
+    metric: 'messages' | 'voiceMinutes'
+  ): Promise<number> {
     return this.executeQuery('getMemberMetric', async () => {
       const [record] = await this.db
         .select()
         .from(members)
         .where(and(eq(members.guildId, guildId), eq(members.userId, userId)))
         .limit(1);
-        
+
       if (!record) return 0;
       return record[metric] || 0;
     });

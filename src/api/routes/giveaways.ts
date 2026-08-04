@@ -91,7 +91,7 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       });
     }
 
-    const channel = await client.channels.fetch(data.channelId).catch(() => null) as TextChannel;
+    const channel = (await client.channels.fetch(data.channelId).catch(() => null)) as TextChannel;
     if (!channel || !channel.isTextBased()) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -104,7 +104,10 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
     const baseTime = isScheduled ? new Date(data.startTime!).getTime() : Date.now();
     const endTime = new Date(baseTime + data.duration);
 
-    let color = typeof data.embedColor === 'string' ? parseInt(data.embedColor.replace('#', ''), 16) : (data.embedColor || 0x5865f2);
+    let color =
+      typeof data.embedColor === 'string'
+        ? parseInt(data.embedColor.replace('#', ''), 16)
+        : data.embedColor || 0x5865f2;
     if (isNaN(color)) color = 0x5865f2;
 
     // Create giveaway embed
@@ -149,7 +152,9 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
       startTime: data.startTime ? new Date(data.startTime) : null,
       description: data.description || null,
       requirements: data.requiredRole ? { roleIds: [data.requiredRole] } : {},
-      bonusEntries: data.bonusEntries ? { roles: Object.fromEntries(data.bonusEntries.map(b => [b.roleId, b.entries])) } : {},
+      bonusEntries: data.bonusEntries
+        ? { roles: Object.fromEntries(data.bonusEntries.map(b => [b.roleId, b.entries])) }
+        : {},
       embedTitle: data.embedTitle || null,
       embedColor: color,
       embedImage: data.embedImage || null,
@@ -159,7 +164,7 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
     // Update message ID in the database if sent immediately
     if (messageId) {
       await giveawayService.updateGiveawayMessage(giveaway.giveawayId, messageId);
-      
+
       try {
         const message = await channel.messages.fetch(messageId);
         // Also update our button customId to use gw_enter
@@ -176,9 +181,14 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
           .setEmoji('ℹ️');
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button, infoButton);
-        
-        embed.setFooter({ text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId, defaultValue: `Giveaway ID: ${giveaway.giveawayId}` }) });
-        
+
+        embed.setFooter({
+          text: t('commands.giveaway.embed.footer', {
+            id: giveaway.giveawayId,
+            defaultValue: `Giveaway ID: ${giveaway.giveawayId}`,
+          }),
+        });
+
         await message.edit({ embeds: [embed], components: [row] });
       } catch (error) {
         logger.error('Error adding buttons to giveaway message:', error);
@@ -257,7 +267,10 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
     if (updates.bonusEntries) updateData.bonusEntries = updates.bonusEntries || {};
     if (updates.embedTitle !== undefined) updateData.embedTitle = updates.embedTitle;
     if (updates.embedColor !== undefined) {
-      const parsedColor = typeof updates.embedColor === 'string' ? parseInt(updates.embedColor.replace('#', ''), 16) : updates.embedColor;
+      const parsedColor =
+        typeof updates.embedColor === 'string'
+          ? parseInt(updates.embedColor.replace('#', ''), 16)
+          : updates.embedColor;
       if (!isNaN(parsedColor)) updateData.embedColor = parsedColor;
     }
     if (updates.embedImage !== undefined) updateData.embedImage = updates.embedImage;
@@ -269,17 +282,25 @@ router.patch('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respon
       .where(and(eq(giveaways.giveawayId, giveawayId), eq(giveaways.guildId, guildId)));
 
     // Update the giveaway message
-    const channel = (await client.channels.fetch(giveaway.channelId).catch(() => null)) as TextChannel;
+    const channel = (await client.channels
+      .fetch(giveaway.channelId)
+      .catch(() => null)) as TextChannel;
 
     if (channel && giveaway.messageId) {
       try {
         const message = await channel.messages.fetch(giveaway.messageId);
         const endTime = updateData.endTime || giveaway.endTime;
 
-        const embedColor = updateData.embedColor !== undefined ? updateData.embedColor : giveaway.embedColor;
-        const embedTitle = updateData.embedTitle !== undefined ? updateData.embedTitle : giveaway.embedTitle;
-        const embedImage = updateData.embedImage !== undefined ? updateData.embedImage : giveaway.embedImage;
-        const embedThumbnail = updateData.embedThumbnail !== undefined ? updateData.embedThumbnail : giveaway.embedThumbnail;
+        const embedColor =
+          updateData.embedColor !== undefined ? updateData.embedColor : giveaway.embedColor;
+        const embedTitle =
+          updateData.embedTitle !== undefined ? updateData.embedTitle : giveaway.embedTitle;
+        const embedImage =
+          updateData.embedImage !== undefined ? updateData.embedImage : giveaway.embedImage;
+        const embedThumbnail =
+          updateData.embedThumbnail !== undefined
+            ? updateData.embedThumbnail
+            : giveaway.embedThumbnail;
 
         const embed = new EmbedBuilder()
           .setTitle(embedTitle || '🎉 GIVEAWAY 🎉')
@@ -345,7 +366,9 @@ router.delete('/:guildId/giveaways/:giveawayId', async (req: Request, res: Respo
     }
 
     // Delete giveaway message
-    const channel = (await client.channels.fetch(giveaway.channelId).catch(() => null)) as TextChannel;
+    const channel = (await client.channels
+      .fetch(giveaway.channelId)
+      .catch(() => null)) as TextChannel;
 
     if (channel && giveaway.messageId) {
       try {

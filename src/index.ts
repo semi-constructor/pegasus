@@ -105,11 +105,7 @@ class PegasusBot extends Client {
           logger.info(chalk.blue('Starting API server on primary shard...'));
           startApiServer();
         } else {
-          logger.info(
-            chalk.yellow(
-              `API server skipped on Shard #${shardId} (running on Shard 0)`
-            )
-          );
+          logger.info(chalk.yellow(`API server skipped on Shard #${shardId} (running on Shard 0)`));
         }
       } else {
         logger.info(chalk.yellow('API server disabled - bot running in standalone mode'));

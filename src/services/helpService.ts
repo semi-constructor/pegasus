@@ -14,7 +14,7 @@ interface JsonOption {
 }
 
 // Discord ApplicationCommandOptionType values
-const OPT_SUB_COMMAND       = 1;
+const OPT_SUB_COMMAND = 1;
 const OPT_SUB_COMMAND_GROUP = 2;
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ export class HelpService {
 
         for (const cmd of cmds) {
           const options = this.getJsonOptions(cmd);
-          const leaves  = this.flattenToLeaves(options);
+          const leaves = this.flattenToLeaves(options);
 
           if (leaves.length > 0) {
             for (const leaf of leaves) {
@@ -134,8 +134,8 @@ export class HelpService {
 
         const raw = lines.join('\n') || t('common.none');
         embed.addFields({
-          name:   t(`commands.help.categories.${category}`),
-          value:  raw.length > 1024 ? raw.slice(0, 1021) + '…' : raw,
+          name: t(`commands.help.categories.${category}`),
+          value: raw.length > 1024 ? raw.slice(0, 1021) + '…' : raw,
           inline: false,
         });
       }
@@ -162,7 +162,7 @@ export class HelpService {
         .setColor(0x5865f2)
         .setTimestamp();
 
-      const options    = this.getJsonOptions(command);
+      const options = this.getJsonOptions(command);
       const hasSubcmds = options.some(
         o => o.type === OPT_SUB_COMMAND || o.type === OPT_SUB_COMMAND_GROUP
       );
@@ -170,18 +170,18 @@ export class HelpService {
       // ── Header: name | category | cooldown ───────────────────────────────
       embed.addFields(
         {
-          name:   t('commands.help.commandName'),
-          value:  `\`/${command.data.name}\``,
+          name: t('commands.help.commandName'),
+          value: `\`/${command.data.name}\``,
           inline: true,
         },
         {
-          name:   t('commands.help.category'),
-          value:  t(`commands.help.categories.${command.category}`),
+          name: t('commands.help.category'),
+          value: t(`commands.help.categories.${command.category}`),
           inline: true,
         },
         {
-          name:   t('commands.help.cooldown'),
-          value:  command.cooldown
+          name: t('commands.help.cooldown'),
+          value: command.cooldown
             ? t('commands.help.cooldownValue', { seconds: command.cooldown })
             : t('commands.help.noCooldown'),
           inline: true,
@@ -190,16 +190,16 @@ export class HelpService {
 
       // ── Description ───────────────────────────────────────────────────────
       embed.addFields({
-        name:   t('commands.help.description', { defaultValue: 'Description' }),
-        value:  command.data.description || t('commands.help.noDescription'),
+        name: t('commands.help.description', { defaultValue: 'Description' }),
+        value: command.data.description || t('commands.help.noDescription'),
         inline: false,
       });
 
       // ── Required permissions ──────────────────────────────────────────────
       if (command.permissions && command.permissions.length > 0) {
         embed.addFields({
-          name:   t('commands.help.permissions'),
-          value:  command.permissions.map(p => `\`${String(p)}\``).join(', '),
+          name: t('commands.help.permissions'),
+          value: command.permissions.map(p => `\`${String(p)}\``).join(', '),
           inline: false,
         });
       }
@@ -207,22 +207,22 @@ export class HelpService {
       // ── Options / subcommands ─────────────────────────────────────────────
       if (options.length === 0) {
         embed.addFields({
-          name:   t('commands.help.usage'),
-          value:  `\`/${command.data.name}\``,
+          name: t('commands.help.usage'),
+          value: `\`/${command.data.name}\``,
           inline: false,
         });
       } else if (!hasSubcmds) {
         // Plain command with options only
         embed.addFields({
-          name:   t('commands.help.usage'),
-          value:  this.buildUsageLine(command.data.name, options),
+          name: t('commands.help.usage'),
+          value: this.buildUsageLine(command.data.name, options),
           inline: false,
         });
         const optLines = this.renderOptions(options);
         if (optLines.length > 0) {
           embed.addFields({
-            name:   t('commands.help.options'),
-            value:  optLines.join('\n'),
+            name: t('commands.help.options'),
+            value: optLines.join('\n'),
             inline: false,
           });
         }
@@ -257,8 +257,8 @@ export class HelpService {
 
     const value = lines.join('\n');
     embed.addFields({
-      name:   `\`/${cmdName} ${sub.name}\``,
-      value:  value.length > 1024 ? value.slice(0, 1021) + '…' : value,
+      name: `\`/${cmdName} ${sub.name}\``,
+      value: value.length > 1024 ? value.slice(0, 1021) + '…' : value,
       inline: false,
     });
   }
@@ -279,8 +279,8 @@ export class HelpService {
 
       const value = lines.join('\n');
       embed.addFields({
-        name:   `\`/${cmdName} ${group.name} ${child.name}\``,
-        value:  value.length > 1024 ? value.slice(0, 1021) + '…' : value,
+        name: `\`/${cmdName} ${group.name} ${child.name}\``,
+        value: value.length > 1024 ? value.slice(0, 1021) + '…' : value,
         inline: false,
       });
     }
@@ -302,9 +302,7 @@ export class HelpService {
       .filter(o => o.type !== OPT_SUB_COMMAND && o.type !== OPT_SUB_COMMAND_GROUP)
       .map(o => (o.required ? `<${o.name}>` : `[${o.name}]`));
 
-    return args.length > 0
-      ? `\`/${fullName} ${args.join(' ')}\``
-      : `\`/${fullName}\``;
+    return args.length > 0 ? `\`/${fullName} ${args.join(' ')}\`` : `\`/${fullName}\``;
   }
 
   private flattenToLeaves(options: JsonOption[]): Array<{ fullName: string; description: string }> {
@@ -313,14 +311,14 @@ export class HelpService {
     for (const opt of options) {
       if (opt.type === OPT_SUB_COMMAND) {
         result.push({
-          fullName:    opt.name,
+          fullName: opt.name,
           description: opt.description || t('commands.help.noDescription'),
         });
       } else if (opt.type === OPT_SUB_COMMAND_GROUP) {
         for (const child of opt.options ?? []) {
           if (child.type === OPT_SUB_COMMAND) {
             result.push({
-              fullName:    `${opt.name} ${child.name}`,
+              fullName: `${opt.name} ${child.name}`,
               description: child.description || t('commands.help.noDescription'),
             });
           }

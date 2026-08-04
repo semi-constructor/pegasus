@@ -76,7 +76,10 @@ export interface GiveawayData {
 
 export class GiveawayService {
   private activeTimers = new Map<string, NodeJS.Timeout>();
-  public startCommandEmbedCache = new Map<string, {embedTitle?: string|null, embedImage?: string|null, embedThumbnail?: string|null}>();
+  public startCommandEmbedCache = new Map<
+    string,
+    { embedTitle?: string | null; embedImage?: string | null; embedThumbnail?: string | null }
+  >();
 
   async createGiveaway(data: CreateGiveawayData) {
     const giveawayId = `GW${generateId(10)}`;
@@ -430,7 +433,7 @@ export class GiveawayService {
         .setColor(giveaway.status === 'active' ? giveaway.embedColor || 0x0099ff : 0x808080)
         .setTitle(
           giveaway.status === 'active'
-            ? (giveaway.embedTitle || t('commands.giveaway.embed.title'))
+            ? giveaway.embedTitle || t('commands.giveaway.embed.title')
             : t('commands.giveaway.embed.ended')
         )
         .setDescription(
@@ -453,7 +456,7 @@ export class GiveawayService {
           text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId }),
         })
         .setTimestamp();
-        
+
       if (giveaway.embedImage) embed.setImage(giveaway.embedImage);
       if (giveaway.embedThumbnail) embed.setThumbnail(giveaway.embedThumbnail);
 
@@ -618,41 +621,56 @@ export class GiveawayService {
 
     for (const giveaway of scheduledGiveaways) {
       logger.info(`Processing scheduled giveaway: ${giveaway.giveawayId}`);
-      
+
       // We update the embed first, this will send the message if messageId is null!
-      // But wait! updateGiveawayEmbed returns early if messageId is null! 
+      // But wait! updateGiveawayEmbed returns early if messageId is null!
       // I need to send the message here directly and then update DB.
-      
+
       const client = (global as any).client;
       if (!client) continue;
 
       if (!client.guilds.cache.has(giveaway.guildId)) continue;
-      
+
       try {
-        const channel = await client.channels.fetch(giveaway.channelId).catch(() => null) as TextChannel;
+        const channel = (await client.channels
+          .fetch(giveaway.channelId)
+          .catch(() => null)) as TextChannel;
         if (!channel) continue;
-        
+
         const embed = new EmbedBuilder()
           .setTitle(giveaway.embedTitle || '🎉 GIVEAWAY 🎉')
           .setDescription(
             `**Prize:** ${giveaway.prize}\n${giveaway.description || ''}\n\nReact with 🎉 to enter!`
           )
           .addFields(
-            { name: 'Ends', value: `<t:${Math.floor(new Date(giveaway.endTime).getTime() / 1000)}:R>`, inline: true },
+            {
+              name: 'Ends',
+              value: `<t:${Math.floor(new Date(giveaway.endTime).getTime() / 1000)}:R>`,
+              inline: true,
+            },
             { name: 'Winners', value: giveaway.winnerCount.toString(), inline: true },
             { name: 'Hosted By', value: `<@${giveaway.hostedBy}>`, inline: true }
           )
           .setColor(giveaway.embedColor || 0x5865f2)
-          .setFooter({ text: t('commands.giveaway.embed.footer', { id: giveaway.giveawayId, defaultValue: `Giveaway ID: ${giveaway.giveawayId}` }) })
+          .setFooter({
+            text: t('commands.giveaway.embed.footer', {
+              id: giveaway.giveawayId,
+              defaultValue: `Giveaway ID: ${giveaway.giveawayId}`,
+            }),
+          })
           .setTimestamp(new Date(giveaway.endTime));
 
         if (giveaway.embedImage) embed.setImage(giveaway.embedImage);
         if (giveaway.embedThumbnail) embed.setThumbnail(giveaway.embedThumbnail);
-        
+
         // Add roles to embed if there are requirements
         const reqs: any = giveaway.requirements || {};
         if (reqs.roleIds && reqs.roleIds.length > 0) {
-           embed.addFields({ name: 'Required Role', value: `<@&${reqs.roleIds[0]}>`, inline: false });
+          embed.addFields({
+            name: 'Required Role',
+            value: `<@&${reqs.roleIds[0]}>`,
+            inline: false,
+          });
         }
 
         const button = new ButtonBuilder()
@@ -670,20 +688,19 @@ export class GiveawayService {
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button, infoButton);
 
         const message = await channel.send({ embeds: [embed], components: [row] });
-        
+
         // Update DB
         await giveawayRepository.updateGiveaway(giveaway.giveawayId, {
           status: 'active',
-          messageId: message.id
+          messageId: message.id,
         });
-        
+
         // Schedule end
         this.scheduleGiveawayEnd({
           giveawayId: giveaway.giveawayId,
           endTime: giveaway.endTime,
           status: 'active',
         });
-        
       } catch (error) {
         logger.error(`Error sending scheduled giveaway ${giveaway.giveawayId}:`, error);
       }

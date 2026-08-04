@@ -97,7 +97,9 @@ const handlePostConfig = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Not Found', message: 'Guild not found in bot cache' });
     }
 
-    const panelChannel = (await client.channels.fetch(panelChannelId).catch(() => null)) as TextChannel;
+    const panelChannel = (await client.channels
+      .fetch(panelChannelId)
+      .catch(() => null)) as TextChannel;
     if (!panelChannel || !panelChannel.isTextBased()) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -237,7 +239,9 @@ const handlePanelUpdate = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Not Found', message: 'Guild not found in bot cache' });
     }
 
-    const panelChannel = (await client.channels.fetch(config.panelChannelId).catch(() => null)) as TextChannel;
+    const panelChannel = (await client.channels
+      .fetch(config.panelChannelId)
+      .catch(() => null)) as TextChannel;
     if (panelChannel && panelChannel.isTextBased()) {
       const existingMsg = await panelChannel.messages.fetch(config.panelMessageId);
 
@@ -300,7 +304,9 @@ const handleChannelsLock = async (req: Request, res: Response) => {
 
     const guild = await crossShardService.fetchGuild(client, guildId);
     if (guild) {
-      const voiceChannel = (await client.channels.fetch(channelId).catch(() => null)) as VoiceChannel;
+      const voiceChannel = (await client.channels
+        .fetch(channelId)
+        .catch(() => null)) as VoiceChannel;
       if (voiceChannel && voiceChannel.isVoiceBased()) {
         await voiceChannel.permissionOverwrites.edit(guild.id, { Connect: false });
       }
@@ -353,7 +359,9 @@ const handleChannelsUnlock = async (req: Request, res: Response) => {
 
     const guild = await crossShardService.fetchGuild(client, guildId);
     if (guild) {
-      const voiceChannel = (await client.channels.fetch(channelId).catch(() => null)) as VoiceChannel;
+      const voiceChannel = (await client.channels
+        .fetch(channelId)
+        .catch(() => null)) as VoiceChannel;
       if (voiceChannel && voiceChannel.isVoiceBased()) {
         await voiceChannel.permissionOverwrites.edit(guild.id, { Connect: null });
       }
@@ -414,7 +422,9 @@ const handleChannelsLimit = async (req: Request, res: Response) => {
 
     const guild = await crossShardService.fetchGuild(client, guildId);
     if (guild) {
-      const voiceChannel = (await client.channels.fetch(channelId).catch(() => null)) as VoiceChannel;
+      const voiceChannel = (await client.channels
+        .fetch(channelId)
+        .catch(() => null)) as VoiceChannel;
       if (voiceChannel && voiceChannel.isVoiceBased()) {
         await voiceChannel.setUserLimit(limit);
       }

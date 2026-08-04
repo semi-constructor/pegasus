@@ -27,23 +27,22 @@ import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 import { moderationScheduler } from '../../services/moderationScheduler';
 
-
 export const data = new SlashCommandBuilder()
   .setName('kick')
-      .setDescription(t('commands.moderation.subcommands.kick.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.kick.options.user'))
-          .setRequired(true)
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.kick.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
+  .setDescription(t('commands.moderation.subcommands.kick.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.kick.options.user'))
+      .setRequired(true)
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.kick.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers);
 
 export const category = CommandCategory.Moderation;
@@ -164,8 +163,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -294,4 +291,3 @@ async function recordModCase(
     return null;
   }
 }
-

@@ -144,7 +144,10 @@ export class TicketService {
 
     try {
       // Check user's open tickets
-      const openTickets = await this.ticketRepository.getUserOpenTicketsByPanel(member.id, panel.id);
+      const openTickets = await this.ticketRepository.getUserOpenTicketsByPanel(
+        member.id,
+        panel.id
+      );
       if (openTickets.length >= panel.maxTicketsPerUser) {
         throw new Error(t('tickets.maxTicketsReached', { max: panel.maxTicketsPerUser }));
       }
@@ -168,43 +171,43 @@ export class TicketService {
 
       // Create ticket channel
       const ticketChannel = await guild.channels.create({
-      name: ticketName,
-      type: ChannelType.GuildText,
-      parent: category?.id,
-      permissionOverwrites: [
-        {
-          id: guild.id,
-          deny: [PermissionFlagsBits.ViewChannel],
-          type: OverwriteType.Role,
-        },
-        {
-          id: member.id,
-          allow: [
-            PermissionFlagsBits.ViewChannel,
-            PermissionFlagsBits.SendMessages,
-            PermissionFlagsBits.ReadMessageHistory,
-            PermissionFlagsBits.AttachFiles,
-            PermissionFlagsBits.EmbedLinks,
-          ],
-          type: OverwriteType.Member,
-        },
-        // Add support roles
-        ...Array.from(new Set(panel.supportRoles ?? [] as string[]))
-          .filter((roleId: string) => guild.roles.cache.has(roleId))
-          .map((roleId: string) => ({
-          id: roleId,
-          allow: [
-            PermissionFlagsBits.ViewChannel,
-            PermissionFlagsBits.SendMessages,
-            PermissionFlagsBits.ReadMessageHistory,
-            PermissionFlagsBits.AttachFiles,
-            PermissionFlagsBits.EmbedLinks,
-            PermissionFlagsBits.ManageMessages,
-          ],
-          type: OverwriteType.Role,
-        })),
-      ],
-    });
+        name: ticketName,
+        type: ChannelType.GuildText,
+        parent: category?.id,
+        permissionOverwrites: [
+          {
+            id: guild.id,
+            deny: [PermissionFlagsBits.ViewChannel],
+            type: OverwriteType.Role,
+          },
+          {
+            id: member.id,
+            allow: [
+              PermissionFlagsBits.ViewChannel,
+              PermissionFlagsBits.SendMessages,
+              PermissionFlagsBits.ReadMessageHistory,
+              PermissionFlagsBits.AttachFiles,
+              PermissionFlagsBits.EmbedLinks,
+            ],
+            type: OverwriteType.Member,
+          },
+          // Add support roles
+          ...Array.from(new Set(panel.supportRoles ?? ([] as string[])))
+            .filter((roleId: string) => guild.roles.cache.has(roleId))
+            .map((roleId: string) => ({
+              id: roleId,
+              allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.AttachFiles,
+                PermissionFlagsBits.EmbedLinks,
+                PermissionFlagsBits.ManageMessages,
+              ],
+              type: OverwriteType.Role,
+            })),
+        ],
+      });
 
       // Create ticket in database
       const ticket = await this.ticketRepository.createTicket({
@@ -394,7 +397,11 @@ export class TicketService {
     }
 
     if (ticket.departmentId && panel) {
-      const department = await ticketWorkflowRepository.getDepartment(guild.id, panel.id, ticket.departmentId);
+      const department = await ticketWorkflowRepository.getDepartment(
+        guild.id,
+        panel.id,
+        ticket.departmentId
+      );
       if (department && department.supportRoles) {
         for (const roleId of department.supportRoles) {
           rolesToFreeze.add(roleId);

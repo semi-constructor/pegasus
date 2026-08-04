@@ -48,7 +48,9 @@ router.post('/:guildId/trivia', async (req: Request, res: Response) => {
     if (data.type === 'preset' && data.preset && data.questionCount) {
       const locale = getGuildLocale(guildId);
       try {
-        const localeData = JSON.parse(fs.readFileSync(path.join(__dirname, `../../i18n/locales/${locale}.json`), 'utf-8'));
+        const localeData = JSON.parse(
+          fs.readFileSync(path.join(__dirname, `../../i18n/locales/${locale}.json`), 'utf-8')
+        );
         const presetQuestions = localeData.trivia?.presets?.[data.preset] || [];
         const shuffled = [...presetQuestions].sort(() => 0.5 - Math.random());
         gameQuestions = shuffled.slice(0, data.questionCount);
@@ -62,15 +64,18 @@ router.post('/:guildId/trivia', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid question configuration' });
     }
 
-    const [game] = await db.insert(triviaGames).values({
-      guildId,
-      channelId: data.channelId,
-      scheduledAt: new Date(data.scheduledAt),
-      rewardXp: data.rewardXp,
-      rewardCoins: data.rewardCoins,
-      questions: gameQuestions,
-      status: 'scheduled',
-    }).returning();
+    const [game] = await db
+      .insert(triviaGames)
+      .values({
+        guildId,
+        channelId: data.channelId,
+        scheduledAt: new Date(data.scheduledAt),
+        rewardXp: data.rewardXp,
+        rewardCoins: data.rewardCoins,
+        questions: gameQuestions,
+        status: 'scheduled',
+      })
+      .returning();
 
     logger.info(`Scheduled trivia game in guild ${guildId} for ${data.scheduledAt}`);
 
@@ -92,10 +97,7 @@ router.get('/:guildId/trivia', async (req: Request, res: Response) => {
 
   try {
     const db = getDatabase();
-    const games = await db
-      .select()
-      .from(triviaGames)
-      .where(eq(triviaGames.guildId, guildId));
+    const games = await db.select().from(triviaGames).where(eq(triviaGames.guildId, guildId));
 
     return res.json({ success: true, games });
   } catch (error) {

@@ -28,19 +28,13 @@ export const data = new SlashCommandBuilder()
           .addChannelTypes(ChannelType.GuildText)
       )
   )
-  .addSubcommand(subcommand =>
-    subcommand.setName('disable').setDescription('Disable starboard')
-  )
+  .addSubcommand(subcommand => subcommand.setName('disable').setDescription('Disable starboard'))
   .addSubcommand(subcommand =>
     subcommand
       .setName('threshold')
       .setDescription('Set the number of stars required')
       .addIntegerOption(option =>
-        option
-          .setName('count')
-          .setDescription('Number of stars')
-          .setRequired(true)
-          .setMinValue(1)
+        option.setName('count').setDescription('Number of stars').setRequired(true).setMinValue(1)
       )
   )
   .addSubcommand(subcommand =>
@@ -48,10 +42,7 @@ export const data = new SlashCommandBuilder()
       .setName('emoji')
       .setDescription('Set the starboard emoji')
       .addStringOption(option =>
-        option
-          .setName('emoji')
-          .setDescription('Emoji to use (e.g., ⭐)')
-          .setRequired(true)
+        option.setName('emoji').setDescription('Emoji to use (e.g., ⭐)').setRequired(true)
       )
   )
   .addSubcommand(subcommand =>
@@ -64,7 +55,10 @@ export const permissions = [PermissionFlagsBits.ManageGuild];
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   if (!interaction.guild) {
-    await interaction.reply({ content: 'This command can only be used in a server.', ephemeral: true });
+    await interaction.reply({
+      content: 'This command can only be used in a server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -93,21 +87,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await interaction.editReply('Starboard is not configured for this server.');
         return;
       }
-      
+
       const embed = new EmbedBuilder()
-        .setColor(0xFFAC33)
+        .setColor(0xffac33)
         .setTitle('Starboard Configuration')
         .addFields(
           { name: 'Status', value: settings.enabled ? 'Enabled' : 'Disabled', inline: true },
-          { name: 'Channel', value: settings.channelId ? `<#${settings.channelId}>` : 'None', inline: true },
+          {
+            name: 'Channel',
+            value: settings.channelId ? `<#${settings.channelId}>` : 'None',
+            inline: true,
+          },
           { name: 'Threshold', value: settings.threshold.toString(), inline: true },
           { name: 'Emoji', value: settings.emoji, inline: true }
         );
-        
+
       await interaction.editReply({ embeds: [embed] });
       return;
     }
-    
+
     return;
   } catch (error) {
     logger.error('Error in starboard command:', error);

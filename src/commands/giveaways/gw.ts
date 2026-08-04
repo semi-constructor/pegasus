@@ -47,17 +47,14 @@ export const data = new SlashCommandBuilder()
           .setMinValue(1)
           .setMaxValue(20)
       )
-      .addChannelOption(
-        option =>
-          option
-            .setName('channel')
-            .setDescription(t('commands.giveaway.subcommands.start.options.channel'))
-            .setRequired(false)
-            .addChannelTypes(ChannelType.GuildText)
+      .addChannelOption(option =>
+        option
+          .setName('channel')
+          .setDescription(t('commands.giveaway.subcommands.start.options.channel'))
+          .setRequired(false)
+          .addChannelTypes(ChannelType.GuildText)
       )
-      .addStringOption(option =>
-        option.setName('embed_title').setDescription('Custom embed title')
-      )
+      .addStringOption(option => option.setName('embed_title').setDescription('Custom embed title'))
       .addAttachmentOption(option =>
         option.setName('embed_image').setDescription('Custom embed image')
       )
@@ -90,9 +87,7 @@ export const data = new SlashCommandBuilder()
           .setMinValue(1)
           .setMaxValue(50)
       )
-      .addStringOption(option =>
-        option.setName('embed_title').setDescription('Custom embed title')
-      )
+      .addStringOption(option => option.setName('embed_title').setDescription('Custom embed title'))
       .addAttachmentOption(option =>
         option.setName('embed_image').setDescription('Custom embed image')
       )
@@ -140,9 +135,7 @@ export const data = new SlashCommandBuilder()
           .setDescription(t('commands.giveaway.subcommands.configure.options.giveawayId'))
           .setRequired(true)
       )
-      .addStringOption(option =>
-        option.setName('embed_title').setDescription('Custom embed title')
-      )
+      .addStringOption(option => option.setName('embed_title').setDescription('Custom embed title'))
       .addAttachmentOption(option =>
         option.setName('embed_image').setDescription('Custom embed image')
       )

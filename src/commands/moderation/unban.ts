@@ -26,26 +26,24 @@ import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 
-
-
 export const data = new SlashCommandBuilder()
   .setName('unban')
-      .setDescription(t('commands.moderation.subcommands.unban.description'))
-      .addStringOption(option =>
-        option
-          .setName('user_id')
-          .setDescription(t('commands.moderation.subcommands.unban.options.userId'))
-          .setRequired(true)
-          .setMinLength(17)
-          .setMaxLength(20)
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.unban.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
+  .setDescription(t('commands.moderation.subcommands.unban.description'))
+  .addStringOption(option =>
+    option
+      .setName('user_id')
+      .setDescription(t('commands.moderation.subcommands.unban.options.userId'))
+      .setRequired(true)
+      .setMinLength(17)
+      .setMaxLength(20)
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.unban.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 export const category = CommandCategory.Moderation;
@@ -130,8 +128,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -260,4 +256,3 @@ async function recordModCase(
     return null;
   }
 }
-

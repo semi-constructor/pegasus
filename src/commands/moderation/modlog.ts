@@ -27,24 +27,23 @@ import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 import { moderationScheduler } from '../../services/moderationScheduler';
 
-
 export const data = new SlashCommandBuilder()
   .setName('modlog')
-      .setDescription(t('commands.moderation.subcommands.modlog.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.modlog.options.user'))
-          .setRequired(false)
-      )
-      .addIntegerOption(option =>
-        option
-          .setName('limit')
-          .setDescription(t('commands.moderation.subcommands.modlog.options.limit'))
-          .setRequired(false)
-          .setMinValue(1)
-          .setMaxValue(25)
-      )
+  .setDescription(t('commands.moderation.subcommands.modlog.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.modlog.options.user'))
+      .setRequired(false)
+  )
+  .addIntegerOption(option =>
+    option
+      .setName('limit')
+      .setDescription(t('commands.moderation.subcommands.modlog.options.limit'))
+      .setRequired(false)
+      .setMinValue(1)
+      .setMaxValue(25)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export const category = CommandCategory.Moderation;
@@ -169,8 +168,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
   await interaction.editReply({ embeds: [botEmbed, auditEmbed] });
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -299,6 +296,3 @@ async function recordModCase(
     return null;
   }
 }
-
-
-

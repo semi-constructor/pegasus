@@ -16,9 +16,7 @@ export async function execute(client: Client<true>) {
   const shardId = client.shard?.ids[0] ?? 0;
   const isPrimaryShard = !client.shard || client.shard.ids.includes(0);
 
-  logger.info(
-    chalk.green(`Ready! Logged in as ${client.user.tag} (Shard #${shardId})`)
-  );
+  logger.info(chalk.green(`Ready! Logged in as ${client.user.tag} (Shard #${shardId})`));
 
   // Register slash commands only on primary shard to avoid duplicate REST calls
   if (isPrimaryShard) {

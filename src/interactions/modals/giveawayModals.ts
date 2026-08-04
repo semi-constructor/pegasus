@@ -286,7 +286,9 @@ async function handleGiveawayConfigure(interaction: ModalSubmitInteraction, give
         bonusEntries,
         ...(cachedEmbed?.embedTitle !== undefined ? { embedTitle: cachedEmbed.embedTitle } : {}),
         ...(cachedEmbed?.embedImage !== undefined ? { embedImage: cachedEmbed.embedImage } : {}),
-        ...(cachedEmbed?.embedThumbnail !== undefined ? { embedThumbnail: cachedEmbed.embedThumbnail } : {}),
+        ...(cachedEmbed?.embedThumbnail !== undefined
+          ? { embedThumbnail: cachedEmbed.embedThumbnail }
+          : {}),
       },
       interaction.user
     );

@@ -1,4 +1,12 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
+} from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { getDatabase } from '../../database/connection';
 import { economyTrades, economyBalances } from '../../database/schema/economy';
@@ -13,10 +21,7 @@ export const data = new SlashCommandBuilder()
       .setName('initiate')
       .setDescription('Initiate a trade with another user')
       .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription('The user to trade with')
-          .setRequired(true)
+        option.setName('user').setDescription('The user to trade with').setRequired(true)
       )
   );
 
@@ -39,16 +44,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const tradeId = randomUUID();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
 
-    await getDatabase().insert(economyTrades).values({
-      id: tradeId,
-      guildId: interaction.guildId!,
-      initiatorId: interaction.user.id,
-      receiverId: targetUser.id,
-      initiatorOffer: { coins: 0, items: [] },
-      receiverOffer: { coins: 0, items: [] },
-      status: 'pending',
-      expiresAt: expiresAt,
-    });
+    await getDatabase()
+      .insert(economyTrades)
+      .values({
+        id: tradeId,
+        guildId: interaction.guildId!,
+        initiatorId: interaction.user.id,
+        receiverId: targetUser.id,
+        initiatorOffer: { coins: 0, items: [] },
+        receiverOffer: { coins: 0, items: [] },
+        status: 'pending',
+        expiresAt: expiresAt,
+      });
 
     const embed = new EmbedBuilder()
       .setTitle('Trade Initiated')

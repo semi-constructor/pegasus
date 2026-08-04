@@ -26,94 +26,92 @@ import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 
-
-
 export const data = new SlashCommandBuilder()
   .setName('timeout')
-      .setDescription(t('commands.moderation.subcommands.timeout.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.timeout.options.user'))
-          .setRequired(true)
+  .setDescription(t('commands.moderation.subcommands.timeout.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.timeout.options.user'))
+      .setRequired(true)
+  )
+  .addIntegerOption(option =>
+    option
+      .setName('duration')
+      .setDescription(t('commands.moderation.subcommands.timeout.options.duration'))
+      .setRequired(true)
+      .setMinValue(1)
+      .setMaxValue(40320) // 28 days in minutes
+      .addChoices(
+        {
+          name: '60 seconds',
+          value: 1,
+          name_localizations: { de: '60 Sekunden', 'es-ES': '60 segundos', fr: '60 secondes' },
+        },
+        {
+          name: '5 minutes',
+          value: 5,
+          name_localizations: { de: '5 Minuten', 'es-ES': '5 minutos', fr: '5 minutes' },
+        },
+        {
+          name: '10 minutes',
+          value: 10,
+          name_localizations: { de: '10 Minuten', 'es-ES': '10 minutos', fr: '10 minutes' },
+        },
+        {
+          name: '30 minutes',
+          value: 30,
+          name_localizations: { de: '30 Minuten', 'es-ES': '30 minutos', fr: '30 minutes' },
+        },
+        {
+          name: '1 hour',
+          value: 60,
+          name_localizations: { de: '1 Stunde', 'es-ES': '1 hora', fr: '1 heure' },
+        },
+        {
+          name: '6 hours',
+          value: 360,
+          name_localizations: { de: '6 Stunden', 'es-ES': '6 horas', fr: '6 heures' },
+        },
+        {
+          name: '12 hours',
+          value: 720,
+          name_localizations: { de: '12 Stunden', 'es-ES': '12 horas', fr: '12  heures' },
+        },
+        {
+          name: '1 day',
+          value: 1440,
+          name_localizations: { de: '1 Tag', 'es-ES': '1 día', fr: '1 jour' },
+        },
+        {
+          name: '3 days',
+          value: 4320,
+          name_localizations: { de: '3 Tage', 'es-ES': '3 días', fr: '3 jours' },
+        },
+        {
+          name: '1 week',
+          value: 10080,
+          name_localizations: { de: '1 Woche', 'es-ES': '1 semana', fr: '1  semaine' },
+        },
+        {
+          name: '2 weeks',
+          value: 20160,
+          name_localizations: { de: '2 Wochen', 'es-ES': '2 semanas', fr: '2  semaines' },
+        },
+        {
+          name: '4 weeks',
+          value: 40320,
+          name_localizations: { de: '4 Wochen', 'es-ES': '4 semanas', fr: '4  semaines' },
+        }
       )
-      .addIntegerOption(option =>
-        option
-          .setName('duration')
-          .setDescription(t('commands.moderation.subcommands.timeout.options.duration'))
-          .setRequired(true)
-          .setMinValue(1)
-          .setMaxValue(40320) // 28 days in minutes
-          .addChoices(
-            {
-              name: '60 seconds',
-              value: 1,
-              name_localizations: { de: '60 Sekunden', 'es-ES': '60 segundos', fr: '60 secondes' },
-            },
-            {
-              name: '5 minutes',
-              value: 5,
-              name_localizations: { de: '5 Minuten', 'es-ES': '5 minutos', fr: '5 minutes' },
-            },
-            {
-              name: '10 minutes',
-              value: 10,
-              name_localizations: { de: '10 Minuten', 'es-ES': '10 minutos', fr: '10 minutes' },
-            },
-            {
-              name: '30 minutes',
-              value: 30,
-              name_localizations: { de: '30 Minuten', 'es-ES': '30 minutos', fr: '30 minutes' },
-            },
-            {
-              name: '1 hour',
-              value: 60,
-              name_localizations: { de: '1 Stunde', 'es-ES': '1 hora', fr: '1 heure' },
-            },
-            {
-              name: '6 hours',
-              value: 360,
-              name_localizations: { de: '6 Stunden', 'es-ES': '6 horas', fr: '6 heures' },
-            },
-            {
-              name: '12 hours',
-              value: 720,
-              name_localizations: { de: '12 Stunden', 'es-ES': '12 horas', fr: '12  heures' },
-            },
-            {
-              name: '1 day',
-              value: 1440,
-              name_localizations: { de: '1 Tag', 'es-ES': '1 día', fr: '1 jour' },
-            },
-            {
-              name: '3 days',
-              value: 4320,
-              name_localizations: { de: '3 Tage', 'es-ES': '3 días', fr: '3 jours' },
-            },
-            {
-              name: '1 week',
-              value: 10080,
-              name_localizations: { de: '1 Woche', 'es-ES': '1 semana', fr: '1  semaine' },
-            },
-            {
-              name: '2 weeks',
-              value: 20160,
-              name_localizations: { de: '2 Wochen', 'es-ES': '2 semanas', fr: '2  semaines' },
-            },
-            {
-              name: '4 weeks',
-              value: 40320,
-              name_localizations: { de: '4 Wochen', 'es-ES': '4 semanas', fr: '4  semaines' },
-            }
-          )
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.timeout.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.timeout.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export const category = CommandCategory.Moderation;
@@ -249,8 +247,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
   }
 }
 
-
-
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
     count: minutes,
@@ -378,4 +374,3 @@ async function recordModCase(
     return null;
   }
 }
-

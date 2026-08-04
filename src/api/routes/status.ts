@@ -157,7 +157,9 @@ router.get('/', async (_req: Request, res: Response) => {
 
     const avgPing =
       shardStats.length > 0
-        ? Math.round(shardStats.reduce((a, b) => a + (b.ping < 0 ? 0 : b.ping), 0) / shardStats.length)
+        ? Math.round(
+            shardStats.reduce((a, b) => a + (b.ping < 0 ? 0 : b.ping), 0) / shardStats.length
+          )
         : client.ws.ping;
 
     const status: SystemStatus = {

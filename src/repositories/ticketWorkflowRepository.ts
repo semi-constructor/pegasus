@@ -39,7 +39,11 @@ export class TicketWorkflowRepository extends BaseRepository {
     });
   }
 
-  async getDepartment(guildId: string, panelId: string, departmentId: string): Promise<TicketDepartment | null> {
+  async getDepartment(
+    guildId: string,
+    panelId: string,
+    departmentId: string
+  ): Promise<TicketDepartment | null> {
     return this.executeQuery('getDepartment', async () => {
       const [record] = await this.db
         .select()

@@ -12,7 +12,7 @@ export const starboardService = {
       .from(starboardSettings)
       .where(eq(starboardSettings.guildId, guildId))
       .limit(1);
-    
+
     return settings[0] || null;
   },
 
@@ -94,7 +94,8 @@ export const starboardService = {
           if (sMsg) {
             await sMsg.edit({ content, embeds: [embed] });
             const db = getDatabase();
-            await db.update(starboardMessages)
+            await db
+              .update(starboardMessages)
               .set({ stars: count, updatedAt: new Date() })
               .where(eq(starboardMessages.messageId, message.id));
           }
@@ -106,17 +107,20 @@ export const starboardService = {
         try {
           const sMsg = await starboardChannel.send({ content, embeds: [embed] });
           const db = getDatabase();
-          await db.insert(starboardMessages).values({
-            messageId: message.id,
-            guildId,
-            channelId: message.channel.id,
-            authorId: message.author.id,
-            starboardMessageId: sMsg.id,
-            stars: count,
-          }).onConflictDoUpdate({
-            target: starboardMessages.messageId,
-            set: { starboardMessageId: sMsg.id, stars: count, updatedAt: new Date() }
-          });
+          await db
+            .insert(starboardMessages)
+            .values({
+              messageId: message.id,
+              guildId,
+              channelId: message.channel.id,
+              authorId: message.author.id,
+              starboardMessageId: sMsg.id,
+              stars: count,
+            })
+            .onConflictDoUpdate({
+              target: starboardMessages.messageId,
+              set: { starboardMessageId: sMsg.id, stars: count, updatedAt: new Date() },
+            });
         } catch (e) {
           logger.error('Failed to send starboard message:', e);
         }
@@ -144,5 +148,5 @@ export const starboardService = {
     if (count === 0) {
       await db.delete(starboardMessages).where(eq(starboardMessages.messageId, message.id));
     }
-  }
+  },
 };

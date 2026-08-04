@@ -380,9 +380,9 @@ export class EconomyService {
             success: false,
             amount: -fine,
             robberBalance: result.balance ?? robberBalance,
-            error:
-              `${t('commands.economy.rob.failedText', { user: '' }) 
-              } (${fine} ${settings.currencyName})`,
+            error: `${t('commands.economy.rob.failedText', {
+              user: '',
+            })} (${fine} ${settings.currencyName})`,
           };
         }
 
@@ -455,7 +455,13 @@ export class EconomyService {
         const stockConsumed = await economyRepository.consumeShopItemStock(itemId, quantity);
         if (!stockConsumed) {
           // Revert money deduction
-          await this.addMoney(userId, guildId, totalCost, 'shop_refund', `Refund for failed purchase of ${item.name}`);
+          await this.addMoney(
+            userId,
+            guildId,
+            totalCost,
+            'shop_refund',
+            `Refund for failed purchase of ${item.name}`
+          );
           return { success: false, error: t('commands.economy.errors.notEnoughStock') };
         }
       }
@@ -485,7 +491,9 @@ export class EconomyService {
           // Revert money and stock
           await this.addMoney(userId, guildId, totalCost, 'shop_refund', `Refund`);
           if (item.stock !== null && item.stock !== -1) {
-            await economyRepository.updateShopItem(itemId, { stock: item.stock - quantity + quantity });
+            await economyRepository.updateShopItem(itemId, {
+              stock: item.stock - quantity + quantity,
+            });
           }
           return { success: false, error: t('commands.economy.errors.general') };
         }

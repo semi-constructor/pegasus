@@ -497,7 +497,9 @@ router.get('/:guildId/members', async (req: Request, res: Response): Promise<Res
     }
 
     const members = guild.members?.cache;
-    const onlineMembers = members ? members.filter((m: any) => m.presence?.status !== 'offline') : [];
+    const onlineMembers = members
+      ? members.filter((m: any) => m.presence?.status !== 'offline')
+      : [];
     const bots = members ? members.filter((m: any) => m.user?.bot) : [];
     const humans = members ? members.filter((m: any) => !m.user?.bot) : [];
 
@@ -517,7 +519,8 @@ router.get('/:guildId/members', async (req: Request, res: Response): Promise<Res
         : [],
       stats: {
         total: guild.memberCount || 0,
-        online: typeof onlineMembers === 'number' ? onlineMembers : (onlineMembers as any)?.size || 0,
+        online:
+          typeof onlineMembers === 'number' ? onlineMembers : (onlineMembers as any)?.size || 0,
         bots: typeof bots === 'number' ? bots : (bots as any)?.size || 0,
         humans: typeof humans === 'number' ? humans : (humans as any)?.size || 0,
       },

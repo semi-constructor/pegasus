@@ -206,7 +206,9 @@ router.patch('/:guildId/tickets/panels/:panelId', async (req: Request, res: Resp
       existingPanel.messageId &&
       existingPanel.channelId
     ) {
-      const channel = (await client.channels.fetch(existingPanel.channelId).catch(() => null)) as TextChannel;
+      const channel = (await client.channels
+        .fetch(existingPanel.channelId)
+        .catch(() => null)) as TextChannel;
 
       if (channel) {
         try {
@@ -269,7 +271,9 @@ router.delete('/:guildId/tickets/panels/:panelId', async (req: Request, res: Res
 
     // Delete the panel message if it exists
     if (existingPanel.messageId && existingPanel.channelId) {
-      const channel = (await client.channels.fetch(existingPanel.channelId).catch(() => null)) as TextChannel;
+      const channel = (await client.channels
+        .fetch(existingPanel.channelId)
+        .catch(() => null)) as TextChannel;
 
       if (channel) {
         try {

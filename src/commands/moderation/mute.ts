@@ -27,31 +27,30 @@ import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 import { moderationScheduler } from '../../services/moderationScheduler';
 
-
 export const data = new SlashCommandBuilder()
   .setName('mute')
-      .setDescription(t('commands.moderation.subcommands.mute.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.mute.options.user'))
-          .setRequired(true)
-      )
-      .addIntegerOption(option =>
-        option
-          .setName('duration')
-          .setDescription(t('commands.moderation.subcommands.mute.options.duration'))
-          .setRequired(false)
-          .setMinValue(1)
-          .setMaxValue(10080)
-      )
-      .addStringOption(option =>
-        option
-          .setName('reason')
-          .setDescription(t('commands.moderation.subcommands.mute.options.reason'))
-          .setRequired(false)
-          .setMaxLength(500)
-      )
+  .setDescription(t('commands.moderation.subcommands.mute.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.mute.options.user'))
+      .setRequired(true)
+  )
+  .addIntegerOption(option =>
+    option
+      .setName('duration')
+      .setDescription(t('commands.moderation.subcommands.mute.options.duration'))
+      .setRequired(false)
+      .setMinValue(1)
+      .setMaxValue(10080)
+  )
+  .addStringOption(option =>
+    option
+      .setName('reason')
+      .setDescription(t('commands.moderation.subcommands.mute.options.reason'))
+      .setRequired(false)
+      .setMaxLength(500)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export const category = CommandCategory.Moderation;
@@ -129,7 +128,14 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     const durationMs = durationMinutes ? durationMinutes * 60 * 1000 : null;
     const expiresAt = durationMs ? new Date(Date.now() + durationMs) : null;
 
-    const record = await recordModCase(interaction, user.id, 'mute', reason, durationMs ?? undefined, expiresAt);
+    const record = await recordModCase(
+      interaction,
+      user.id,
+      'mute',
+      reason,
+      durationMs ?? undefined,
+      expiresAt
+    );
 
     if (durationMs && record) {
       await moderationScheduler.scheduleTempAction({
@@ -137,7 +143,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         guildId: interaction.guild!.id,
         userId: user.id,
         expiresAt: expiresAt!,
-        type: 'mute'
+        type: 'mute',
       });
     }
 
@@ -203,8 +209,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -333,4 +337,3 @@ async function recordModCase(
     return null;
   }
 }
-

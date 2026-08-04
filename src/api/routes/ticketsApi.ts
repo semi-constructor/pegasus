@@ -165,7 +165,9 @@ const handleLock = async (req: Request, res: Response) => {
     const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
       try {
-        const channel = (await client.channels.fetch(ticket.channelId).catch(() => null)) as TextChannel;
+        const channel = (await client.channels
+          .fetch(ticket.channelId)
+          .catch(() => null)) as TextChannel;
         if (channel && channel.isTextBased()) {
           // Update channel permissions to prevent user from sending messages
           await channel.permissionOverwrites.edit(ticket.userId, { SendMessages: false });
@@ -249,7 +251,9 @@ const handleFreeze = async (req: Request, res: Response) => {
     const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
       try {
-        const channel = (await client.channels.fetch(ticket.channelId).catch(() => null)) as TextChannel;
+        const channel = (await client.channels
+          .fetch(ticket.channelId)
+          .catch(() => null)) as TextChannel;
         if (channel && channel.isTextBased()) {
           // Update channel permissions to freeze user interactions
           await channel.permissionOverwrites.edit(ticket.userId, {
@@ -341,7 +345,9 @@ const handleClaim = async (req: Request, res: Response) => {
     const guild = await crossShardService.fetchGuild(client, ticket.guildId);
     if (guild) {
       try {
-        const channel = (await client.channels.fetch(ticket.channelId).catch(() => null)) as TextChannel;
+        const channel = (await client.channels
+          .fetch(ticket.channelId)
+          .catch(() => null)) as TextChannel;
         if (channel && channel.isTextBased()) {
           const embed = new EmbedBuilder()
             .setTitle('👋 Ticket Claimed')

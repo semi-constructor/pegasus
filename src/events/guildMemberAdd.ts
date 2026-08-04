@@ -21,13 +21,15 @@ export async function execute(member: GuildMember) {
   try {
     // Welcome message logic
     const welcomeConfig = await configurationService.getWelcomeConfig(member.guild.id);
-    
+
     if (welcomeConfig.enabled) {
       if (welcomeConfig.channel) {
         const channel = member.guild.channels.cache.get(welcomeConfig.channel);
         if (channel && channel.isTextBased()) {
-          const content = welcomeConfig.message ? formatMessage(welcomeConfig.message, member) : undefined;
-          
+          const content = welcomeConfig.message
+            ? formatMessage(welcomeConfig.message, member)
+            : undefined;
+
           let attachment: AttachmentBuilder | undefined;
           if (welcomeConfig.imageEnabled) {
             try {
@@ -39,9 +41,10 @@ export async function execute(member: GuildMember) {
           }
 
           if (welcomeConfig.embedEnabled) {
-            const embed = new EmbedBuilder()
-              .setColor((welcomeConfig.embedColor as any) || 0x0099ff);
-              
+            const embed = new EmbedBuilder().setColor(
+              (welcomeConfig.embedColor as any) || 0x0099ff
+            );
+
             if (welcomeConfig.embedTitle) {
               embed.setTitle(formatMessage(welcomeConfig.embedTitle, member));
             }
@@ -58,21 +61,25 @@ export async function execute(member: GuildMember) {
             } else {
               embed.setThumbnail(member.user.displayAvatarURL());
             }
-            
-            await (channel as TextChannel).send({ 
-              content: !welcomeConfig.embedEnabled ? content : undefined,
-              embeds: [embed],
-              files: attachment ? [attachment] : undefined
-            }).catch(() => null);
+
+            await (channel as TextChannel)
+              .send({
+                content: !welcomeConfig.embedEnabled ? content : undefined,
+                embeds: [embed],
+                files: attachment ? [attachment] : undefined,
+              })
+              .catch(() => null);
           } else if (content || attachment) {
-            await (channel as TextChannel).send({ 
-              content, 
-              files: attachment ? [attachment] : undefined 
-            }).catch(() => null);
+            await (channel as TextChannel)
+              .send({
+                content,
+                files: attachment ? [attachment] : undefined,
+              })
+              .catch(() => null);
           }
         }
       }
-      
+
       if (welcomeConfig.dmEnabled && welcomeConfig.dmMessage) {
         try {
           const dmContent = formatMessage(welcomeConfig.dmMessage, member);

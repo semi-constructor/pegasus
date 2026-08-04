@@ -83,8 +83,12 @@ export async function execute(message: Message) {
             const args = message.content.slice(prefix.length).trim().split(/ +/);
             const commandName = args.shift()?.toLowerCase();
             const expectedName = cmd.name?.toLowerCase() || '';
-            
-            if (commandName && (commandName === expectedName || `${prefix.toLowerCase()}${commandName}` === expectedName)) {
+
+            if (
+              commandName &&
+              (commandName === expectedName ||
+                `${prefix.toLowerCase()}${commandName}` === expectedName)
+            ) {
               // Enforce channel restrictions
               const restrictChannel = cmd.channelId || guildSettings.customCommandsChannel;
               if (restrictChannel && message.channel.id !== restrictChannel) {
@@ -96,11 +100,11 @@ export async function execute(message: Message) {
                   .setTitle(cmd.embedTitle || 'Custom Command')
                   .setDescription(cmd.embedDescription || ' ')
                   .setColor(cmd.embedColor || '#3498db');
-                  
+
                 if (cmd.embedFooter) embed.setFooter({ text: cmd.embedFooter });
                 if (cmd.embedThumbnail) embed.setThumbnail(cmd.embedThumbnail);
                 if (cmd.embedImage) embed.setImage(cmd.embedImage);
-                
+
                 await message.reply({ embeds: [embed] });
                 return;
               } else if (cmd.response || cmd.reply) {

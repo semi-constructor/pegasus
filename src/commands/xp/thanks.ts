@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  ChatInputCommandInteraction,
-  TextChannel,
-} from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, TextChannel } from 'discord.js';
 import { CommandCategory } from '../../types/command';
 import { t } from '../../i18n';
 import { engagementService } from '../../services/engagementService';
@@ -59,6 +55,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       content: `💖 <@${interaction.user.id}> gave thanks to <@${targetUser.id}>! Reason: ${reason}`,
     });
   } catch (error: any) {
-    await interaction.editReply({ content: `${t('common.error')  }: ${  error.message}` });
+    await interaction.editReply({ content: `${t('common.error')}: ${error.message}` });
   }
 }

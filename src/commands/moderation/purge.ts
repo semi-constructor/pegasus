@@ -27,30 +27,29 @@ import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 import { moderationScheduler } from '../../services/moderationScheduler';
 
-
 export const data = new SlashCommandBuilder()
   .setName('purge')
-      .setDescription(t('commands.moderation.subcommands.purge.description'))
-      .addIntegerOption(option =>
-        option
-          .setName('amount')
-          .setDescription(t('commands.moderation.subcommands.purge.options.amount'))
-          .setRequired(true)
-          .setMinValue(2)
-          .setMaxValue(100)
-      )
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.purge.options.user'))
-          .setRequired(false)
-      )
-      .addChannelOption(option =>
-        option
-          .setName('channel')
-          .setDescription(t('commands.moderation.subcommands.purge.options.channel'))
-          .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
-      )
+  .setDescription(t('commands.moderation.subcommands.purge.description'))
+  .addIntegerOption(option =>
+    option
+      .setName('amount')
+      .setDescription(t('commands.moderation.subcommands.purge.options.amount'))
+      .setRequired(true)
+      .setMinValue(2)
+      .setMaxValue(100)
+  )
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.purge.options.user'))
+      .setRequired(false)
+  )
+  .addChannelOption(option =>
+    option
+      .setName('channel')
+      .setDescription(t('commands.moderation.subcommands.purge.options.channel'))
+      .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
 
 export const category = CommandCategory.Moderation;
@@ -145,8 +144,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -275,4 +272,3 @@ async function recordModCase(
     return null;
   }
 }
-

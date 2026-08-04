@@ -27,23 +27,21 @@ import { ensureUserAndGuildExist } from '../../utils/userUtils';
 import { logger } from '../../utils/logger';
 import { modCaseRepository } from '../../repositories/modCaseRepository';
 
-
-
 export const data = new SlashCommandBuilder()
   .setName('reset-xp')
-      .setDescription(t('commands.moderation.subcommands.resetxp.description'))
-      .addUserOption(option =>
-        option
-          .setName('user')
-          .setDescription(t('commands.moderation.subcommands.resetxp.options.user'))
-          .setRequired(true)
-      )
-      .addBooleanOption(option =>
-        option
-          .setName('confirm')
-          .setDescription(t('commands.moderation.subcommands.resetxp.options.confirm'))
-          .setRequired(true)
-      )
+  .setDescription(t('commands.moderation.subcommands.resetxp.description'))
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setDescription(t('commands.moderation.subcommands.resetxp.options.user'))
+      .setRequired(true)
+  )
+  .addBooleanOption(option =>
+    option
+      .setName('confirm')
+      .setDescription(t('commands.moderation.subcommands.resetxp.options.confirm'))
+      .setRequired(true)
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export const category = CommandCategory.Moderation;
@@ -113,8 +111,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
   }
 }
-
-
 
 function formatDuration(minutes: number): string {
   const minStr = t('common.duration.minutes', {
@@ -243,4 +239,3 @@ async function recordModCase(
     return null;
   }
 }
-
