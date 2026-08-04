@@ -17,7 +17,7 @@ export const data = new SlashCommandBuilder()
         )
       )
       .addStringOption(option =>
-        option.setName('url').setDescription('Feed URL').setRequired(true)
+        option.setName('url').setDescription('Feed URL or YouTube Channel ID').setRequired(true)
       )
       .addChannelOption(option =>
         option.setName('channel').setDescription('Channel to post updates').setRequired(true)
@@ -62,11 +62,16 @@ export async function execute(interaction: CommandInteraction) {
     const role = (interaction as any).options.getRole('role');
     const message = (interaction as any).options.getString('message');
 
+    let finalUrl = url;
+    if (type === 'youtube' && !finalUrl.startsWith('http')) {
+      finalUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${finalUrl}`;
+    }
+
     try {
       await db.insert(socialFeeds).values({
         guildId: interaction.guildId,
         feedType: type,
-        feedUrl: url,
+        feedUrl: finalUrl,
         channelId: channel.id,
         mentionRole: role ? role.id : null,
         customMessage: message,
