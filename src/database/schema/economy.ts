@@ -78,6 +78,7 @@ export const economyShopItems = pgTable(
     stock: integer('stock').default(-1), // -1 = unlimited
     requiresRole: varchar('requires_role', { length: 255 }),
     enabled: boolean('enabled').notNull().default(true),
+    tradeable: boolean('tradeable').notNull().default(true),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },

@@ -100,7 +100,9 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
     }
 
     const giveawayId = uuidv4();
-    const endTime = new Date(Date.now() + data.duration);
+    const isScheduled = data.startTime && new Date(data.startTime) > new Date();
+    const baseTime = isScheduled ? new Date(data.startTime!).getTime() : Date.now();
+    const endTime = new Date(baseTime + data.duration);
 
     let color = typeof data.embedColor === 'string' ? parseInt(data.embedColor.replace('#', ''), 16) : (data.embedColor || 0x5865f2);
     if (isNaN(color)) color = 0x5865f2;
@@ -126,8 +128,6 @@ router.post('/:guildId/giveaways', async (req: Request, res: Response) => {
     if (data.requiredRole) {
       embed.addFields({ name: 'Required Role', value: `<@&${data.requiredRole}>`, inline: false });
     }
-
-    const isScheduled = data.startTime && new Date(data.startTime) > new Date();
 
     let messageId: string | null = null;
     if (!isScheduled) {

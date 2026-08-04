@@ -15,4 +15,6 @@ export * from './auth';
 export * from './bug_reports';
 export * from './social_feeds';
 export * from './birthdays';
+export * from './reminders';
 export * from './trivia';
+export * from './starboard';

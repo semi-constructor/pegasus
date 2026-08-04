@@ -50,6 +50,9 @@ export interface GuildSettings {
   achievementsChannel?: string;
   customCommands: string;
   customCommandsChannel?: string;
+  aiEnabled?: boolean;
+  aiChannel?: string;
+  aiPersona?: string;
   createdAt: Date;
   updatedAt: Date;
 }

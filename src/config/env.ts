@@ -49,6 +49,7 @@ const EnvSchema = z.object({
   NEWS_API_KEY: z.string().optional(),
   GEIZHALS_API_KEY: z.string().optional(),
   GEIZHALS_USERNAME: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
 
   // Caching & Performance
   REDIS_URL: z.string().url().optional(),

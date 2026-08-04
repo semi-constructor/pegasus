@@ -16,6 +16,7 @@ import { getTranslation, t } from '../i18n';
 import { wordFilterService, type WordFilterViolation } from '../services/wordFilterService';
 import { modLogService } from '../services/modLogService';
 import { autoModService } from '../services/autoModService';
+import { aiService } from '../services/aiService';
 import { engagementService } from '../services/engagementService';
 import type { WordFilterActionConfig, WordFilterSeverity } from '../types';
 
@@ -63,6 +64,10 @@ export async function execute(message: Message) {
     // Evaluate AutoMod V2
     const autoModTriggered = await autoModService.evaluateMessage(message);
     if (autoModTriggered) return;
+
+    // Evaluate AI Assistant
+    const aiHandled = await aiService.evaluateMessage(message);
+    if (aiHandled) return;
 
     // Handle prefix list commands before processing XP
     const handled = await listCommandService.handle(message);

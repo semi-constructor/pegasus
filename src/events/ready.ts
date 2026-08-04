@@ -6,6 +6,8 @@ import chalk from 'chalk';
 import { moderationScheduler } from '../services/moderationScheduler';
 import { crossShardService } from '../services/crossShardService';
 import { CronService } from '../services/cronService';
+import { reminderService } from '../services/reminderService';
+import { musicService } from '../services/musicService';
 
 export const name = Events.ClientReady;
 export const once = true;
@@ -40,6 +42,12 @@ export async function execute(client: Client<true>) {
   // Start Background Cron Jobs
   const cronService = new CronService(client);
   cronService.startAll();
+
+  // Start Reminder Service
+  reminderService.init(client);
+
+  // Initialize Music Player
+  await musicService.init(client);
 
   // Initial bot presence setup
   const totalGuilds = await crossShardService.getTotalGuildsCount(client);

@@ -625,9 +625,11 @@ export class GiveawayService {
       
       const client = (global as any).client;
       if (!client) continue;
+
+      if (!client.guilds.cache.has(giveaway.guildId)) continue;
       
       try {
-        const channel = await client.channels.fetch(giveaway.channelId) as TextChannel;
+        const channel = await client.channels.fetch(giveaway.channelId).catch(() => null) as TextChannel;
         if (!channel) continue;
         
         const embed = new EmbedBuilder()

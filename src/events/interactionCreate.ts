@@ -30,6 +30,7 @@ import { handleJTCButtons } from '../interactions/buttons/jtcButtons';
 import { handleJTCModals } from '../interactions/modals/jtcModals';
 import { handleJTCSelectMenus } from '../interactions/selectMenus/jtcSelectMenus';
 import { ticketWorkflowService } from '../services/ticketWorkflowService';
+import { handleRoleButtons } from '../interactions/buttons/roleButtons';
 
 export const name = Events.InteractionCreate;
 
@@ -237,6 +238,18 @@ async function handleButton(interaction: ButtonInteraction) {
       return;
     }
 
+    // Handle interactive roles
+    if (interaction.customId.startsWith('role_toggle:')) {
+      await handleRoleButtons(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith('trade_')) {
+      const { handleTradeButtons } = await import('../interactions/buttons/tradeButtons');
+      await handleTradeButtons(interaction);
+      return;
+    }
+
     // Add other button handlers here as needed
   } catch (error) {
     logger.error(`Error handling button ${interaction.customId}:`, error);
@@ -312,6 +325,12 @@ async function handleModal(interaction: ModalSubmitInteraction) {
 
     if (interaction.customId.startsWith('jtc_')) {
       await handleJTCModals(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith('trade_')) {
+      const { handleTradeModal } = await import('../interactions/buttons/tradeButtons');
+      await handleTradeModal(interaction);
       return;
     }
 

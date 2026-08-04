@@ -49,6 +49,9 @@ class TriviaService {
 
       if (!game) return;
 
+      // Ensure this shard is responsible for this guild
+      if (!client.guilds.cache.has(game.guildId)) return;
+
       // Mark as active
       await db
         .update(triviaGames)

@@ -34,6 +34,7 @@ export interface WelcomeConfig {
   channel?: string;
   message?: string;
   embedEnabled: boolean;
+  imageEnabled: boolean;
   embedColor: string;
   embedTitle?: string;
   embedImage?: string;
@@ -47,6 +48,7 @@ export interface GoodbyeConfig {
   channel?: string;
   message?: string;
   embedEnabled: boolean;
+  imageEnabled: boolean;
   embedColor: string;
   embedTitle?: string;
   embedImage?: string;
@@ -365,6 +367,7 @@ export class ConfigurationService {
         channel: settings.welcomeChannel || undefined,
         message: settings.welcomeMessage || undefined,
         embedEnabled: settings.welcomeEmbedEnabled,
+        imageEnabled: settings.welcomeImageEnabled,
         embedColor: settings.welcomeEmbedColor || '#0099FF',
         embedTitle: settings.welcomeEmbedTitle || undefined,
         embedImage: settings.welcomeEmbedImage || undefined,
@@ -386,6 +389,7 @@ export class ConfigurationService {
       if (config.channel !== undefined) updateData.welcomeChannel = config.channel;
       if (config.message !== undefined) updateData.welcomeMessage = config.message;
       if (config.embedEnabled !== undefined) updateData.welcomeEmbedEnabled = config.embedEnabled;
+      if (config.imageEnabled !== undefined) updateData.welcomeImageEnabled = config.imageEnabled;
       if (config.embedColor !== undefined) updateData.welcomeEmbedColor = config.embedColor;
       if (config.embedTitle !== undefined) updateData.welcomeEmbedTitle = config.embedTitle;
       if (config.embedImage !== undefined) updateData.welcomeEmbedImage = config.embedImage;
@@ -427,6 +431,7 @@ export class ConfigurationService {
         channel: settings.goodbyeChannel || undefined,
         message: settings.goodbyeMessage || undefined,
         embedEnabled: settings.goodbyeEmbedEnabled,
+        imageEnabled: settings.goodbyeImageEnabled,
         embedColor: settings.goodbyeEmbedColor || '#FF0000',
         embedTitle: settings.goodbyeEmbedTitle || undefined,
         embedImage: settings.goodbyeEmbedImage || undefined,
@@ -446,6 +451,7 @@ export class ConfigurationService {
       if (config.channel !== undefined) updateData.goodbyeChannel = config.channel;
       if (config.message !== undefined) updateData.goodbyeMessage = config.message;
       if (config.embedEnabled !== undefined) updateData.goodbyeEmbedEnabled = config.embedEnabled;
+      if (config.imageEnabled !== undefined) updateData.goodbyeImageEnabled = config.imageEnabled;
       if (config.embedColor !== undefined) updateData.goodbyeEmbedColor = config.embedColor;
       if (config.embedTitle !== undefined) updateData.goodbyeEmbedTitle = config.embedTitle;
       if (config.embedImage !== undefined) updateData.goodbyeEmbedImage = config.embedImage;

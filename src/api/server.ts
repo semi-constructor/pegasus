@@ -201,7 +201,7 @@ app.use(
 
 // Management API routes (mutations - invalidate cache)
 app.use(
-  '/:guildId/economy',
+  '/guilds/:guildId/economy',
   authenticateToken,
   invalidateCache(() => `*economy*`),
   (req, res, next) => {
@@ -211,7 +211,7 @@ app.use(
 );
 
 app.use(
-  '/:guildId/moderation',
+  '/guilds/:guildId/moderation',
   authenticateToken,
   invalidateCache(() => `*moderation*`),
   (req, res, next) => {
@@ -221,7 +221,7 @@ app.use(
 );
 
 app.use(
-  '/:guildId/xp',
+  '/guilds/:guildId/xp',
   authenticateToken,
   invalidateCache(() => `*xp*`),
   (req, res, next) => {
@@ -231,7 +231,7 @@ app.use(
 );
 
 app.use(
-  '/:guildId/tickets',
+  '/guilds/:guildId/tickets',
   authenticateToken,
   invalidateCache(() => `*tickets*`),
   (req, res, next) => {
@@ -241,7 +241,7 @@ app.use(
 );
 
 app.use(
-  '/:guildId/giveaways',
+  '/guilds/:guildId/giveaways',
   authenticateToken,
   invalidateCache(() => `*giveaways*`),
   (req, res, next) => {
@@ -251,7 +251,7 @@ app.use(
 );
 
 app.use(
-  '/:guildId/settings',
+  '/guilds/:guildId/settings',
   authenticateToken,
   invalidateCache(() => `*settings*`),
   (req, res, next) => {

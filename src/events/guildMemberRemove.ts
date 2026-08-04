@@ -1,8 +1,9 @@
-import { EmbedBuilder, Events, type GuildMember, TextChannel } from 'discord.js';
+import { EmbedBuilder, Events, type GuildMember, TextChannel, AttachmentBuilder } from 'discord.js';
 import { modLogService } from '../services/modLogService';
 import { configurationService } from '../services/configurationService';
 import { t } from '../i18n';
 import { logger } from '../utils/logger';
+import { generateGoodbyeImage } from '../utils/canvas';
 
 export const name = Events.GuildMemberRemove;
 export const once = false;
@@ -25,7 +26,16 @@ export async function execute(member: GuildMember) {
       const channel = member.guild.channels.cache.get(goodbyeConfig.channel);
       if (channel && channel.isTextBased()) {
         const content = goodbyeConfig.message ? formatMessage(goodbyeConfig.message, member) : undefined;
-        
+        let attachment: AttachmentBuilder | undefined;
+        if (goodbyeConfig.imageEnabled) {
+          try {
+            const buffer = await generateGoodbyeImage(member, goodbyeConfig.embedImage);
+            attachment = new AttachmentBuilder(buffer, { name: 'goodbye.png' });
+          } catch (err) {
+            logger.error('Failed to generate goodbye image:', err);
+          }
+        }
+
         if (goodbyeConfig.embedEnabled) {
           const embed = new EmbedBuilder()
             .setColor((goodbyeConfig.embedColor as any) || 0xff0000);
@@ -36,7 +46,9 @@ export async function execute(member: GuildMember) {
           if (content) {
             embed.setDescription(content);
           }
-          if (goodbyeConfig.embedImage) {
+          if (attachment) {
+            embed.setImage('attachment://goodbye.png');
+          } else if (goodbyeConfig.embedImage) {
             embed.setImage(goodbyeConfig.embedImage);
           }
           if (goodbyeConfig.embedThumbnail) {
@@ -45,9 +57,16 @@ export async function execute(member: GuildMember) {
             embed.setThumbnail(member.user.displayAvatarURL());
           }
           
-          await (channel as TextChannel).send({ embeds: [embed] }).catch(() => null);
-        } else if (content) {
-          await (channel as TextChannel).send({ content }).catch(() => null);
+          await (channel as TextChannel).send({ 
+            content: !goodbyeConfig.embedEnabled ? content : undefined,
+            embeds: [embed],
+            files: attachment ? [attachment] : undefined
+          }).catch(() => null);
+        } else if (content || attachment) {
+          await (channel as TextChannel).send({ 
+            content, 
+            files: attachment ? [attachment] : undefined 
+          }).catch(() => null);
         }
       }
     }
