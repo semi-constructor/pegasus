@@ -211,7 +211,7 @@ export const economyTrades = pgTable(
       .$defaultFn(() => crypto.randomUUID()),
     guildId: varchar('guild_id', { length: 255 }).notNull(),
     initiatorId: varchar('initiator_id', { length: 255 }).notNull(),
-    receiverId: varchar('receiver_id', { length: 255 }).notNull(),
+    receiverId: varchar('receiver_id', { length: 255 }),
     initiatorOffer: jsonb('initiator_offer').notNull(),
     receiverOffer: jsonb('receiver_offer').notNull(),
     status: varchar('status', { length: 20 }).notNull().default('pending'),
