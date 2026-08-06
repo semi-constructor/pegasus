@@ -85,3 +85,4 @@ geizhalsService.ts
 geizhalsServiceMock.ts
 geizhals.ts
 askpass.bat
+!DEPLOY.md
