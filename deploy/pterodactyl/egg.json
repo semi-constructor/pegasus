@@ -1,0 +1,272 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-08-06T13:21:11+02:00",
+    "name": "Pegasus Discord Bot",
+    "author": "toowake@proton.me",
+    "description": "Official Pegasus Discord Bot egg. Deploys the Pegasus Discord bot with Node.js 22, PostgreSQL support, internal API support for Pegasus Dashboard, and configurable features.",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:nodejs_22": "ghcr.io\/ptero-eggs\/yolks:nodejs_22"
+    },
+    "file_denylist": [],
+    "startup": "if [ \"$ENABLE_API\" = \"1\" ] || [ \"$ENABLE_API\" = \"true\" ]; then export ENABLE_API=true; else export ENABLE_API=false; fi; if [ \"$ENABLE_ECONOMY\" = \"1\" ] || [ \"$ENABLE_ECONOMY\" = \"true\" ]; then export ENABLE_ECONOMY=true; else export ENABLE_ECONOMY=false; fi; if [ \"$ENABLE_MODERATION\" = \"1\" ] || [ \"$ENABLE_MODERATION\" = \"true\" ]; then export ENABLE_MODERATION=true; else export ENABLE_MODERATION=false; fi; if [ \"$ENABLE_XP\" = \"1\" ] || [ \"$ENABLE_XP\" = \"true\" ]; then export ENABLE_XP=true; else export ENABLE_XP=false; fi; if [ \"$ENABLE_TICKETS\" = \"1\" ] || [ \"$ENABLE_TICKETS\" = \"true\" ]; then export ENABLE_TICKETS=true; else export ENABLE_TICKETS=false; fi; if [ \"$ENABLE_GIVEAWAYS\" = \"1\" ] || [ \"$ENABLE_GIVEAWAYS\" = \"true\" ]; then export ENABLE_GIVEAWAYS=true; else export ENABLE_GIVEAWAYS=false; fi; if [ -f package-lock.json ]; then npm ci --include=dev; else npm install --include=dev; fi; if [ \"$RUN_BUILD\" = \"1\" ] || [ \"$RUN_BUILD\" = \"true\" ]; then npm run build; fi; npm start",
+    "config": {
+        "files": "{}",
+        "startup": "{}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "set -e\ncd \/mnt\/server\n\nif ! command -v git >\/dev\/null 2>&1; then\n    if command -v apt-get >\/dev\/null 2>&1; then\n        apt-get update && apt-get install -y git\n    elif command -v apk >\/dev\/null 2>&1; then\n        apk add --no-cache git\n    else\n        echo \"No supported package manager found to install git\" >&2\n        exit 1\n    fi\nfi\n\nif [ ! -d .git ]; then\n    echo \"Cloning ${GITHUB_REPO}\"\n    git clone \"${GITHUB_REPO}\" .\nelse\n    echo \"Repo already present, pulling latest\"\n    git pull\nfi\n\nmkdir -p \/mnt\/server\/logs\n\nif [ ! -f package.json ]; then\n    echo \"package.json still missing after clone, aborting\" >&2\n    exit 1\nfi\n\nif [ -f package-lock.json ]; then\n    npm ci --include=dev\nelse\n    npm install --include=dev\nfi\n\nnpm run build",
+            "container": "ghcr.io\/ptero-eggs\/yolks:nodejs_22",
+            "entrypoint": "sh"
+        }
+    },
+    "variables": [
+        {
+            "name": "DISCORD_TOKEN",
+            "description": "Discord Bot Token from Discord Developer Portal",
+            "env_variable": "DISCORD_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "DISCORD_CLIENT_ID",
+            "description": "Discord User ID of the Discord Bot (Right Click Bot Profile -> Copy User ID)",
+            "env_variable": "DISCORD_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "DATABASE_URL",
+            "description": "Postgres Database URL (must start with postgresql:\/\/)",
+            "env_variable": "DATABASE_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:\/^postgresql:\\\/\\\/\/",
+            "field_type": "text"
+        },
+        {
+            "name": "DEVELOPER_IDS",
+            "description": "An array of the IDs for users with developer access\r\nFormat: [\"0123456789\", \"9876543210\"]",
+            "env_variable": "DEVELOPER_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "field_type": "text"
+        },
+        {
+            "name": "ENABLE_API",
+            "description": "Enable this to let the pegasus dashboard communicate directly with the bots codebase. Set to FALSE when you havent deployed a dashboard to add a layer of security.",
+            "env_variable": "ENABLE_API",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "API_PORT",
+            "description": "The port the API will run on. Automatically filled from the server's primary allocation.",
+            "env_variable": "API_PORT",
+            "default_value": "{{SERVER_PORT}}",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "BOT_API_TOKEN",
+            "description": "Authorization Token for the Bots internal API which primary purpose serves for the pegasus-dashboard",
+            "env_variable": "BOT_API_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:32|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "API_TOKEN (legacy)",
+            "description": "Legacy support for API_TOKEN, we recommend to use BOT_API_TOKEN. Tho both should have the same value.",
+            "env_variable": "API_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:32|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "ENCRYPTION_KEY",
+            "description": "Encryption Key for the API",
+            "env_variable": "ENCRYPTION_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:32,32",
+            "field_type": "text"
+        },
+        {
+            "name": "ENABLE_ECONOMY",
+            "description": "",
+            "env_variable": "ENABLE_ECONOMY",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "ENABLE_MODERATION",
+            "description": "",
+            "env_variable": "ENABLE_MODERATION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "ENABLE_XP",
+            "description": "",
+            "env_variable": "ENABLE_XP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "ENABLE_TICKETS",
+            "description": "",
+            "env_variable": "ENABLE_TICKETS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "ENABLE_GIVEAWAYS",
+            "description": "",
+            "env_variable": "ENABLE_GIVEAWAYS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "STEAM_API_KEY",
+            "description": "Steam API Key if you need steam features",
+            "env_variable": "STEAM_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "SENTRY_DSN",
+            "description": "Sentry DSN API Key",
+            "env_variable": "SENTRY_DSN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "RATE_LIMIT_WINDOW",
+            "description": "Rate Limit Window (For hosting providers, we recommend to set this variable manually to prohibit possible attacks and locking it to 'Users Can View' only)",
+            "env_variable": "RATE_LIMIT_WINDOW",
+            "default_value": "60000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "RATE_LIMIT_MAX_REQUESTS",
+            "description": "Max requests within the time window. (For hosting providers, we recommend to set this variable manually to prohibit possible attacks and locking it to 'Users Can View' only)",
+            "env_variable": "RATE_LIMIT_MAX_REQUESTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "LOG_LEVEL",
+            "description": "",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "info",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "LOG_FILE_PATH",
+            "description": "",
+            "env_variable": "LOG_FILE_PATH",
+            "default_value": ".\/logs",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "GITHUB_REPO",
+            "description": "",
+            "env_variable": "GITHUB_REPO",
+            "default_value": "https:\/\/github.com\/semi-constructor\/pegasus.git",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "RUN_BUILD",
+            "description": "",
+            "env_variable": "RUN_BUILD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "NODE_ENV",
+            "description": "",
+            "env_variable": "NODE_ENV",
+            "default_value": "production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "SUPPORT_SERVER_INVITE",
+            "description": "Discord invite link to the support server of the person hosting this bot",
+            "env_variable": "SUPPORT_SERVER_INVITE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|url",
+            "field_type": "text"
+        }
+    ]
+}
