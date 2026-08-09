@@ -2,6 +2,7 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { getDatabase } from '../database/connection';
 import { userXp, xpMultipliers } from '../database/schema/xp';
 import { users } from '../database/schema/users';
+import { economyCooldowns } from '../database/schema/economy';
 import { logger } from '../utils/logger';
 import { configurationService } from './configurationService';
 import { ensureUserExists } from '../utils/userUtils';
@@ -139,6 +140,23 @@ export class XPService {
         if (dbMultiplier.targetType === 'channel' && channelId === dbMultiplier.targetId) {
           multiplier *= dbMultiplier.multiplier / 100;
         }
+      }
+
+      // Apply vote multiplier
+      const [voteCooldown] = await getDatabase()
+        .select()
+        .from(economyCooldowns)
+        .where(
+          and(
+            eq(economyCooldowns.userId, member.user.id),
+            eq(economyCooldowns.guildId, 'global'),
+            eq(economyCooldowns.commandType, 'vote')
+          )
+        )
+        .limit(1);
+
+      if (voteCooldown && voteCooldown.lastUsed.getTime() > Date.now() - 24 * 60 * 60 * 1000) {
+        multiplier *= 1.2;
       }
 
       return Math.floor(baseXp * multiplier);

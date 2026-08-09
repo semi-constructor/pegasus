@@ -23,6 +23,7 @@ export const socialFeeds = pgTable(
     customMessage: varchar('custom_message', { length: 2000 }),
     lastEntryId: varchar('last_entry_id', { length: 255 }), // to track what was last posted
     enabled: boolean('enabled').default(true).notNull(),
+    youtubeLongformOnly: boolean('youtube_longform_only').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
