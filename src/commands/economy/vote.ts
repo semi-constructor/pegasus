@@ -50,6 +50,35 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
+    // Check Top.gg API if token is provided
+    if (process.env.TOPGG_TOKEN) {
+      try {
+        const response = await fetch(`https://top.gg/api/bots/1375140177961418774/check?userId=${userId}`, {
+          headers: {
+            Authorization: process.env.TOPGG_TOKEN
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.voted === 0) {
+            await interaction.editReply({
+              embeds: [
+                embedBuilder.createErrorEmbed(
+                  'You haven\\'t voted yet! Please [click here to vote on Top.gg](https://top.gg/bot/1375140177961418774), then run `/vote` again to claim your rewards!'
+                )
+              ]
+            });
+            return;
+          }
+        } else {
+          logger.warn(`Top.gg API returned status ${response.status}`);
+        }
+      } catch (error) {
+        logger.error('Failed to check Top.gg API:', error);
+      }
+    }
+
     // Random coins between 3000 and 6000
     const amount = Math.floor(Math.random() * (6000 - 3000 + 1) + 3000);
     
