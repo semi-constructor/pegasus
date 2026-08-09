@@ -60,12 +60,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         });
         
         if (response.ok) {
-          const data = await response.json();
+          const data = (await response.json()) as { voted: number };
           if (data.voted === 0) {
             await interaction.editReply({
               embeds: [
                 embedBuilder.createErrorEmbed(
-                  'You haven\\'t voted yet! Please [click here to vote on Top.gg](https://top.gg/bot/1375140177961418774), then run `/vote` again to claim your rewards!'
+                  "You haven't voted yet! Please [click here to vote on Top.gg](https://top.gg/bot/1375140177961418774), then run `/vote` again to claim your rewards!"
                 )
               ]
             });
