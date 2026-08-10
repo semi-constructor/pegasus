@@ -67,7 +67,7 @@
     "postgres": "^3.4.3",
     "rss-parser": "^3.13.0",
     "socket.io": "^4.8.3",
-    "systeminformation": "^5.27.7",
+    "systeminformation": "^5.31.7",
     "uuid": "^11.1.0",
     "winston": "^3.11.0",
     "zod": "^3.22.4"
