@@ -19,6 +19,7 @@ export interface GiveawayRequirements {
   roleIds?: string[];
   minLevel?: number;
   minTimeInServer?: string;
+  minAccountAge?: string;
 }
 
 export interface GiveawayBonusEntries {
@@ -343,6 +344,19 @@ export class GiveawayService {
       const requiredTime = this.parseTimeRequirement(requirements.minTimeInServer);
 
       if (timeInServer < requiredTime) {
+        return {
+          met: false,
+          reason: t('commands.giveaway.requirementsNotMet'),
+        };
+      }
+    }
+
+    // Check account age requirement
+    if (requirements.minAccountAge) {
+      const accountAge = Date.now() - member.user.createdAt.getTime();
+      const requiredAge = this.parseTimeRequirement(requirements.minAccountAge);
+
+      if (accountAge < requiredAge) {
         return {
           met: false,
           reason: t('commands.giveaway.requirementsNotMet'),

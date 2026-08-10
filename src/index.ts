@@ -7,6 +7,7 @@ import { loadEvents } from './handlers/eventHandler';
 import { initializeI18n } from './i18n';
 import { logger } from './utils/logger';
 import { startApiServer } from './api/server';
+import { registerAllInteractions } from './handlers/registerInteractions';
 import type { Command } from './types/command';
 
 // Extend the Discord.js Client
@@ -90,6 +91,10 @@ class PegasusBot extends Client {
       // Load events
       logger.info(chalk.blue('Loading events...'));
       await loadEvents(this);
+
+      // Register Interactions
+      logger.info(chalk.blue('Registering interactions...'));
+      await registerAllInteractions();
 
       // Login to Discord
       logger.info(chalk.blue('Logging in to Discord...'));

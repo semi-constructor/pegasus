@@ -1,59 +1,62 @@
 import { Client, EmbedBuilder, TextChannel } from 'discord.js';
 import { getDatabase } from '../database/connection';
 import { reminders } from '../database/schema';
-import { eq, lt, and } from 'drizzle-orm';
+import { eq, gt, and } from 'drizzle-orm';
 import { logger } from '../utils/logger';
+import schedule from 'node-schedule';
+import { EmbedFactory } from '../utils/EmbedFactory';
 
 export class ReminderService {
-  private timer: NodeJS.Timeout | null = null;
   private client: Client | null = null;
 
   public init(client: Client) {
     this.client = client;
-    // Check every minute
-    this.timer = setInterval(() => this.checkReminders(), 60 * 1000);
-    // Check immediately on startup
-    void this.checkReminders();
+    void this.loadRemindersFromDatabase();
   }
 
-  public async checkReminders() {
+  public async loadRemindersFromDatabase() {
     if (!this.client) return;
 
     try {
       const db = getDatabase();
       const now = new Date();
 
+      // Load all reminders that haven't fired yet
       const pendingReminders = await db
         .select()
         .from(reminders)
-        .where(and(eq(reminders.completed, false), lt(reminders.fireAt, now)));
+        .where(and(eq(reminders.completed, false), gt(reminders.fireAt, now)));
 
       for (const reminder of pendingReminders) {
-        try {
-          if (reminder.guildId && !this.client.guilds.cache.has(reminder.guildId)) continue;
-
-          const channel = await this.client.channels.fetch(reminder.channelId).catch(() => null);
-          if (channel && channel.isTextBased()) {
-            const embed = new EmbedBuilder()
-              .setTitle('⏰ Reminder')
-              .setDescription(reminder.message)
-              .setColor('#3498db')
-              .setTimestamp(reminder.createdAt);
-
-            await (channel as TextChannel).send({
-              content: `<@${reminder.userId}>, here is your reminder!`,
-              embeds: [embed],
-            });
-          }
-
-          // Mark as completed
-          await db.update(reminders).set({ completed: true }).where(eq(reminders.id, reminder.id));
-        } catch (err) {
-          logger.error(`Failed to process reminder ${reminder.id}:`, err);
-        }
+        schedule.scheduleJob(reminder.id.toString(), reminder.fireAt, async () => {
+          await this.triggerReminder(reminder);
+        });
       }
+      logger.info(`Loaded ${pendingReminders.length} pending reminders into node-schedule`);
     } catch (err) {
-      logger.error('Failed to check reminders:', err);
+      logger.error('Failed to load reminders from database:', err);
+    }
+  }
+
+  private async triggerReminder(reminder: any) {
+    if (!this.client) return;
+    try {
+      if (reminder.guildId && !this.client.guilds.cache.has(reminder.guildId)) return;
+
+      const channel = await this.client.channels.fetch(reminder.channelId).catch(() => null);
+      if (channel && channel.isTextBased()) {
+        const embed = EmbedFactory.info(reminder.message, '⏰ Reminder');
+        await (channel as TextChannel).send({
+          content: `<@${reminder.userId}>, here is your reminder!`,
+          embeds: [embed],
+        });
+      }
+
+      // Mark as completed
+      const db = getDatabase();
+      await db.update(reminders).set({ completed: true }).where(eq(reminders.id, reminder.id));
+    } catch (err) {
+      logger.error(`Failed to process reminder ${reminder.id}:`, err);
     }
   }
 
@@ -65,19 +68,25 @@ export class ReminderService {
     fireAt: Date
   ) {
     const db = getDatabase();
-    await db.insert(reminders).values({
+    const result = await db.insert(reminders).values({
       userId,
       guildId,
       channelId,
       message,
       fireAt,
+    }).returning();
+    
+    const newReminder = result[0];
+    
+    // Schedule immediately in memory
+    schedule.scheduleJob(newReminder.id.toString(), fireAt, async () => {
+      await this.triggerReminder(newReminder);
     });
   }
 
   public destroy() {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
+    // Gracefully shut down node-schedule
+    schedule.gracefulShutdown();
   }
 }
 

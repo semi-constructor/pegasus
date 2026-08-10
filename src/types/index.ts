@@ -53,6 +53,8 @@ export interface GuildSettings {
   aiEnabled?: boolean;
   aiChannel?: string;
   aiPersona?: string;
+  honeypotChannelId?: string;
+  stickies?: Record<string, string>;
   createdAt: Date;
   updatedAt: Date;
 }

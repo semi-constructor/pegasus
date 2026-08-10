@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import { Server as SocketIOServer } from 'socket.io';
 import { statusRouter } from './routes/status';
 import { statsRouter } from './routes/stats';
 import { guildsRouter } from './routes/guilds';
@@ -291,10 +292,33 @@ export function startApiServer() {
     logger.info(`Stats aggregator running with ${statsInterval}ms update interval`);
   });
 
+  // Attach WebSockets
+  const io = new SocketIOServer(server, {
+    cors: {
+      origin: Array.from(allowedOriginsSet),
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
+
+  io.on('connection', (socket) => {
+    logger.info(`WebSocket client connected: ${socket.id}`);
+    
+    socket.on('subscribe_guild', (guildId) => {
+      socket.join(`guild_${guildId}`);
+      logger.info(`Socket ${socket.id} subscribed to guild_${guildId}`);
+    });
+
+    socket.on('disconnect', () => {
+      logger.info(`WebSocket client disconnected: ${socket.id}`);
+    });
+  });
+
   // Graceful shutdown
   process.on('SIGTERM', () => {
     logger.info('SIGTERM signal received: closing API server');
     statsAggregator.stop();
+    io.close();
     server.close(() => {
       logger.info('API server closed');
     });

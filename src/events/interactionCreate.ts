@@ -12,25 +12,9 @@ import {
 import { logger } from '../utils/logger';
 import { resolveLocale, t, withLocale } from '../i18n';
 import type { Command } from '../types/command';
-import { handleWarningActionButtons } from '../interactions/buttons/warningActions';
-import { handleWarningModals } from '../interactions/modals/warningModals';
-import { handleConfigButton } from '../interactions/buttons/configButtons';
-import { handleConfigModal } from '../interactions/modals/configModals';
-import { handleConfigSelectMenu } from '../interactions/selectMenus/configSelectMenus';
-import { handleTicketButton } from '../interactions/buttons/ticketButtons';
-import { handleTicketModal } from '../interactions/modals/ticketModals';
-import { handleXPButtons } from '../interactions/buttons/xpButtons';
-import { handleXPModals } from '../interactions/modals/xpModals';
-import { handleGiveawayModals } from '../interactions/modals/giveawayModals';
-import { handleGiveawayButtons } from '../interactions/buttons/giveawayButtons';
-import { handleWordFilterActionButtons } from '../interactions/buttons/wordFilterActions';
+import { interactionRegistry } from '../handlers/InteractionRegistry';
 import { securityMiddleware } from '../security/middleware';
 import { SecurityErrorHandler } from '../security/errors';
-import { handleJTCButtons } from '../interactions/buttons/jtcButtons';
-import { handleJTCModals } from '../interactions/modals/jtcModals';
-import { handleJTCSelectMenus } from '../interactions/selectMenus/jtcSelectMenus';
-import { ticketWorkflowService } from '../services/ticketWorkflowService';
-import { handleRoleButtons } from '../interactions/buttons/roleButtons';
 
 export const name = Events.InteractionCreate;
 
@@ -176,178 +160,32 @@ async function handleAutocomplete(interaction: AutocompleteInteraction) {
 
 async function handleButton(interaction: ButtonInteraction) {
   try {
-    // Check if interaction is still valid (not timed out)
-    if (!interaction.isRepliable()) {
-      return; // Interaction has expired, silently fail
+    if (!interaction.isRepliable()) return;
+    const handled = await interactionRegistry.handleButton(interaction);
+    if (!handled && !interaction.replied && !interaction.deferred) {
+      logger.warn(`No handler found for button: ${interaction.customId}`);
+      await interaction.reply({ content: t('common.error'), ephemeral: true });
     }
-
-    // Handle warning action buttons
-    if (
-      interaction.customId.startsWith('warn_action:') ||
-      interaction.customId.startsWith('warn_view:') ||
-      interaction.customId.startsWith('warn_automation_modal:')
-    ) {
-      await handleWarningActionButtons(interaction);
-      return;
-    }
-
-    // Handle config buttons
-    if (interaction.customId.startsWith('config_')) {
-      await handleConfigButton(interaction);
-      return;
-    }
-
-    if (interaction.customId.startsWith('filter_action|')) {
-      await handleWordFilterActionButtons(interaction);
-      return;
-    }
-
-    // Handle ticket rate buttons
-    if (interaction.customId.startsWith('ticket_rate:')) {
-      const parts = interaction.customId.split(':');
-      const ticketId = parts[1];
-      const rating = parseInt(parts[2], 10);
-      await ticketWorkflowService.handleTicketRating(interaction, ticketId, rating);
-      return;
-    }
-
-    // Handle ticket buttons
-    if (interaction.customId.startsWith('ticket_')) {
-      await handleTicketButton(interaction);
-      return;
-    }
-
-    // Handle XP buttons
-    if (interaction.customId.startsWith('xp_')) {
-      await handleXPButtons(interaction);
-      return;
-    }
-
-    // Handle giveaway buttons
-    if (
-      interaction.customId.startsWith('gw_enter:') ||
-      interaction.customId.startsWith('gw_leave:') ||
-      interaction.customId.startsWith('gw_info:')
-    ) {
-      await handleGiveawayButtons(interaction);
-      return;
-    }
-
-    if (interaction.customId.startsWith('jtc_')) {
-      await handleJTCButtons(interaction);
-      return;
-    }
-
-    // Handle interactive roles
-    if (interaction.customId.startsWith('role_toggle:')) {
-      await handleRoleButtons(interaction);
-      return;
-    }
-
-    if (interaction.customId.startsWith('trade_')) {
-      const { handleTradeButtons } = await import('../interactions/buttons/tradeButtons');
-      await handleTradeButtons(interaction);
-      return;
-    }
-
-    // Add other button handlers here as needed
   } catch (error) {
     logger.error(`Error handling button ${interaction.customId}:`, error);
-
-    // Only attempt to reply if interaction is still repliable
     if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
-      try {
-        await interaction.reply({
-          content: t('common.error'),
-          ephemeral: true,
-        });
-      } catch (replyError) {
-        logger.error('Failed to reply to button interaction:', replyError);
-      }
+      await interaction.reply({ content: t('common.error'), ephemeral: true }).catch(() => {});
     }
   }
 }
 
 async function handleModal(interaction: ModalSubmitInteraction) {
   try {
-    // Check if interaction is still valid (not timed out)
-    if (!interaction.isRepliable()) {
-      return; // Interaction has expired, silently fail
+    if (!interaction.isRepliable()) return;
+    const handled = await interactionRegistry.handleModal(interaction);
+    if (!handled && !interaction.replied && !interaction.deferred) {
+      logger.warn(`No handler found for modal: ${interaction.customId}`);
+      await interaction.reply({ content: t('common.error'), ephemeral: true });
     }
-
-    // Handle warning modals
-    if (
-      interaction.customId.startsWith('warn_edit:') ||
-      interaction.customId.startsWith('warn_automation_create')
-    ) {
-      await handleWarningModals(interaction);
-      return;
-    }
-
-    // Handle config modals
-    if (interaction.customId.startsWith('config_')) {
-      await handleConfigModal(interaction);
-      return;
-    }
-
-    // Handle ticket department modal submit
-    if (interaction.customId.startsWith('ticket_modal_dept:')) {
-      const parts = interaction.customId.split(':');
-      const panelDbId = parts[1];
-      const departmentId = parts[2];
-      const reason = interaction.fields.getTextInputValue('reason');
-      await ticketWorkflowService.createDepartmentTicket(
-        interaction,
-        panelDbId,
-        departmentId,
-        reason
-      );
-      return;
-    }
-
-    // Handle ticket modals
-    if (interaction.customId.startsWith('ticket_')) {
-      await handleTicketModal(interaction);
-      return;
-    }
-
-    // Handle XP modals
-    if (interaction.customId === 'xp_card_customization') {
-      await handleXPModals(interaction);
-      return;
-    }
-
-    // Handle giveaway modals
-    if (interaction.customId.startsWith('gw_')) {
-      await handleGiveawayModals(interaction);
-      return;
-    }
-
-    if (interaction.customId.startsWith('jtc_')) {
-      await handleJTCModals(interaction);
-      return;
-    }
-
-    if (interaction.customId.startsWith('trade_')) {
-      const { handleTradeModal } = await import('../interactions/buttons/tradeButtons');
-      await handleTradeModal(interaction);
-      return;
-    }
-
-    // Add other modal handlers here as needed
   } catch (error) {
     logger.error(`Error handling modal ${interaction.customId}:`, error);
-
-    // Only attempt to reply if interaction is still repliable
     if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
-      try {
-        await interaction.reply({
-          content: t('common.error'),
-          ephemeral: true,
-        });
-      } catch (replyError) {
-        logger.error('Failed to reply to modal interaction:', replyError);
-      }
+      await interaction.reply({ content: t('common.error'), ephemeral: true }).catch(() => {});
     }
   }
 }
@@ -359,39 +197,16 @@ async function handleSelectMenu(
     | RoleSelectMenuInteraction
 ) {
   try {
-    // Handle config select menus
-    if (interaction.customId.startsWith('config_')) {
-      await handleConfigSelectMenu(interaction);
-      return;
+    if (!interaction.isRepliable()) return;
+    const handled = await interactionRegistry.handleSelectMenu(interaction);
+    if (!handled && !interaction.replied && !interaction.deferred) {
+      logger.warn(`No handler found for select menu: ${interaction.customId}`);
+      await interaction.reply({ content: t('common.error'), ephemeral: true });
     }
-
-    // Handle ticket department select menu
-    if (interaction.customId.startsWith('ticket_dept_select:')) {
-      if (interaction.isStringSelectMenu()) {
-        const parts = interaction.customId.split(':');
-        const panelDbId = parts[1];
-        const departmentId = interaction.values[0];
-        await ticketWorkflowService.handleDepartmentSelect(interaction, panelDbId, departmentId);
-      }
-      return;
-    }
-
-    if (interaction.customId.startsWith('jtc_')) {
-      if (interaction.isStringSelectMenu()) {
-        await handleJTCSelectMenus(interaction);
-      }
-      return;
-    }
-
-    // Add other select menu handlers here as needed
   } catch (error) {
     logger.error(`Error handling select menu ${interaction.customId}:`, error);
-
-    if (!interaction.replied && !interaction.deferred) {
-      await interaction.reply({
-        content: t('common.error'),
-        ephemeral: true,
-      });
+    if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
+      await interaction.reply({ content: t('common.error'), ephemeral: true }).catch(() => {});
     }
   }
 }

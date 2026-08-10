@@ -73,6 +73,8 @@ export class GuildRepository {
       logsChannel: settings.logsChannel ?? undefined,
       levelUpMessage: settings.levelUpMessage ?? undefined,
       levelUpChannel: settings.levelUpChannel ?? undefined,
+      honeypotChannelId: settings.honeypotChannelId ?? undefined,
+      stickies: settings.stickies ? JSON.parse(settings.stickies) : undefined,
     } as GuildSettings;
   }
 
@@ -80,12 +82,17 @@ export class GuildRepository {
     guildId: string,
     settings: Partial<Omit<GuildSettings, 'guildId' | 'createdAt'>>
   ): Promise<GuildSettings> {
+    const dbSettings = {
+      ...settings,
+      stickies: settings.stickies ? JSON.stringify(settings.stickies) : undefined,
+    };
+
     const [updated] = await this.db
       .insert(guildSettings)
-      .values({ guildId, ...settings })
+      .values({ guildId, ...dbSettings })
       .onConflictDoUpdate({
         target: guildSettings.guildId,
-        set: { ...settings, updatedAt: new Date() },
+        set: { ...dbSettings, updatedAt: new Date() },
       })
       .returning();
 
@@ -99,6 +106,8 @@ export class GuildRepository {
       logsChannel: updated.logsChannel ?? undefined,
       levelUpMessage: updated.levelUpMessage ?? undefined,
       levelUpChannel: updated.levelUpChannel ?? undefined,
+      honeypotChannelId: updated.honeypotChannelId ?? undefined,
+      stickies: updated.stickies ? JSON.parse(updated.stickies) : undefined,
     } as GuildSettings;
   }
 }

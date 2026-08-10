@@ -18,6 +18,8 @@ import { modLogService } from '../services/modLogService';
 import { autoModService } from '../services/autoModService';
 import { aiService } from '../services/aiService';
 import { engagementService } from '../services/engagementService';
+import { cacheService } from '../services/cacheService';
+import { evaluateHoneypot } from '../services/honeypotService';
 import type { WordFilterActionConfig, WordFilterSeverity } from '../types';
 
 const WORD_FILTER_SEVERITY_WEIGHT: Record<WordFilterSeverity, number> = {
@@ -57,9 +59,22 @@ export async function execute(message: Message) {
   if (!message.guild || !message.member) return;
 
   try {
-    // Ensure guild exists in database
+    // Ensure guild exists in database (we still need basic data like prefix)
     const guildData = await guildService.ensureGuild(message.guild);
-    const guildSettings = await guildService.getGuildSettings(message.guild.id);
+    
+    // Use Redis cache for settings to avoid DB spam
+    const guildSettings = await cacheService.getGuildSettings(message.guild.id, async () => {
+      return await guildService.getGuildSettings(message.guild!.id);
+    });
+
+    // Evaluate Scammer Honeypot first
+    const honeypotTriggered = await evaluateHoneypot(message, guildSettings);
+    if (honeypotTriggered) return;
+
+    // Evaluate Sticky Messages
+    // Note: We don't return here because we still want the message to trigger commands/XP
+    const { stickyMessageService } = await import('../services/stickyMessageService');
+    await stickyMessageService.evaluateMessage(message, guildSettings);
 
     // Evaluate AutoMod V2
     const autoModTriggered = await autoModService.evaluateMessage(message);
@@ -73,10 +88,10 @@ export async function execute(message: Message) {
     const handled = await listCommandService.handle(message);
     if (handled) return;
 
-    // Handle custom commands
+    // Handle custom commands - Now pre-parsed and cached!
     try {
-      const customCommands = JSON.parse(guildSettings.customCommands);
-      if (Array.isArray(customCommands)) {
+      const customCommands = guildSettings?.parsedCustomCommands || [];
+      if (customCommands.length > 0) {
         for (const cmd of customCommands) {
           const prefix = cmd.prefix || guildData.prefix;
           if (prefix && message.content.startsWith(prefix)) {

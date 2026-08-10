@@ -66,6 +66,8 @@ export const guildSettings = pgTable('guild_settings', {
   antiSpamEnabled: boolean('anti_spam_enabled').default(true).notNull(),
   maxMentions: integer('max_mentions').default(5).notNull(),
   maxDuplicates: integer('max_duplicates').default(3).notNull(),
+  honeypotChannelId: varchar('honeypot_channel_id', { length: 20 }),
+  stickies: text('stickies').default('[]').notNull(),
   // Public configuration
   publicLevels: boolean('public_levels').default(false).notNull(),
   publicEco: boolean('public_eco').default(false).notNull(),
