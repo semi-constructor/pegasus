@@ -137,6 +137,29 @@ CREATE TABLE IF NOT EXISTS xp_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS tickets (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    guild_id VARCHAR(20) NOT NULL REFERENCES guilds(id) ON DELETE CASCADE,
+    channel_id VARCHAR(20) NOT NULL,
+    user_id VARCHAR(20) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'open' NOT NULL,
+    claimed_by VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL,
+    closed_by VARCHAR(20) REFERENCES users(id) ON DELETE SET NULL,
+    closed_at TIMESTAMP,
+    transcript TEXT,
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ticket_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+    user_id VARCHAR(20) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    attachments JSONB DEFAULT '[]' NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_members_guild ON members(guild_id);
 CREATE INDEX IF NOT EXISTS idx_members_xp ON members(guild_id, xp DESC);
 CREATE INDEX IF NOT EXISTS idx_user_xp_guild ON user_xp(guild_id);
