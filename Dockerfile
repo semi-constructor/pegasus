@@ -1,17 +1,17 @@
 # Multi-stage build for optimized production image
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 # Install build dependencies for canvas
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     python3 \
-    g++ \
-    make \
-    cairo-dev \
-    jpeg-dev \
-    pango-dev \
-    giflib-dev \
-    pixman-dev \
-    git
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -24,34 +24,26 @@ RUN git clone https://github.com/semi-constructor/pegasus.git . && \
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:20-slim
 
 # Install runtime dependencies for canvas including Python for node-gyp and pkg-config
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     python3 \
-    g++ \
-    make \
-    pkgconf \
-    cairo-dev \
-    jpeg-dev \
-    pango-dev \
-    giflib-dev \
-    pixman-dev \
-    cairo \
-    jpeg \
-    pango \
-    giflib \
-    pixman \
-    fontconfig \
-    ttf-dejavu \
-    font-noto \
-    font-noto-cjk \
-    font-noto-emoji \
-    curl
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    fonts-noto \
+    fonts-noto-cjk \
+    fonts-noto-color-emoji \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd -s /bin/false -u 1001 -g nodejs nodejs
 
 # Set working directory
 WORKDIR /app
