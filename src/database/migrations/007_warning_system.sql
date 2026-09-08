@@ -42,13 +42,21 @@ CREATE INDEX IF NOT EXISTS idx_warning_automations_automation_id ON warning_auto
 -- Create audit logs table if it doesn't exist
 CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
-    action VARCHAR(50) NOT NULL,
+    action VARCHAR(100) NOT NULL,
     user_id VARCHAR(20) NOT NULL REFERENCES users(id) ON DELETE SET NULL,
     guild_id VARCHAR(20) NOT NULL REFERENCES guilds(id) ON DELETE CASCADE,
     target_id VARCHAR(20),
+    target_type VARCHAR(50),
     details JSONB,
+    ip_hash VARCHAR(64),
+    user_agent TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+-- Columns that may be missing on existing databases
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS target_type VARCHAR(50);
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ip_hash VARCHAR(64);
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_agent TEXT;
 
 -- Create index for audit logs
 CREATE INDEX IF NOT EXISTS idx_audit_logs_guild ON audit_logs(guild_id);

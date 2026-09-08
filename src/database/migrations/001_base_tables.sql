@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS guild_settings (
     welcome_channel VARCHAR(20),
     welcome_message TEXT,
     welcome_embed_enabled BOOLEAN DEFAULT FALSE NOT NULL,
-    welcome_embed_color VARCHAR(7) DEFAULT '#0099FF',
+    welcome_image_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    welcome_embed_color VARCHAR(7) DEFAULT '#8B5CF6',
     welcome_embed_title VARCHAR(255),
     welcome_embed_image VARCHAR(500),
     welcome_embed_thumbnail VARCHAR(500),
@@ -42,7 +43,8 @@ CREATE TABLE IF NOT EXISTS guild_settings (
     goodbye_channel VARCHAR(20),
     goodbye_message TEXT,
     goodbye_embed_enabled BOOLEAN DEFAULT FALSE NOT NULL,
-    goodbye_embed_color VARCHAR(7) DEFAULT '#FF0000',
+    goodbye_image_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    goodbye_embed_color VARCHAR(7) DEFAULT '#F43F5E',
     goodbye_embed_title VARCHAR(255),
     goodbye_embed_image VARCHAR(500),
     goodbye_embed_thumbnail VARCHAR(500),
@@ -58,6 +60,13 @@ CREATE TABLE IF NOT EXISTS guild_settings (
     xp_booster_multiplier INTEGER DEFAULT 200 NOT NULL,
     level_up_message TEXT,
     level_up_channel VARCHAR(20),
+    achievements_channel VARCHAR(20),
+    achievements_ignored_channels TEXT DEFAULT '[]' NOT NULL,
+    custom_commands TEXT DEFAULT '[]' NOT NULL,
+    custom_commands_channel VARCHAR(20),
+    ai_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    ai_channel VARCHAR(20),
+    ai_persona TEXT DEFAULT 'You are a helpful Discord bot assistant.',
     autorole_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     autorole_roles TEXT DEFAULT '[]' NOT NULL,
     security_enabled BOOLEAN DEFAULT TRUE NOT NULL,
@@ -66,9 +75,28 @@ CREATE TABLE IF NOT EXISTS guild_settings (
     anti_spam_enabled BOOLEAN DEFAULT TRUE NOT NULL,
     max_mentions INTEGER DEFAULT 5 NOT NULL,
     max_duplicates INTEGER DEFAULT 3 NOT NULL,
+    honeypot_channel_id VARCHAR(20),
+    stickies TEXT DEFAULT '[]' NOT NULL,
+    public_levels BOOLEAN DEFAULT FALSE NOT NULL,
+    public_eco BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+-- Columns that may be missing on existing databases
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS welcome_image_enabled BOOLEAN DEFAULT FALSE NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS goodbye_image_enabled BOOLEAN DEFAULT FALSE NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS achievements_channel VARCHAR(20);
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS achievements_ignored_channels TEXT DEFAULT '[]' NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS custom_commands TEXT DEFAULT '[]' NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS custom_commands_channel VARCHAR(20);
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS ai_enabled BOOLEAN DEFAULT FALSE NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS ai_channel VARCHAR(20);
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS ai_persona TEXT DEFAULT 'You are a helpful Discord bot assistant.';
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS honeypot_channel_id VARCHAR(20);
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS stickies TEXT DEFAULT '[]' NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS public_levels BOOLEAN DEFAULT FALSE NOT NULL;
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS public_eco BOOLEAN DEFAULT FALSE NOT NULL;
 
 CREATE TABLE IF NOT EXISTS members (
     user_id VARCHAR(20) REFERENCES users(id) ON DELETE CASCADE NOT NULL,
